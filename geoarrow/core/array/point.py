@@ -24,21 +24,21 @@ class PointArray:
         """Access GeoRust algorithms on this PointArray"""
         import geoarrow.geo
 
-        return geoarrow.geo.PointArray(self)
+        return geoarrow.geo.PointArray.from_pyarrow(self.arr)
 
     @property
     def geos(self) -> geoarrow.geos.PointArray:
         """Access GEOS algorithms on this PointArray"""
         import geoarrow.geos
 
-        return geoarrow.geos.PointArray(self)
+        return geoarrow.geos.PointArray.from_pyarrow(self.arr)
 
     @property
     def proj(self) -> geoarrow.proj.PointArray:
         """Access Proj algorithms on this PointArray"""
         import geoarrow.proj
 
-        return geoarrow.proj.PointArray(self)
+        return geoarrow.proj.PointArray.from_pyarrow(self.arr)
 
 
 def validate_point_array(arr: pa.Array):
