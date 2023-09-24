@@ -18,18 +18,26 @@ def points_3d() -> NDArray[np.object_]:
 def test_round_trip_2d():
     shapely_geoms = points_2d()
     point_array = construct_geometry_array(shapely_geoms)
+
     assert isinstance(point_array, PointArray)
     assert point_array.type.coord_dimension == CoordinateDimension.XY
 
     new_shapely_geoms = point_array.to_shapely()
     assert_geometries_equal(shapely_geoms, new_shapely_geoms)
 
+    scalar = point_array[0]
+    assert scalar.as_py() == shapely_geoms[0]
+
 
 def test_round_trip_3d():
     shapely_geoms = points_3d()
     point_array = construct_geometry_array(shapely_geoms)
+
     assert isinstance(point_array, PointArray)
     assert point_array.type.coord_dimension == CoordinateDimension.XYZ
 
     new_shapely_geoms = point_array.to_shapely()
     assert_geometries_equal(shapely_geoms, new_shapely_geoms)
+
+    scalar = point_array[0]
+    assert scalar.as_py() == shapely_geoms[0]

@@ -6,9 +6,9 @@ import pyarrow as pa
 from numpy.typing import NDArray
 
 import shapely
+from geoarrow.shapely.extension_array import PointArray
+from geoarrow.shapely.extension_scalar import PointScalar
 from shapely import GeometryType
-
-from .extension_array import PointArray
 
 
 class CoordinateDimension(str, Enum):
@@ -202,6 +202,9 @@ class PointType(BaseGeometryType):
     def __arrow_ext_class__(self):
         return PointArray
 
+    def __arrow_ext_scalar_class__(self):
+        return PointScalar
+
 
 class LineStringType(BaseGeometryType):
     extension_name = "geoarrow.linestring"
@@ -271,19 +274,6 @@ class MultiPolygonType(BaseGeometryType):
             interleaved=interleaved, dims=dims, large_list=large_list
         )
         super().__init__(storage_type, self.extension_name)
-
-
-# register_geometry_extension_types()
-# shapely_arr = shapely.points([[1, 2], [3, 4], [5, 6], [5, 6]])
-# point_arr = construct_geometry_array(shapely_arr)
-# point_arr.to_shapely()
-
-# x = point_arr.storage.flatten()
-# x.to_numpy?
-# dir(x)
-
-# point_arr.to_shapely()
-# point_arr.type.coord_dimension
 
 
 def construct_geometry_array(

@@ -1,4 +1,5 @@
 from .extension_array import PointArray
+from .extension_scalar import PointScalar
 from .extension_types import (
     CoordinateDimension,
     LineStringType,
