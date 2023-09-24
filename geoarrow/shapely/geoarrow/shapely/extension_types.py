@@ -6,8 +6,22 @@ import pyarrow as pa
 from numpy.typing import NDArray
 
 import shapely
-from geoarrow.shapely.extension_array import PointArray
-from geoarrow.shapely.extension_scalar import PointScalar
+from geoarrow.shapely.extension_array import (
+    LineStringArray,
+    MultiLineStringArray,
+    MultiPointArray,
+    MultiPolygonArray,
+    PointArray,
+    PolygonArray,
+)
+from geoarrow.shapely.extension_scalar import (
+    LineString,
+    MultiLineString,
+    MultiPoint,
+    MultiPolygon,
+    Point,
+    Polygon,
+)
 from shapely import GeometryType
 
 
@@ -203,7 +217,7 @@ class PointType(BaseGeometryType):
         return PointArray
 
     def __arrow_ext_scalar_class__(self):
-        return PointScalar
+        return Point
 
 
 class LineStringType(BaseGeometryType):
@@ -219,6 +233,12 @@ class LineStringType(BaseGeometryType):
         )
         super().__init__(storage_type, self.extension_name)
 
+    def __arrow_ext_class__(self):
+        return LineStringArray
+
+    def __arrow_ext_scalar_class__(self):
+        return LineString
+
 
 class PolygonType(BaseGeometryType):
     extension_name = "geoarrow.polygon"
@@ -232,6 +252,12 @@ class PolygonType(BaseGeometryType):
             interleaved=interleaved, dims=dims, large_list=large_list
         )
         super().__init__(storage_type, self.extension_name)
+
+    def __arrow_ext_class__(self):
+        return PolygonArray
+
+    def __arrow_ext_scalar_class__(self):
+        return Polygon
 
 
 class MultiPointType(BaseGeometryType):
@@ -247,6 +273,12 @@ class MultiPointType(BaseGeometryType):
         )
         super().__init__(storage_type, self.extension_name)
 
+    def __arrow_ext_class__(self):
+        return MultiPointArray
+
+    def __arrow_ext_scalar_class__(self):
+        return MultiPoint
+
 
 class MultiLineStringType(BaseGeometryType):
     extension_name = "geoarrow.multilinestring"
@@ -261,6 +293,12 @@ class MultiLineStringType(BaseGeometryType):
         )
         super().__init__(storage_type, self.extension_name)
 
+    def __arrow_ext_class__(self):
+        return MultiLineStringArray
+
+    def __arrow_ext_scalar_class__(self):
+        return MultiLineString
+
 
 class MultiPolygonType(BaseGeometryType):
     extension_name = "geoarrow.multipolygon"
@@ -274,6 +312,12 @@ class MultiPolygonType(BaseGeometryType):
             interleaved=interleaved, dims=dims, large_list=large_list
         )
         super().__init__(storage_type, self.extension_name)
+
+    def __arrow_ext_class__(self):
+        return MultiPolygonArray
+
+    def __arrow_ext_scalar_class__(self):
+        return MultiPolygon
 
 
 def construct_geometry_array(
@@ -299,7 +343,7 @@ def construct_geometry_array(
     elif geom_type == GeometryType.LINESTRING:
         assert len(offsets) == 1, "Expected one offsets array"
         (offsets1,) = offsets
-        _parr = pa.FixedSizeListArray.from_arrays(coords, 2)
+        _parr = pa.FixedSizeListArray.from_arrays(coords.flatten(), 2)
         parr = pa.ListArray.from_arrays(pa.array(offsets1), _parr)
         return pa.ExtensionArray.from_storage(
             LineStringType(interleaved=True, dims=dims), parr
@@ -308,7 +352,7 @@ def construct_geometry_array(
     elif geom_type == GeometryType.POLYGON:
         assert len(offsets) == 2, "Expected two offsets arrays"
         offsets1, offsets2 = offsets
-        _parr = pa.FixedSizeListArray.from_arrays(coords, 2)
+        _parr = pa.FixedSizeListArray.from_arrays(coords.flatten(), 2)
         _parr1 = pa.ListArray.from_arrays(pa.array(offsets1), _parr)
         parr = pa.ListArray.from_arrays(pa.array(offsets2), _parr1)
         return pa.ExtensionArray.from_storage(
@@ -318,7 +362,7 @@ def construct_geometry_array(
     elif geom_type == GeometryType.MULTIPOINT:
         assert len(offsets) == 1, "Expected one offsets array"
         (offsets1,) = offsets
-        _parr = pa.FixedSizeListArray.from_arrays(coords, 2)
+        _parr = pa.FixedSizeListArray.from_arrays(coords.flatten(), 2)
         parr = pa.ListArray.from_arrays(pa.array(offsets1), _parr)
         return pa.ExtensionArray.from_storage(
             MultiPointType(interleaved=True, dims=dims), parr
@@ -327,7 +371,7 @@ def construct_geometry_array(
     elif geom_type == GeometryType.MULTILINESTRING:
         assert len(offsets) == 2, "Expected two offsets arrays"
         offsets1, offsets2 = offsets
-        _parr = pa.FixedSizeListArray.from_arrays(coords, 2)
+        _parr = pa.FixedSizeListArray.from_arrays(coords.flatten(), 2)
         _parr1 = pa.ListArray.from_arrays(pa.array(offsets1), _parr)
         parr = pa.ListArray.from_arrays(pa.array(offsets2), _parr1)
         return pa.ExtensionArray.from_storage(
@@ -337,7 +381,7 @@ def construct_geometry_array(
     elif geom_type == GeometryType.MULTIPOLYGON:
         assert len(offsets) == 3, "Expected three offsets arrays"
         offsets1, offsets2, offsets3 = offsets
-        _parr = pa.FixedSizeListArray.from_arrays(coords, 2)
+        _parr = pa.FixedSizeListArray.from_arrays(coords.flatten(), 2)
         _parr1 = pa.ListArray.from_arrays(pa.array(offsets1), _parr)
         _parr2 = pa.ListArray.from_arrays(pa.array(offsets2), _parr1)
         parr = pa.ListArray.from_arrays(pa.array(offsets3), _parr2)

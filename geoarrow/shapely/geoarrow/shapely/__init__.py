@@ -1,5 +1,19 @@
-from .extension_array import PointArray
-from .extension_scalar import PointScalar
+from .extension_array import (
+    LineStringArray,
+    MultiLineStringArray,
+    MultiPointArray,
+    MultiPolygonArray,
+    PointArray,
+    PolygonArray,
+)
+from .extension_scalar import (
+    LineString,
+    MultiLineString,
+    MultiPoint,
+    MultiPolygon,
+    Point,
+    Polygon,
+)
 from .extension_types import (
     CoordinateDimension,
     LineStringType,
