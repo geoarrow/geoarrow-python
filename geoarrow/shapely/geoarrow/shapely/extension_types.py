@@ -342,49 +342,49 @@ def construct_geometry_array(
 
     elif geom_type == GeometryType.LINESTRING:
         assert len(offsets) == 1, "Expected one offsets array"
-        (offsets1,) = offsets
+        (geom_offsets,) = offsets
         _parr = pa.FixedSizeListArray.from_arrays(coords.flatten(), 2)
-        parr = pa.ListArray.from_arrays(pa.array(offsets1), _parr)
+        parr = pa.ListArray.from_arrays(pa.array(geom_offsets), _parr)
         return pa.ExtensionArray.from_storage(
             LineStringType(interleaved=True, dims=dims), parr
         )
 
     elif geom_type == GeometryType.POLYGON:
         assert len(offsets) == 2, "Expected two offsets arrays"
-        offsets1, offsets2 = offsets
+        ring_offsets, geom_offsets = offsets
         _parr = pa.FixedSizeListArray.from_arrays(coords.flatten(), 2)
-        _parr1 = pa.ListArray.from_arrays(pa.array(offsets1), _parr)
-        parr = pa.ListArray.from_arrays(pa.array(offsets2), _parr1)
+        _parr1 = pa.ListArray.from_arrays(pa.array(ring_offsets), _parr)
+        parr = pa.ListArray.from_arrays(pa.array(geom_offsets), _parr1)
         return pa.ExtensionArray.from_storage(
             PolygonType(interleaved=True, dims=dims), parr
         )
 
     elif geom_type == GeometryType.MULTIPOINT:
         assert len(offsets) == 1, "Expected one offsets array"
-        (offsets1,) = offsets
+        (geom_offsets,) = offsets
         _parr = pa.FixedSizeListArray.from_arrays(coords.flatten(), 2)
-        parr = pa.ListArray.from_arrays(pa.array(offsets1), _parr)
+        parr = pa.ListArray.from_arrays(pa.array(geom_offsets), _parr)
         return pa.ExtensionArray.from_storage(
             MultiPointType(interleaved=True, dims=dims), parr
         )
 
     elif geom_type == GeometryType.MULTILINESTRING:
         assert len(offsets) == 2, "Expected two offsets arrays"
-        offsets1, offsets2 = offsets
+        ring_offsets, geom_offsets = offsets
         _parr = pa.FixedSizeListArray.from_arrays(coords.flatten(), 2)
-        _parr1 = pa.ListArray.from_arrays(pa.array(offsets1), _parr)
-        parr = pa.ListArray.from_arrays(pa.array(offsets2), _parr1)
+        _parr1 = pa.ListArray.from_arrays(pa.array(ring_offsets), _parr)
+        parr = pa.ListArray.from_arrays(pa.array(geom_offsets), _parr1)
         return pa.ExtensionArray.from_storage(
             MultiLineStringType(interleaved=True, dims=dims), parr
         )
 
     elif geom_type == GeometryType.MULTIPOLYGON:
         assert len(offsets) == 3, "Expected three offsets arrays"
-        offsets1, offsets2, offsets3 = offsets
+        ring_offsets, polygon_offsets, geom_offsets = offsets
         _parr = pa.FixedSizeListArray.from_arrays(coords.flatten(), 2)
-        _parr1 = pa.ListArray.from_arrays(pa.array(offsets1), _parr)
-        _parr2 = pa.ListArray.from_arrays(pa.array(offsets2), _parr1)
-        parr = pa.ListArray.from_arrays(pa.array(offsets3), _parr2)
+        _parr1 = pa.ListArray.from_arrays(pa.array(ring_offsets), _parr)
+        _parr2 = pa.ListArray.from_arrays(pa.array(polygon_offsets), _parr1)
+        parr = pa.ListArray.from_arrays(pa.array(geom_offsets), _parr2)
         return pa.ExtensionArray.from_storage(
             MultiPolygonType(interleaved=True, dims=dims), parr
         )
