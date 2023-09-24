@@ -11,6 +11,9 @@ from shapely import GeometryType
 
 # TODO: support separated coords; right now it assumes interleaved
 
+# TODO: add tests where the selected scalar is _not_ the first polygon. The offsets are
+# incorrect when not the first polygon.
+
 
 class Point(pa.ExtensionScalar):
     def to_shapely(self) -> shapely.Point:
@@ -120,14 +123,22 @@ class MultiPolygon(pa.ExtensionScalar):
     def as_py(self) -> shapely.MultiPolygon:
         coords = (
             self.value.values.flatten()
+            .flatten()
+            .flatten()
             .to_numpy(zero_copy_only=False, writable=True)
             .reshape(-1, len(self.type.coord_dimension))
         )
-        geom_offsets = np.array([0, coords.shape[0]], dtype=np.int32)
+        polygon_offsets = self.value.values.offsets
+        ring_offsets = self.value.values.flatten().offsets
+        geom_offsets = np.array([0, 1], dtype=np.int32)
         geoms = shapely.from_ragged_array(
             GeometryType.MULTIPOLYGON,
             coords,
-            (geom_offsets,),
+            (
+                ring_offsets,
+                polygon_offsets,
+                geom_offsets,
+            ),
         )
         assert len(geoms) == 1
         return geoms[0]
