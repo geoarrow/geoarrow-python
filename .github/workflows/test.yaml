@@ -49,7 +49,7 @@ jobs:
           # Because of namespace packaging we have to add __init__.py in geoarrow and
           # rebuild to avoid confusing pytest
 
-          for pkg in c pyarrow pandas; do
+          for pkg in pyarrow pandas; do
             pushd geoarrow-$pkg
             touch src/geoarrow/__init__.py
             pip uninstall --yes geoarrow-$pkg
