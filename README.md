@@ -7,8 +7,8 @@ The geoarrow Python packages provide an implementation of the [GeoArrow specific
 Python bindings for geoarrow are not yet available on PyPI. You can install via URL:
 
 ```bash
-python -m pip install "https://github.com/geoarrow/geoarrow-python/archive/refs/heads/main.zip#egg=geoarrow-pyarrow&subdirectory=geoarrow-pyarrow"
-python -m pip install "https://github.com/geoarrow/geoarrow-python/archive/refs/heads/main.zip#egg=geoarrow-pandas&subdirectory=geoarrow-pandas"
+python -m pip install "git+https://github.com/geoarrow/geoarrow-python.git#egg=geoarrow-pyarrow&subdirectory=geoarrow-pyarrow"
+python -m pip install "git+https://github.com/geoarrow/geoarrow-python.git#egg=geoarrow-pandas&subdirectory=geoarrow-pandas"
 ```
 
 If you can import the namespace, you're good to go! The most user-friendly interface to geoarrow currently depends on `pyarrow`, which you can import with:
