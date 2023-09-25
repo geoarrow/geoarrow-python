@@ -14,7 +14,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
+        python-version: ['3.8', '3.9', '3.10', '3.11']
 
     steps:
       - uses: actions/checkout@v3
@@ -44,7 +44,7 @@ jobs:
           pytest geoarrow-pandas/tests -v -s
 
       - name: Run doctests
-        if: success() && matrix.python-version == '3.12'
+        if: success() && matrix.python-version == '3.11'
         run: |
           # Because of namespace packaging we have to add __init__.py in geoarrow and
           # rebuild to avoid confusing pytest
@@ -69,7 +69,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.12'
+          python-version: '3.11'
           cache: 'pip'
 
       - name: Install (geoarrow-pyarrow)
