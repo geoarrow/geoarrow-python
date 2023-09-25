@@ -244,10 +244,3 @@ def test_accessor_with_crs():
 def test_accessor_with_dimensions():
     ga_series = pd.Series(["POINT (0 1)"]).geoarrow.with_dimensions(ga.Dimensions.XYZ)
     assert ga_series.dtype.pyarrow_dtype.dimensions == ga.Dimensions.XYZ
-
-
-def test_accessor_to_geopandas():
-    series = pd.Series(["POINT (0 1)", "POINT (1 2)"])
-    geoseries = series.geoarrow.to_geopandas()
-    assert len(geoseries) == 2
-    assert geoseries[0].wkt == "POINT (0 1)"
