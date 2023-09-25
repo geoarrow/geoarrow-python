@@ -27,21 +27,21 @@ jobs:
 
       - name: Install (geoarrow-pyarrow)
         run: |
-          pushd python/geoarrow-pyarrow
+          pushd geoarrow-pyarrow
           pip install ".[test]"
 
       - name: Install (geoarrow-pandas)
         run: |
-          pushd python/geoarrow-pandas
+          pushd geoarrow-pandas
           pip install ".[test]"
 
       - name: Run tests (geoarrow-pyarrow)
         run: |
-          pytest python/geoarrow-pyarrow/tests -v -s
+          pytest geoarrow-pyarrow/tests -v -s
 
       - name: Run tests (geoarrow-pandas)
         run: |
-          pytest python/geoarrow-pandas/tests -v -s
+          pytest geoarrow-pandas/tests -v -s
 
       - name: Run doctests
         if: success() && matrix.python-version == '3.11'
@@ -50,7 +50,7 @@ jobs:
           # rebuild to avoid confusing pytest
 
           for pkg in c pyarrow pandas; do
-            pushd python/geoarrow-$pkg
+            pushd geoarrow-$pkg
             touch src/geoarrow/__init__.py
             pip uninstall --yes geoarrow-$pkg
             pip install .
@@ -74,12 +74,12 @@ jobs:
 
       - name: Install (geoarrow-pyarrow)
         run: |
-          pushd python/geoarrow-pyarrow
+          pushd geoarrow-pyarrow
           pip install -e ".[test]"
 
       - name: Install (geoarrow-pandas)
         run: |
-          pushd python/geoarrow-pandas
+          pushd geoarrow-pandas
           pip install -e ".[test]"
 
       - name: Install coverage dependencies
@@ -93,12 +93,12 @@ jobs:
 
       - name: Coverage
         run: |
-          pushd python/geoarrow-pyarrow
+          pushd geoarrow-pyarrow
           python -m pytest --cov ./src/geoarrow ..
           python -m coverage xml
           popd
 
-          pushd python/geoarrow-pandas
+          pushd geoarrow-pandas
           python -m pytest --cov ./src/geoarrow ..
           python -m coverage xml
           popd
