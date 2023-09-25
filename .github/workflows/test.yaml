@@ -43,20 +43,15 @@ jobs:
         run: |
           pytest geoarrow-pandas/tests -v -s
 
-      - name: Run doctests
+      - name: Run doctests (geoarrow-pyarrow)
         if: success() && matrix.python-version == '3.11'
         run: |
-          # Because of namespace packaging we have to add __init__.py in geoarrow and
-          # rebuild to avoid confusing pytest
+          pytest --pyargs geoarrow.pyarrow --doctest-modules
 
-          for pkg in pyarrow pandas; do
-            pushd geoarrow-$pkg
-            touch src/geoarrow/__init__.py
-            pip uninstall --yes geoarrow-$pkg
-            pip install .
-            pytest --pyargs geoarrow.$pkg --doctest-modules
-            popd
-          done
+      - name: Run doctests (geoarrow-pandas)
+        if: success() && matrix.python-version == '3.11'
+        run: |
+          pytest --pyargs geoarrow.pandas --doctest-modules
 
   coverage:
     needs: [test]
