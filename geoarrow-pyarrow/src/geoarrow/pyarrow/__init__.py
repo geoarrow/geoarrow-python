@@ -58,6 +58,7 @@ from ._compute import (
     with_geometry_type,
     rechunk,
     point_coords,
+    to_geopandas
 )
 
 
