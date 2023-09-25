@@ -187,7 +187,7 @@ class PointType(BaseGeometryType):
 
     @classmethod
     def __arrow_ext_deserialize__(cls, storage_type: pa.DataType, serialized: bytes):
-        raise NotImplementedError("Type deserialization not yet implemented")
+        return cls(interleaved=True, dims=CoordinateDimension.XY)
 
     def __arrow_ext_class__(self):
         return PointArray
@@ -214,7 +214,7 @@ class LineStringType(BaseGeometryType):
 
     @classmethod
     def __arrow_ext_deserialize__(cls, storage_type: pa.DataType, serialized: bytes):
-        raise NotImplementedError("Type deserialization not yet implemented")
+        return cls(interleaved=True, dims=CoordinateDimension.XY)
 
     def __arrow_ext_class__(self):
         return LineStringArray
@@ -241,7 +241,7 @@ class PolygonType(BaseGeometryType):
 
     @classmethod
     def __arrow_ext_deserialize__(cls, storage_type: pa.DataType, serialized: bytes):
-        raise NotImplementedError("Type deserialization not yet implemented")
+        return cls(interleaved=True, dims=CoordinateDimension.XY)
 
     def __arrow_ext_class__(self):
         return PolygonArray
@@ -268,7 +268,7 @@ class MultiPointType(BaseGeometryType):
 
     @classmethod
     def __arrow_ext_deserialize__(cls, storage_type: pa.DataType, serialized: bytes):
-        raise NotImplementedError("Type deserialization not yet implemented")
+        return cls(interleaved=True, dims=CoordinateDimension.XY)
 
     def __arrow_ext_class__(self):
         return MultiPointArray
@@ -295,7 +295,7 @@ class MultiLineStringType(BaseGeometryType):
 
     @classmethod
     def __arrow_ext_deserialize__(cls, storage_type: pa.DataType, serialized: bytes):
-        raise NotImplementedError("Type deserialization not yet implemented")
+        return cls(interleaved=True, dims=CoordinateDimension.XY)
 
     def __arrow_ext_class__(self):
         return MultiLineStringArray
@@ -322,7 +322,7 @@ class MultiPolygonType(BaseGeometryType):
 
     @classmethod
     def __arrow_ext_deserialize__(cls, storage_type: pa.DataType, serialized: bytes):
-        raise NotImplementedError("Type deserialization not yet implemented")
+        return cls(interleaved=True, dims=CoordinateDimension.XY)
 
     def __arrow_ext_class__(self):
         return MultiPolygonArray
