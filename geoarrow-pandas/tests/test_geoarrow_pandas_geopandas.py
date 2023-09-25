@@ -1,5 +1,7 @@
 import pytest
 
+pytest.importorskip("geopandas")
+
 import pandas as pd
 import geoarrow.pandas as gapd
 import geoarrow.pyarrow as ga
