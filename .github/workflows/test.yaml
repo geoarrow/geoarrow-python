@@ -51,7 +51,7 @@ jobs:
       - name: Run doctests (geoarrow-pandas)
         if: success() && matrix.python-version == '3.11'
         run: |
-          pytest --pyargs geoarrow.pandas --doctest-modules
+          pytest --pyargs geoarrow.pandas --doctest-modules --import-mode=importlib
 
   coverage:
     needs: [test]
