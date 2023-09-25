@@ -30,7 +30,7 @@ test = ["pytest", "pandas", "numpy", "geopandas"]
 
 [project.urls]
 homepage = "https://geoarrow.org"
-repository = "https://github.com/geoarrow/geoarrow-c"
+repository = "https://github.com/geoarrow/geoarrow-python"
 
 [build-system]
 requires = [
@@ -40,4 +40,4 @@ requires = [
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools_scm]
-root = "../.."
+root = ".."
