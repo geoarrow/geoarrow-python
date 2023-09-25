@@ -1,15 +1,14 @@
 # geoarrow for Python
 
-The geoarrow Python packages provide bindings to the geoarrow-c implementation of the [GeoArrow specification](https://github.com/geoarrow/geoarrow) and integrations with [pyarrow](https://arrow.apache.org/docs/python) and [pandas](https://pandas.pydata.org/). The geoarrow Python bindings provide input/output to/from Arrow-friendly formats (e.g., Parquet, Arrow Stream, Arrow File) and general-purpose coordinate shuffling tools among GeoArrow, WKT, and WKB encodings.
+The geoarrow Python packages provide bindings to the geoarrow-c implementation of the [GeoArrow specification](https://github.com/geoarrow/geoarrow) and integrations with [pyarrow](https://arrow.apache.org/docs/python) and [pandas](https://pandas.pydata.org/). The geoarrow Python bindings provide input/output to/from Arrow-friendly formats (e.g., Parquet, Arrow Stream, Arrow File) and general-purpose coordinate shuffling tools among GeoArrow, WKT, and WKB encodings. 
 
 ## Installation
 
 Python bindings for geoarrow are not yet available on PyPI. You can install via URL (requires a C++ compiler):
 
 ```bash
-python -m pip install "https://github.com/geoarrow/geoarrow-c/archive/refs/heads/main.zip#egg=geoarrow-c&subdirectory=python/geoarrow-c"
-python -m pip install "https://github.com/geoarrow/geoarrow-c/archive/refs/heads/main.zip#egg=geoarrow-pyarrow&subdirectory=python/geoarrow-pyarrow"
-python -m pip install "https://github.com/geoarrow/geoarrow-c/archive/refs/heads/main.zip#egg=geoarrow-pandas&subdirectory=python/geoarrow-pandas"
+python -m pip install "https://github.com/geoarrow/geoarrow-python/archive/refs/heads/main.zip#egg=geoarrow-pyarrow&subdirectory=geoarrow-pyarrow"
+python -m pip install "https://github.com/geoarrow/geoarrow-python/archive/refs/heads/main.zip#egg=geoarrow-pandas&subdirectory=geoarrow-pandas"
 ```
 
 If you can import the namespace, you're good to go! The most user-friendly interface to geoarrow currently depends on `pyarrow`, which you can import with:
@@ -52,7 +51,7 @@ Alternatively, you can construct GeoArrow arrays directly from a series of buffe
 import numpy as np
 
 ga.point().from_geobuffers(
-    None,
+    None, 
     np.array([1.0, 2.0, 3.0]),
     np.array([3.0, 4.0, 5.0])
 )
@@ -167,7 +166,7 @@ geopandas.GeoSeries.from_wkb(ga.as_wkb(array))
     2      MULTILINESTRING ((631355.519 5122892.285, 6313...
     3      MULTILINESTRING ((665166.020 5138641.982, 6651...
     4      MULTILINESTRING ((673606.020 5162961.982, 6736...
-                                 ...
+                                 ...                        
     250    MULTILINESTRING ((681672.620 5078601.582, 6818...
     251    MULTILINESTRING ((414867.917 5093040.881, 4147...
     252    MULTILINESTRING ((414867.917 5093040.881, 4148...
@@ -276,25 +275,16 @@ geoarrow_array2
 
 ## Building
 
-Python bindings for nanoarrow are managed with [setuptools](https://setuptools.pypa.io/en/latest/index.html).
+Python bindings for geoarrow are managed with [setuptools](https://setuptools.pypa.io/en/latest/index.html).
 This means you can build the project using:
 
 ```shell
-git clone https://github.com/geoarrow/geoarrow-c.git
-cd python
-pip install -e geoarrow-c/ goearrow-pyarrow/ geoarrow-pandas/
+git clone https://github.com/geoarrow/geoarrow-python.git
+pip install -e geoarrow-pyarrow/ geoarrow-pandas/
 ```
 
 Tests use [pytest](https://docs.pytest.org/):
 
 ```shell
-# Install dependencies
-for d in geoarrow-c geoarrow-pyarrow geoarrow-pandas; do
-    cd $d && pip install -e ".[test]" && cd ..
-done
-
-# Run tests
-for d in geoarrow-c geoarrow-pyarrow geoarrow-pandas; do
-    cd $d && pytest && cd ..
-done
+pytest
 ```
