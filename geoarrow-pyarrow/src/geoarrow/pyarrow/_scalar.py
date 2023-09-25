@@ -1,6 +1,6 @@
 import pyarrow as pa
 
-from ._type import VectorType
+from geoarrow.pyarrow._type import VectorType
 
 
 class VectorScalar(pa.ExtensionScalar):
@@ -50,6 +50,7 @@ def scalar_cls_from_name(name):
         return MultiPolygonScalar
     else:
         raise ValueError(f'Expected valid extension name but got "{name}"')
+
 
 # Inject array_cls_from_name exactly once to avoid circular import
 if VectorType._scalar_cls_from_name is None:

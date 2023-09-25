@@ -2,8 +2,16 @@ import pyarrow as pa
 
 from geoarrow.c import lib
 
-from ._kernel import Kernel
-from ._type import WktType, WkbType, VectorType, wkb, wkt, large_wkb, large_wkt
+from geoarrow.pyarrow._kernel import Kernel
+from geoarrow.pyarrow._type import (
+    WktType,
+    WkbType,
+    VectorType,
+    wkb,
+    wkt,
+    large_wkb,
+    large_wkt,
+)
 
 
 class VectorArray(pa.ExtensionArray):

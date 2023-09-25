@@ -6,8 +6,8 @@ import pyarrow.dataset as _ds
 import pyarrow.compute as _compute
 import pyarrow.parquet as _pq
 from geoarrow.c.lib import CoordType
-from ._type import wkt, wkb, VectorType
-from ._kernel import Kernel
+from geoarrow.pyarrow._type import wkt, wkb, VectorType
+from geoarrow.pyarrow._kernel import Kernel
 
 
 class GeoDataset:
