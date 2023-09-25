@@ -9,7 +9,7 @@ Examples
 
 from geoarrow.c.lib import GeometryType, Dimensions, CoordType, EdgeType, CrsType
 
-from ._type import (
+from geoarrow.pyarrow._type import (
     VectorType,
     WktType,
     WkbType,
@@ -35,11 +35,11 @@ from ._type import (
     unregister_extension_types,
 )
 
-from ._kernel import Kernel
+from geoarrow.pyarrow._kernel import Kernel
 
-from ._array import array
+from geoarrow.pyarrow._array import array
 
-from . import _scalar
+from geoarrow.pyarrow import _scalar
 
 from ._compute import (
     parse_all,

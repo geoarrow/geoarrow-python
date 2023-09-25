@@ -3,7 +3,7 @@ import sys
 import pyarrow as pa
 
 from geoarrow.c import lib
-from ._type import VectorType
+from geoarrow.pyarrow._type import VectorType
 
 
 class Kernel:

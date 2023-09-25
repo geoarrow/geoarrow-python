@@ -4,9 +4,9 @@ import pyarrow as pa
 import pyarrow.compute as pc
 
 from geoarrow.c.lib import GeometryType, Dimensions, CoordType, EdgeType
-from . import _type
-from ._array import array
-from ._kernel import Kernel
+from geoarrow.pyarrow import _type
+from geoarrow.pyarrow._array import array
+from geoarrow.pyarrow._kernel import Kernel
 
 _max_workers = 1
 
