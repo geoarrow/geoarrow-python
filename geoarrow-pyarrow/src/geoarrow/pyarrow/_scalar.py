@@ -5,6 +5,14 @@ from geoarrow.pyarrow._type import VectorType
 
 class VectorScalar(pa.ExtensionScalar):
     def to_shapely(self):
+        """
+        Convert an array item to a shapely geometry
+
+        >>> import geoarrow.pyarrow as ga
+        >>> array = ga.array(["POINT (30 10)"])
+        >>> array[0].to_shapely()
+        <POINT (30 10)>
+        """
         raise NotImplementedError()
 
 
