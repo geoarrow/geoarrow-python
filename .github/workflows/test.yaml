@@ -1,0 +1,109 @@
+name: test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ['3.10']
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+
+      - name: Install (geoarrow-pyarrow)
+        run: |
+          pushd python/geoarrow-pyarrow
+          pip install ".[test]"
+
+      - name: Install (geoarrow-pandas)
+        run: |
+          pushd python/geoarrow-pandas
+          pip install ".[test]"
+
+      - name: Run tests (geoarrow-pyarrow)
+        run: |
+          pytest python/geoarrow-pyarrow/tests -v -s
+
+      - name: Run tests (geoarrow-pandas)
+        run: |
+          pytest python/geoarrow-pandas/tests -v -s
+
+      - name: Run doctests
+        if: success() && matrix.python-version == '3.11'
+        run: |
+          # Because of namespace packaging we have to add __init__.py in geoarrow and
+          # rebuild to avoid confusing pytest
+
+          for pkg in c pyarrow pandas; do
+            pushd python/geoarrow-$pkg
+            touch src/geoarrow/__init__.py
+            pip uninstall --yes geoarrow-$pkg
+            pip install .
+            pytest --pyargs geoarrow.$pkg --doctest-modules
+            popd
+          done
+
+  coverage:
+    needs: [test]
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+          cache: 'pip'
+
+      - name: Install (geoarrow-pyarrow)
+        run: |
+          pushd python/geoarrow-pyarrow
+          pip install -e ".[test]"
+
+      - name: Install (geoarrow-pandas)
+        run: |
+          pushd python/geoarrow-pandas
+          pip install -e ".[test]"
+
+      - name: Install coverage dependencies
+        run: |
+          pip install pytest-cov
+
+      - name: Install editable
+        run: |
+          pip install -e geoarrow-pyarrow/
+          pip install -e geoarrow-pandas/
+
+      - name: Coverage
+        run: |
+          pushd python/geoarrow-pyarrow
+          python -m pytest --cov ./src/geoarrow ..
+          python -m coverage xml
+          popd
+
+          pushd python/geoarrow-pandas
+          python -m pytest --cov ./src/geoarrow ..
+          python -m coverage xml
+          popd
+
+      - name: Upload coverage to codecov
+        uses: codecov/codecov-action@v2
+        with:
+          files: 'geoarrow-pyarrow/coverage.xml,geoarrow-pandas/coverage.xml'
