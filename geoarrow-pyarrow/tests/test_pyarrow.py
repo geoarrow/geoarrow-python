@@ -115,10 +115,12 @@ def test_register_extension_types():
 def test_array():
     array = ga.array(["POINT (30 10)"])
     assert array.type == ga.wkt()
+    assert isinstance(array[0], ga._scalar.WktScalar)
 
     wkb_item = b"\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x3e\x40\x00\x00\x00\x00\x00\x00\x24\x40"
     array = ga.array([wkb_item])
     assert array.type == ga.wkb()
+    assert isinstance(array[0], ga._scalar.WkbScalar)
 
     with pytest.raises(TypeError):
         ga.array([1])

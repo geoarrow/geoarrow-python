@@ -48,6 +48,11 @@ class GeoArrowExtensionScalar(bytes):
         )
         return f'GeoArrowExtensionScalar("{wkt_array[0].as_py()}")'
 
+    def to_shapely(self):
+        from shapely import from_wkb
+
+        return from_wkb(self)
+
     @property
     def wkt(self):
         """The well-known text representation of this feature."""
@@ -477,6 +482,4 @@ class GeoArrowAccessor:
         return tuple(_pd.Series(dim, index=self._obj.index) for dim in point_coords)
 
     def to_geopandas(self):
-        import geopandas
-
-        return geopandas.GeoSeries.from_wkb(self.as_wkb().geoarrow.format_wkb())
+        return _ga.to_geopandas(self._obj)

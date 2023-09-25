@@ -562,3 +562,26 @@ def point_coords(obj, dimensions=None):
         return (pa.chunked_array(dim) for dim in zip(*flattened))
     else:
         return obj.storage.flatten()
+
+
+def to_geopandas(obj):
+    """Extract point coordinates into separate arrays or chunked arrays.
+
+    >>> import geoarrow.pyarrow as ga
+    >>> array = ga.as_geoarrow(["POINT (0 1)"])
+    >>> ga.to_geopandas(array)
+    0    POINT (0.00000 1.00000)
+    dtype: geometry
+    """
+    import pandas as pd
+    import geopandas
+
+    # Ideally we will avoid serialization via geobuffers + from_ragged_array()
+    wkb_array_or_chunked = as_wkb(obj)
+
+    # Avoids copy on convert to pandas
+    wkb_pandas = pd.Series(
+        wkb_array_or_chunked, dtype=pd.ArrowDtype(wkb_array_or_chunked.type.storage_type)
+    )
+
+    return geopandas.GeoSeries.from_wkb(wkb_pandas, crs=wkb_array_or_chunked.type.crs)
