@@ -70,6 +70,10 @@ geoarrow-pyarrow
 
     .. autofunction:: with_geometry_type
 
+    .. autofunction:: point_coords
+
+    .. autofunction:: to_geopandas
+
     Class Reference
     ---------------
 

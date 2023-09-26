@@ -449,7 +449,7 @@ class GeoArrowAccessor:
         )
 
     def format_wkb(self):
-        """See :func:`geoarrow.pyarrow.format_wkb`
+        """See :func:`geoarrow.pyarrow.as_wkb`
         """
         if not self._obj_is_geoarrow():
             raise TypeError("Can't format_wkb() a non-geoarrow Series")
@@ -475,7 +475,7 @@ class GeoArrowAccessor:
         return self._wrap_series(array_or_chunked)
 
     def bounds(self):
-        """See :func:`geoarrow.pyarrow.bounds`
+        """See :func:`geoarrow.pyarrow.box`
         """
         array_or_chunked = _ga.box(self._obj)
         if isinstance(array_or_chunked, _pa.ChunkedArray):
@@ -497,7 +497,7 @@ class GeoArrowAccessor:
         )
 
     def total_bounds(self):
-        """See :func:`geoarrow.pyarrow.total_bounds`
+        """See :func:`geoarrow.pyarrow.box_agg`
         """
         struct_scalar1 = _ga.box_agg(self._obj)
         return _pd.DataFrame({k: [v] for k, v in struct_scalar1.as_py().items()})
