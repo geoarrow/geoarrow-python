@@ -39,3 +39,9 @@ jobs:
         run: |
           pushd docs
           sphinx-build source _build/html
+
+      - name: Upload built documentation
+        uses: actions/upload-artifact@main
+        with:
+          name: docs
+          path: docs/_build/html
