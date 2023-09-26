@@ -14,6 +14,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+      - uses: r-lib/actions/setup-pandoc@v2
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -38,6 +39,7 @@ jobs:
       - name: Build docs
         run: |
           pushd docs
+          pandoc ../README.md --from markdown --to rst -s -o source/README_generated.rst
           sphinx-build source _build/html
 
       - name: Upload built documentation
