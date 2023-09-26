@@ -49,6 +49,7 @@ class GeoArrowExtensionScalar(bytes):
         return f'GeoArrowExtensionScalar("{wkt_array[0].as_py()}")'
 
     def to_shapely(self):
+        """The shapely representation of this feature."""
         from shapely import from_wkb
 
         return from_wkb(self)
@@ -380,6 +381,29 @@ class GeoArrowExtensionDtype(_pd.api.extensions.ExtensionDtype):
 
 @_pd.api.extensions.register_series_accessor("geoarrow")
 class GeoArrowAccessor:
+    """
+    GeoArrow series accessor
+
+    The GeoArrow series accessor adds a convenient way to apply the type
+    introspection and coordinate shuffling capabilities of geoarrow-pyarrow
+    to columns in a pandas data frame. The accessor can be applied to
+    text columns (interpreted as WKT), binary columns (interpreted as WKB),
+    :class:`GeoArrowExtensionDtype` columns, or a ``geopandas.GeoSeries``.
+
+    >>> import geoarrow.pandas as _
+    >>> import pandas as pd
+    >>> series = pd.Series(["POINT (0 1)", "POINT (2 3)"])
+    >>> x, y = series.geoarrow.point_coords()
+    >>> x
+    0    0.0
+    1    2.0
+    dtype: float64
+    >>> y
+    0    1.0
+    1    3.0
+    dtype: float64
+    """
+
     def __init__(self, pandas_obj):
         self._obj = pandas_obj
 
@@ -392,16 +416,24 @@ class GeoArrowAccessor:
         return isinstance(self._obj.dtype, GeoArrowExtensionDtype)
 
     def parse_all(self):
+        """See :func:`geoarrow.pyarrow.parse_all`
+        """
         _ga.parse_all(self._obj)
         return self._obj
 
     def as_wkt(self):
+        """See :func:`geoarrow.pyarrow.as_wkt`
+        """
         return self._wrap_series(_ga.as_wkt(self._obj))
 
     def as_wkb(self):
+        """See :func:`geoarrow.pyarrow.as_wkb`
+        """
         return self._wrap_series(_ga.as_wkb(self._obj))
 
     def format_wkt(self, precision=None, max_element_size_bytes=None):
+        """See :func:`geoarrow.pyarrow.format_wkt`
+        """
         if not self._obj_is_geoarrow():
             raise TypeError("Can't format_wkt() a non-geoarrow Series")
 
@@ -417,6 +449,8 @@ class GeoArrowAccessor:
         )
 
     def format_wkb(self):
+        """See :func:`geoarrow.pyarrow.format_wkb`
+        """
         if not self._obj_is_geoarrow():
             raise TypeError("Can't format_wkb() a non-geoarrow Series")
 
@@ -435,10 +469,14 @@ class GeoArrowAccessor:
         )
 
     def as_geoarrow(self, type=None, coord_type=None):
+        """See :func:`geoarrow.pyarrow.as_geoarrow`
+        """
         array_or_chunked = _ga.as_geoarrow(self._obj, type=type, coord_type=coord_type)
         return self._wrap_series(array_or_chunked)
 
     def bounds(self):
+        """See :func:`geoarrow.pyarrow.bounds`
+        """
         array_or_chunked = _ga.box(self._obj)
         if isinstance(array_or_chunked, _pa.ChunkedArray):
             flattened = [chunk.flatten() for chunk in array_or_chunked.chunks]
@@ -459,27 +497,43 @@ class GeoArrowAccessor:
         )
 
     def total_bounds(self):
+        """See :func:`geoarrow.pyarrow.total_bounds`
+        """
         struct_scalar1 = _ga.box_agg(self._obj)
         return _pd.DataFrame({k: [v] for k, v in struct_scalar1.as_py().items()})
 
     def with_coord_type(self, coord_type):
+        """See :func:`geoarrow.pyarrow.with_coord_type`
+        """
         return self._wrap_series(_ga.with_coord_type(self._obj, coord_type))
 
     def with_edge_type(self, edge_type):
+        """See :func:`geoarrow.pyarrow.with_edge_type`
+        """
         return self._wrap_series(_ga.with_edge_type(self._obj, edge_type))
 
     def with_crs(self, crs, crs_type=None):
+        """See :func:`geoarrow.pyarrow.with_crs`
+        """
         return self._wrap_series(_ga.with_crs(self._obj, crs=crs, crs_type=crs_type))
 
     def with_dimensions(self, dimensions):
+        """See :func:`geoarrow.pyarrow.with_dimensions`
+        """
         return self._wrap_series(_ga.with_dimensions(self._obj, dimensions))
 
     def with_geometry_type(self, geometry_type):
+        """See :func:`geoarrow.pyarrow.with_geometry_type`
+        """
         return self.with_geometry_type(_ga.with_coord_type(self._obj, geometry_type))
 
     def point_coords(self, dimensions=None):
+        """See :func:`geoarrow.pyarrow.point_coords`
+        """
         point_coords = _ga.point_coords(_ga.with_coord_type(self._obj, dimensions))
         return tuple(_pd.Series(dim, index=self._obj.index) for dim in point_coords)
 
     def to_geopandas(self):
+        """See :func:`geoarrow.pyarrow.to_geopandas`
+        """
         return _ga.to_geopandas(self._obj)

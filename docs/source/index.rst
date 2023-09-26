@@ -7,4 +7,5 @@ Contents
 .. toctree::
    :maxdepth: 2
 
-   PyArrow integration <pyarrow>
+   geoarrow-pyarrow <pyarrow>
+   geoarrow-pandas <pandas>

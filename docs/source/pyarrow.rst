@@ -1,6 +1,6 @@
 
-Integration with pyarrow
-========================
+geoarrow-pyarrow
+================
 
 .. automodule:: geoarrow.pyarrow
 
