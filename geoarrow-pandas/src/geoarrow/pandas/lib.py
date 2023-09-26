@@ -72,6 +72,12 @@ class GeoArrowExtensionScalar(bytes):
 
 
 class GeoArrowExtensionArray(_pd.api.extensions.ExtensionArray):
+    """ExtensionArray implementation wrapping a geoarrow Array
+
+    This ExtensionArray implementation currently wraps a ``pyarrow.Array``
+    or ``pyarrow.ChunkedArray`` with an extension type. Most users will
+    not instantiate this class directly.
+    """
     def __init__(self, obj, type=None):
         if type is not None:
             self._dtype = GeoArrowExtensionDtype(type)
@@ -234,6 +240,13 @@ class GeoArrowExtensionArray(_pd.api.extensions.ExtensionArray):
 
 @_pd.api.extensions.register_extension_dtype
 class GeoArrowExtensionDtype(_pd.api.extensions.ExtensionDtype):
+    """ExtensionDtype implementation wrapping a geoarrow type
+
+    The dtype object for geoarrow-encoded arrays that are converted
+    to pandas. Use the ``pyarrow_dtype`` property to return the underlying
+    ``VectorType`` (e.g., to query the ``crs`` or ``dimensions``).
+    """
+
     _match = _re.compile(
         r"^geoarrow."
         r"(?P<type>wkt|wkb|point|linestring|polygon|multipoint|multilinestring|multipolygon)"
