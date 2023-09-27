@@ -565,7 +565,7 @@ def point_coords(obj, dimensions=None):
 
 
 def to_geopandas(obj):
-    """Extract point coordinates into separate arrays or chunked arrays.
+    """Convert a geoarrow-like array into a ``geopandas.GeoSeries``.
 
     >>> import geoarrow.pyarrow as ga
     >>> array = ga.as_geoarrow(["POINT (0 1)"])

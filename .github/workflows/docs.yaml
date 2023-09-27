@@ -1,0 +1,49 @@
+name: docs
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: r-lib/actions/setup-pandoc@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install docs requirements
+        run: |
+          pip install -r docs/requirements.txt
+
+      - name: Install
+        run: |
+          pushd geoarrow-pyarrow
+          pip install ".[test]"
+          popd
+
+          pushd geoarrow-pandas
+          pip install ".[test]"
+          popd
+
+      - name: Build docs
+        run: |
+          pushd docs
+          pandoc ../README.md --from markdown --to rst -s -o source/README_generated.rst
+          sphinx-build source _build/html
+
+      - name: Upload built documentation
+        uses: actions/upload-artifact@main
+        with:
+          name: docs
+          path: docs/_build/html
