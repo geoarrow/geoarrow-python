@@ -30,6 +30,18 @@ def obj_as_array_or_chunked(obj_in):
         return array(obj_in, validate=False)
 
 
+def ensure_storage(obj):
+    if not isinstance(obj.type, pa.ExtensionType):
+        return obj
+
+    if isinstance(obj, pa.ChunkedArray):
+        return pa.chunked_array(
+            [chunk.storage for chunk in obj.chunks], type=obj.type.storage_type
+        )
+    else:
+        return obj.storage
+
+
 def construct_kernel_and_push1(kernel_constructor, obj, args):
     kernel = kernel_constructor(obj.type, **args)
     return kernel.push(obj)
@@ -473,7 +485,7 @@ def with_edge_type(obj, edge_type):
     """
     obj = obj_as_array_or_chunked(obj)
     new_type = obj.type.with_edge_type(edge_type)
-    return new_type.wrap_array(obj.storage)
+    return new_type.wrap_array(ensure_storage(obj))
 
 
 def with_crs(obj, crs, crs_type=None):
@@ -486,7 +498,7 @@ def with_crs(obj, crs, crs_type=None):
     """
     obj = obj_as_array_or_chunked(obj)
     new_type = obj.type.with_crs(crs, crs_type)
-    return new_type.wrap_array(obj.storage)
+    return new_type.wrap_array(ensure_storage(obj))
 
 
 def with_dimensions(obj, dimensions):
@@ -581,7 +593,8 @@ def to_geopandas(obj):
 
     # Avoids copy on convert to pandas
     wkb_pandas = pd.Series(
-        wkb_array_or_chunked, dtype=pd.ArrowDtype(wkb_array_or_chunked.type.storage_type)
+        wkb_array_or_chunked,
+        dtype=pd.ArrowDtype(wkb_array_or_chunked.type.storage_type),
     )
 
     return geopandas.GeoSeries.from_wkb(wkb_pandas, crs=wkb_array_or_chunked.type.crs)

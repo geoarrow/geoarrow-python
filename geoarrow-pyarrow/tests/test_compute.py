@@ -278,6 +278,10 @@ def test_with_edge_type():
     planar = _compute.with_edge_type(spherical, ga.EdgeType.PLANAR)
     assert planar.type.edge_type == ga.EdgeType.PLANAR
 
+    planar_chunked = pa.chunked_array([planar])
+    spherical_chunked = _compute.with_edge_type(planar_chunked, ga.EdgeType.SPHERICAL)
+    assert spherical_chunked.type.edge_type == ga.EdgeType.SPHERICAL
+
 
 def test_with_crs():
     wkt_array = ga.array(["POINT (0 1)", "POINT (2 3)"])
@@ -287,6 +291,10 @@ def test_with_crs():
     crsnope = _compute.with_crs(crsified, None)
     assert crsnope.type.crs == ""
     assert crsnope.type.crs_type == ga.CrsType.NONE
+
+    crsnope_chunked = pa.chunked_array([crsnope])
+    crsified_chunked = _compute.with_crs(crsnope_chunked, "EPSG:1234")
+    assert crsified_chunked.type.crs == "EPSG:1234"
 
 
 def test_with_coord_type():
