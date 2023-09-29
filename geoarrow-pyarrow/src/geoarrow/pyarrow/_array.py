@@ -4,8 +4,6 @@ from geoarrow.c import lib
 
 from geoarrow.pyarrow._kernel import Kernel
 from geoarrow.pyarrow._type import (
-    WktType,
-    WkbType,
     VectorType,
     wkb,
     wkt,
@@ -26,35 +24,6 @@ class VectorArray(pa.ExtensionArray):
         array_view = lib.CArrayView(carray, cschema)
         buffers = array_view.buffers()
         return [np.array(b) if b is not None else None for b in buffers]
-
-    def as_wkt(self):
-        if self.type.extension_name == "geoarrow.wkt":
-            return self
-        kernel = Kernel.as_wkt(self.type)
-        return kernel.push(self)
-
-    def as_wkb(self):
-        if self.type.extension_name == "geoarrow.wkb":
-            return self
-        kernel = Kernel.as_wkb(self.type)
-        return kernel.push(self)
-
-    def as_geoarrow(self, type_to=None):
-        if type_to is None:
-            raise NotImplementedError("Auto-detection of best geoarrow type")
-
-        if isinstance(type_to, WktType):
-            return self.as_wkt()
-        elif isinstance(type_to, WkbType):
-            return self.as_wkb()
-        elif not isinstance(type_to, VectorType):
-            raise TypeError("type_to must inherit from VectorType")
-
-        if self.type._type.id == type_to._type.id:
-            return self
-
-        kernel = Kernel.as_geoarrow(self.type, type_to._type.id)
-        return kernel.push(self)
 
     def __repr__(self):
         n_values_to_show = 10

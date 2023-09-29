@@ -65,7 +65,7 @@ def test_parse_all():
     with pytest.raises(lib.GeoArrowCException):
         _compute.parse_all(["not valid wkt"])
 
-    geoarrow_array = ga.array(["POINT (0 1)"]).as_geoarrow(ga.point())
+    geoarrow_array = ga.as_geoarrow(["POINT (0 1)"])
     assert _compute.parse_all(geoarrow_array) is None
 
 
@@ -73,14 +73,14 @@ def test_as_wkt():
     wkt_array = ga.array(["POINT (0 1)"])
     assert _compute.as_wkt(wkt_array) is wkt_array
 
-    assert _compute.as_wkt(wkt_array.as_wkb()).storage == wkt_array.storage
+    assert _compute.as_wkt(ga.as_wkb(wkt_array)).storage == wkt_array.storage
 
 
 def test_as_wkb():
-    wkb_array = ga.array(["POINT (0 1)"]).as_wkb()
+    wkb_array = ga.as_wkb(["POINT (0 1)"])
     assert _compute.as_wkb(wkb_array) is wkb_array
 
-    assert _compute.as_wkb(wkb_array.as_wkt()).storage == wkb_array.storage
+    assert _compute.as_wkb(ga.as_wkb(wkb_array)).storage == wkb_array.storage
 
 
 def test_format_wkt():
@@ -91,7 +91,7 @@ def test_format_wkt():
 
 
 def test_unique_geometry_types():
-    ga_array = ga.array(pa.array([], type=pa.utf8())).as_geoarrow(ga.point())
+    ga_array = ga.as_geoarrow(pa.array([], type=pa.utf8()), ga.point())
     out = _compute.unique_geometry_types(ga_array).flatten()
     assert out[0] == pa.array([ga.GeometryType.POINT], type=pa.int32())
     assert out[1] == pa.array([ga.Dimensions.XY], type=pa.int32())
@@ -132,7 +132,7 @@ def test_infer_type_common():
     common = _compute.infer_type_common(empty)
     assert common == pa.null()
 
-    already_geoarrow = ga.array(["POINT (0 1)"]).as_geoarrow(ga.point())
+    already_geoarrow = ga.as_geoarrow(["POINT (0 1)"])
     common = _compute.infer_type_common(already_geoarrow)
     assert common.id == already_geoarrow.type.id
     common_interleaved = _compute.infer_type_common(

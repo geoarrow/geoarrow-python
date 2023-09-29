@@ -144,40 +144,6 @@ def test_array():
     assert array.type.storage_type == pa.large_binary()
 
 
-def test_array_as():
-    array = ga.array(["POINT (30 10)"])
-    array_wkb = array.as_wkb()
-
-    array_as_wkt = array.as_wkt()
-    assert array_as_wkt is array
-
-    array_as_wkt = array_wkb.as_wkt()
-    assert array_as_wkt.type == ga.wkt()
-
-    array_as_wkb = array.as_wkb()
-    assert array_as_wkb.type == ga.wkb()
-
-    array_as_wkb = array_wkb.as_wkb()
-    assert array_as_wkb is array_wkb
-
-    array_as_wkb = array_wkb.as_geoarrow(ga.wkb())
-    assert array_as_wkb is array_wkb
-
-    array_as_wkt = array_wkb.as_geoarrow(ga.wkt())
-    assert array_as_wkt.type == ga.wkt()
-
-    array_as_wkb = array.as_geoarrow(ga.wkb())
-    assert array_as_wkb.type == ga.wkb()
-
-    array_as_ga = array.as_geoarrow(ga.point())
-    assert array_as_ga.type == ga.point()
-
-    with pytest.raises(TypeError):
-        array.as_geoarrow(123)
-    with pytest.raises(NotImplementedError):
-        array.as_geoarrow(None)
-
-
 def test_array_repr():
     array = ga.array(["POINT (30 10)"])
     array_repr = repr(array)
@@ -305,7 +271,7 @@ def test_kernel_visit_void():
 
 
 def test_array_geobuffers():
-    arr = ga.array(["POLYGON ((0 0, 1 0, 0 1, 0 0))"]).as_geoarrow(ga.polygon())
+    arr = ga.as_geoarrow(["POLYGON ((0 0, 1 0, 0 1, 0 0))"])
     bufs = arr.geobuffers()
     assert bufs[0] is None
     np.testing.assert_array_equal(bufs[1], np.array([0, 1]))
@@ -321,7 +287,7 @@ def test_point_array_from_geobuffers():
         np.array([4.0, 5.0, 6.0]),
     )
     assert len(arr) == 3
-    assert arr.as_wkt()[2].as_py() == "POINT (3 6)"
+    assert ga.as_wkt(arr)[2].as_py() == "POINT (3 6)"
 
     arr = (
         ga.point()
@@ -329,7 +295,7 @@ def test_point_array_from_geobuffers():
         .from_geobuffers(None, np.array([1.0, 2.0, 3.0, 4.0, 5.0, 6.0]))
     )
     assert len(arr) == 3
-    assert arr.as_wkt()[2].as_py() == "POINT (5 6)"
+    assert ga.as_wkt(arr)[2].as_py() == "POINT (5 6)"
 
 
 def test_linestring_array_from_geobuffers():
@@ -340,7 +306,7 @@ def test_linestring_array_from_geobuffers():
         np.array([4.0, 5.0, 6.0]),
     )
     assert len(arr) == 1
-    assert arr.as_wkt()[0].as_py() == "LINESTRING (1 4, 2 5, 3 6)"
+    assert ga.as_wkt(arr)[0].as_py() == "LINESTRING (1 4, 2 5, 3 6)"
 
 
 def test_polygon_array_from_geobuffers():
@@ -352,7 +318,7 @@ def test_polygon_array_from_geobuffers():
         np.array([4.0, 5.0, 6.0, 4.0]),
     )
     assert len(arr) == 1
-    assert arr.as_wkt()[0].as_py() == "POLYGON ((1 4, 2 5, 3 6, 1 4))"
+    assert ga.as_wkt(arr)[0].as_py() == "POLYGON ((1 4, 2 5, 3 6, 1 4))"
 
 
 def test_multipoint_array_from_geobuffers():
@@ -363,7 +329,7 @@ def test_multipoint_array_from_geobuffers():
         np.array([4.0, 5.0, 6.0]),
     )
     assert len(arr) == 1
-    assert arr.as_wkt()[0].as_py() == "MULTIPOINT (1 4, 2 5, 3 6)"
+    assert ga.as_wkt(arr)[0].as_py() == "MULTIPOINT (1 4, 2 5, 3 6)"
 
 
 def test_multilinestring_array_from_geobuffers():
@@ -375,7 +341,7 @@ def test_multilinestring_array_from_geobuffers():
         np.array([4.0, 5.0, 6.0, 4.0]),
     )
     assert len(arr) == 1
-    assert arr.as_wkt()[0].as_py() == "MULTILINESTRING ((1 4, 2 5, 3 6, 1 4))"
+    assert ga.as_wkt(arr)[0].as_py() == "MULTILINESTRING ((1 4, 2 5, 3 6, 1 4))"
 
 
 def test_multipolygon_array_from_geobuffers():
@@ -388,12 +354,12 @@ def test_multipolygon_array_from_geobuffers():
         np.array([4.0, 5.0, 6.0, 4.0]),
     )
     assert len(arr) == 1
-    assert arr.as_wkt()[0].as_py() == "MULTIPOLYGON (((1 4, 2 5, 3 6, 1 4)))"
+    assert ga.as_wkt(arr)[0].as_py() == "MULTIPOLYGON (((1 4, 2 5, 3 6, 1 4)))"
 
 
 # Easier to test here because we have actual geoarrow arrays to parse
 def test_c_array_view():
-    arr = ga.array(["POLYGON ((0 0, 1 0, 0 1, 0 0))"]).as_geoarrow(ga.polygon())
+    arr = ga.as_geoarrow(["POLYGON ((0 0, 1 0, 0 1, 0 0))"])
 
     cschema = lib.SchemaHolder()
     arr.type._export_to_c(cschema._addr())
@@ -427,7 +393,7 @@ def test_c_array_view():
 
 def test_c_array_view_interleaved():
     arr = ga.array(["POLYGON ((0 0, 1 0, 0 1, 0 0))"])
-    arr = arr.as_geoarrow(ga.polygon().with_coord_type(ga.CoordType.INTERLEAVED))
+    arr = ga.as_geoarrow(arr, ga.polygon().with_coord_type(ga.CoordType.INTERLEAVED))
 
     cschema = lib.SchemaHolder()
     arr.type._export_to_c(cschema._addr())
