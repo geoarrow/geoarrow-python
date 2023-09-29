@@ -271,22 +271,32 @@ def test_rechunk_max_bytes():
 
 
 def test_with_edge_type():
-    wkt_array = ga.array(["POINT (0 1)", "POINT (2 3)"])
-    spherical = _compute.with_edge_type(wkt_array, ga.EdgeType.SPHERICAL)
+    storage_array = pa.array(["POINT (0 1)", "POINT (2 3)"])
+    spherical = _compute.with_edge_type(storage_array, ga.EdgeType.SPHERICAL)
+    assert isinstance(spherical.type, ga.WktType)
     assert spherical.type.edge_type == ga.EdgeType.SPHERICAL
 
     planar = _compute.with_edge_type(spherical, ga.EdgeType.PLANAR)
     assert planar.type.edge_type == ga.EdgeType.PLANAR
 
+    planar_chunked = pa.chunked_array([planar])
+    spherical_chunked = _compute.with_edge_type(planar_chunked, ga.EdgeType.SPHERICAL)
+    assert spherical_chunked.type.edge_type == ga.EdgeType.SPHERICAL
+
 
 def test_with_crs():
-    wkt_array = ga.array(["POINT (0 1)", "POINT (2 3)"])
-    crsified = _compute.with_crs(wkt_array, "EPSG:1234")
+    storage_array = pa.array(["POINT (0 1)", "POINT (2 3)"])
+    crsified = _compute.with_crs(storage_array, "EPSG:1234")
+    assert isinstance(crsified.type, ga.WktType)
     assert crsified.type.crs == "EPSG:1234"
 
     crsnope = _compute.with_crs(crsified, None)
     assert crsnope.type.crs == ""
     assert crsnope.type.crs_type == ga.CrsType.NONE
+
+    crsnope_chunked = pa.chunked_array([crsnope])
+    crsified_chunked = _compute.with_crs(crsnope_chunked, "EPSG:1234")
+    assert crsified_chunked.type.crs == "EPSG:1234"
 
 
 def test_with_coord_type():
