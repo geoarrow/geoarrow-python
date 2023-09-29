@@ -1,26 +1,27 @@
 # geoarrow for Python
 
-The geoarrow Python packages provide an implementation of the [GeoArrow specification](https://github.com/geoarrow/geoarrow) that integrations with [pyarrow](https://arrow.apache.org/docs/python) and [pandas](https://pandas.pydata.org/). The geoarrow Python bindings provide input/output to/from Arrow-friendly formats (e.g., Parquet, Arrow Stream, Arrow File) and general-purpose coordinate shuffling tools among GeoArrow, WKT, and WKB encodings. 
+The geoarrow Python packages provide an implementation of the [GeoArrow specification](https://github.com/geoarrow/geoarrow) that integrates with [pyarrow](https://arrow.apache.org/docs/python) and [pandas](https://pandas.pydata.org/). The geoarrow Python bindings enable input/output to/from Arrow-friendly formats (e.g., Parquet, Arrow Stream, Arrow File) and general-purpose coordinate shuffling tools among GeoArrow, WKT, and WKB encodings. 
 
 ## Installation
 
 Python bindings for geoarrow are not yet available on PyPI. You can install via URL:
 
 ```bash
-python -m pip install "git+https://github.com/geoarrow/geoarrow-python.git#egg=geoarrow-pyarrow&subdirectory=geoarrow-pyarrow"
-python -m pip install "git+https://github.com/geoarrow/geoarrow-python.git#egg=geoarrow-pandas&subdirectory=geoarrow-pandas"
+pip install "git+https://github.com/geoarrow/geoarrow-python.git#egg=geoarrow-pyarrow&subdirectory=geoarrow-pyarrow"
+pip install "git+https://github.com/geoarrow/geoarrow-python.git#egg=geoarrow-pandas&subdirectory=geoarrow-pandas"
 ```
 
-If you can import the namespace, you're good to go! The most user-friendly interface to geoarrow currently depends on `pyarrow`, which you can import with:
+If you can import the namespaces, you're good to go!
 
 
 ```python
 import geoarrow.pyarrow as ga
+import geoarrow.pandas as _
 ```
 
 ## Examples
 
-You can create geoarrow-encoded arrays with `as_geoarrow()`:
+You can create geoarrow-encoded `pyarrow.Array`s with `as_geoarrow()`:
 
 
 ```python
@@ -90,11 +91,11 @@ Importing `geoarrow.pyarrow` will register the geoarrow extension types with pya
 
 ```python
 import urllib.request
-import pyarrow.parquet as pq
+from pyarrow import feather
 
-url = "https://github.com/geoarrow/geoarrow-data/releases/download/latest-dev/ns-water-basin_line.parquet"
+url = "https://github.com/geoarrow/geoarrow-data/releases/download/v0.1.0/ns-water-basin_line.arrow"
 local_filename, headers = urllib.request.urlretrieve(url)
-pq.read_table(local_filename).schema
+feather.read_table(local_filename).schema
 ```
 
 
@@ -114,20 +115,16 @@ pq.read_table(local_filename).schema
     MISCNAME_4: string
     SHAPE_LEN: double
     geometry: extension<geoarrow.multilinestring<MultiLinestringType>>
-    -- schema metadata --
-    geo: '
-        {
-        "columns": {
-            "geometry": {
-            "encoding": "' + 2919
 
 
+
+The `as_geoarrow()` function can accept a `geopandas.GeoSeries` as input:
 
 
 ```python
 import geopandas
 
-url = "https://github.com/geoarrow/geoarrow-data/releases/download/latest-dev/ns-water-basin_line.gpkg"
+url = "https://github.com/geoarrow/geoarrow-data/releases/download/v0.1.0/ns-water-basin_line.fgb.zip"
 df = geopandas.read_file(url)
 array = ga.as_geoarrow(df.geometry)
 array
@@ -137,17 +134,17 @@ array
 
 
     MultiLinestringArray:MultiLinestringType(geoarrow.multilinestring <{"$schema":"https://proj.org/schem...>)[255]
-    <MULTILINESTRING ((648686.0197000001 5099181.984099999, 648626.018...>
-    <MULTILINESTRING ((687687.8200000003 5117029.181600001, 686766.020...>
-    <MULTILINESTRING ((631355.5193999996 5122892.2849, 631364.34339999...>
-    <MULTILINESTRING ((665166.0199999996 5138641.9825, 665146.01999999...>
-    <MULTILINESTRING ((673606.0199999996 5162961.9823, 673606.01999999...>
+    <MULTILINESTRING ((648686.210534334 5099183.050480807, 648626.2095...>
+    <MULTILINESTRING ((687688.0166642987 5117030.253445747, 686766.217...>
+    <MULTILINESTRING ((631355.7058094738 5122893.354471898, 631364.529...>
+    <MULTILINESTRING ((665166.2114203956 5138643.056812348, 665146.211...>
+    <MULTILINESTRING ((673606.2114490251 5162963.061371056, 673606.211...>
     ...245 values...
-    <MULTILINESTRING ((681672.6200000001 5078601.5823, 681866.01999999...>
-    <MULTILINESTRING ((414867.91700000037 5093040.8807, 414793.8169999...>
-    <MULTILINESTRING ((414867.91700000037 5093040.8807, 414829.7170000...>
-    <MULTILINESTRING ((414867.91700000037 5093040.8807, 414937.2170000...>
-    <MULTILINESTRING ((648686.0197000001 5099181.984099999, 648866.019...>
+    <MULTILINESTRING ((681672.817898342 5078602.646958541, 681866.2179...>
+    <MULTILINESTRING ((414868.0669037141 5093041.933686847, 414793.966...>
+    <MULTILINESTRING ((414868.0669037141 5093041.933686847, 414829.866...>
+    <MULTILINESTRING ((414868.0669037141 5093041.933686847, 414937.366...>
+    <MULTILINESTRING ((648686.210534334 5099183.050480807, 648866.2105...>
 
 
 
@@ -161,17 +158,17 @@ ga.to_geopandas(array)
 
 
 
-    0      MULTILINESTRING ((648686.020 5099181.984, 6486...
-    1      MULTILINESTRING ((687687.820 5117029.182, 6867...
-    2      MULTILINESTRING ((631355.519 5122892.285, 6313...
-    3      MULTILINESTRING ((665166.020 5138641.982, 6651...
-    4      MULTILINESTRING ((673606.020 5162961.982, 6736...
+    0      MULTILINESTRING ((648686.211 5099183.050, 6486...
+    1      MULTILINESTRING ((687688.017 5117030.253, 6867...
+    2      MULTILINESTRING ((631355.706 5122893.354, 6313...
+    3      MULTILINESTRING ((665166.211 5138643.057, 6651...
+    4      MULTILINESTRING ((673606.211 5162963.061, 6736...
                                  ...                        
-    250    MULTILINESTRING ((681672.620 5078601.582, 6818...
-    251    MULTILINESTRING ((414867.917 5093040.881, 4147...
-    252    MULTILINESTRING ((414867.917 5093040.881, 4148...
-    253    MULTILINESTRING ((414867.917 5093040.881, 4149...
-    254    MULTILINESTRING ((648686.020 5099181.984, 6488...
+    250    MULTILINESTRING ((681672.818 5078602.647, 6818...
+    251    MULTILINESTRING ((414868.067 5093041.934, 4147...
+    252    MULTILINESTRING ((414868.067 5093041.934, 4148...
+    253    MULTILINESTRING ((414868.067 5093041.934, 4149...
+    254    MULTILINESTRING ((648686.211 5099183.050, 6488...
     Length: 255, dtype: geometry
 
 
@@ -185,18 +182,18 @@ The `geoarrow-pandas` package provides an extension array that wraps geoarrow me
 import geoarrow.pandas as _
 import pandas as pd
 
-df = pd.read_parquet("https://github.com/geoarrow/geoarrow-data/releases/download/latest-dev/ns-water-basin_point.parquet")
+df = pd.read_feather("https://github.com/geoarrow/geoarrow-data/releases/download/v0.1.0/ns-water-basin_point.arrow")
 df.geometry.geoarrow.format_wkt().head(5)
 ```
 
 
 
 
-    0     POINT (277022.6936181751 4820886.609673489)
-    1     POINT (315701.2552756762 4855051.378571571)
-    2    POINT (255728.65994492616 4851022.107901295)
-    3     POINT (245206.7841665779 4895609.409696873)
-    4    POINT (337143.18135472975 4860312.288760258)
+    0     MULTIPOINT (277022.6936181751 4820886.609673489)
+    1     MULTIPOINT (315701.2552756762 4855051.378571571)
+    2    MULTIPOINT (255728.65994492616 4851022.107901295)
+    3     MULTIPOINT (245206.7841665779 4895609.409696873)
+    4    MULTIPOINT (337143.18135472975 4860312.288760258)
     dtype: string[pyarrow]
 
 
