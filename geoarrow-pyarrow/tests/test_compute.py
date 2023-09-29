@@ -273,6 +273,7 @@ def test_rechunk_max_bytes():
 def test_with_edge_type():
     storage_array = pa.array(["POINT (0 1)", "POINT (2 3)"])
     spherical = _compute.with_edge_type(storage_array, ga.EdgeType.SPHERICAL)
+    assert isinstance(spherical.type, ga.WktType)
     assert spherical.type.edge_type == ga.EdgeType.SPHERICAL
 
     planar = _compute.with_edge_type(spherical, ga.EdgeType.PLANAR)
@@ -286,7 +287,7 @@ def test_with_edge_type():
 def test_with_crs():
     storage_array = pa.array(["POINT (0 1)", "POINT (2 3)"])
     crsified = _compute.with_crs(storage_array, "EPSG:1234")
-    assert isinstance(crsified, ga.WktType)
+    assert isinstance(crsified.type, ga.WktType)
     assert crsified.type.crs == "EPSG:1234"
 
     crsnope = _compute.with_crs(crsified, None)
