@@ -480,3 +480,31 @@ class ParquetRowGroupGeoDataset(GeoDataset):
         else:
             fields_before.append((path + (field.name,), count))
             return count + 1
+
+
+# Use a lazy import here to avoid requiring pyarrow.dataset
+def dataset(*args, geometry_columns=None, use_row_groups=None, **kwargs):
+    """Construct a GeoDataset
+
+    This constructor is intended to mirror `pyarrow.dataset()`, adding
+    geo-specific arguments. See :class:`geoarrow.pyarrow._dataset.GeoDataset` for
+    details.
+
+    >>> import geoarrow.pyarrow as ga
+    >>> import pyarrow as pa
+    >>> table = pa.table([ga.array(["POINT (0.5 1.5)"])], ["geometry"])
+    >>> dataset = ga.dataset(table)
+    """
+
+    parent = _ds.dataset(*args, **kwargs)
+
+    if use_row_groups is None:
+        use_row_groups = isinstance(parent, _ds.FileSystemDataset) and isinstance(
+            parent.format, _ds.ParquetFileFormat
+        )
+    if use_row_groups:
+        return ParquetRowGroupGeoDataset.create(
+            parent, geometry_columns=geometry_columns
+        )
+    else:
+        return GeoDataset(parent, geometry_columns=geometry_columns)

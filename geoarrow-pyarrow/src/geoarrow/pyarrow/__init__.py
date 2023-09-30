@@ -58,38 +58,8 @@ from ._compute import (
     with_geometry_type,
     rechunk,
     point_coords,
-    to_geopandas
+    to_geopandas,
 )
-
-
-# Use a lazy import here to avoid requiring pyarrow.dataset
-def dataset(*args, geometry_columns=None, use_row_groups=None, **kwargs):
-    """Construct a GeoDataset
-
-    This constructor is intended to mirror `pyarrow.dataset()`, adding
-    geo-specific arguments. See :class:`geoarrow.pyarrow._dataset.GeoDataset` for
-    details.
-
-    >>> import geoarrow.pyarrow as ga
-    >>> import pyarrow as pa
-    >>> table = pa.table([ga.array(["POINT (0.5 1.5)"])], ["geometry"])
-    >>> dataset = ga.dataset(table)
-    """
-    from pyarrow import dataset as _ds
-    from ._dataset import GeoDataset, ParquetRowGroupGeoDataset
-
-    parent = _ds.dataset(*args, **kwargs)
-
-    if use_row_groups is None:
-        use_row_groups = isinstance(parent, _ds.FileSystemDataset) and isinstance(
-            parent.format, _ds.ParquetFileFormat
-        )
-    if use_row_groups:
-        return ParquetRowGroupGeoDataset.create(
-            parent, geometry_columns=geometry_columns
-        )
-    else:
-        return GeoDataset(parent, geometry_columns=geometry_columns)
 
 try:
     register_extension_types()
