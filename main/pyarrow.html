@@ -1152,12 +1152,16 @@ for this type.</p>
 <dt class="sig sig-object py" id="geoarrow.pyarrow._dataset.GeoDataset">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">GeoDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geometry_columns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pyarrow._dataset.GeoDataset" title="Link to this definition">#</a></dt>
 <dd><p>Geospatial-augmented Dataset</p>
+<p>EXPERIMENTAL</p>
 <p>The GeoDataset wraps a pyarrow.Dataset containing one or more geometry columns
 and provides indexing and IO capability. If <cite>geometry_columns</cite> is <cite>None</cite>,
 it will include all columns that inherit from <cite>geoarrow.pyarrow.VectorType</cite>.
 The <cite>geometry_columns</cite> are not required to be geoarrow extension type columns:
 text columns will be parsed as WKT; binary columns will be parsed as WKB
 (but are not detected automatically).</p>
+<p>Note that the <code class="docutils literal notranslate"><span class="pre">GeoDataset</span></code> is only useful in a context where each fragment
+has been written such that features in the fragment are close together
+in space (e.g., one file or row group per state).</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="geoarrow.pyarrow._dataset.GeoDataset.filter_fragments">
 <span class="sig-name descname"><span class="pre">filter_fragments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pyarrow._dataset.GeoDataset.filter_fragments" title="Link to this definition">#</a></dt>
@@ -1170,6 +1174,9 @@ geometry more suitable to a spherical comparison. For datasets with
 more than one geometry column, the filter will be applied to all columns
 and include fragments that intersect the simplified geometry from any
 of the columns.</p>
+<p>Note that datasets with large row groups/fragments and/or datasets that
+were not written with fragments with spatial significance may return
+most or all of the fragments in the parent dataset.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">geoarrow.pyarrow</span> <span class="k">as</span> <span class="nn">ga</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyarrow</span> <span class="k">as</span> <span class="nn">pa</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">table</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">table</span><span class="p">([</span><span class="n">ga</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="s2">&quot;POINT (0.5 1.5)&quot;</span><span class="p">])],</span> <span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">])</span>
