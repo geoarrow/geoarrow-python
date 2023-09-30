@@ -13,12 +13,18 @@ from geoarrow.pyarrow._kernel import Kernel
 class GeoDataset:
     """Geospatial-augmented Dataset
 
+    EXPERIMENTAL
+
     The GeoDataset wraps a pyarrow.Dataset containing one or more geometry columns
     and provides indexing and IO capability. If `geometry_columns` is `None`,
     it will include all columns that inherit from `geoarrow.pyarrow.VectorType`.
     The `geometry_columns` are not required to be geoarrow extension type columns:
     text columns will be parsed as WKT; binary columns will be parsed as WKB
     (but are not detected automatically).
+
+    Note that the ``GeoDataset`` is only useful in a context where each fragment
+    has been written such that features in the fragment are close together
+    in space (e.g., one file or row group per state).
     """
 
     def __init__(self, parent, geometry_columns=None):
@@ -170,6 +176,10 @@ class GeoDataset:
         more than one geometry column, the filter will be applied to all columns
         and include fragments that intersect the simplified geometry from any
         of the columns.
+
+        Note that datasets with large row groups/fragments and/or datasets that
+        were not written with fragments with spatial significance may return
+        most or all of the fragments in the parent dataset.
 
         >>> import geoarrow.pyarrow as ga
         >>> import pyarrow as pa
