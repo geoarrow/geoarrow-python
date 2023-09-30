@@ -10,12 +10,6 @@ import geoarrow.pyarrow._compute as _compute
 import geoarrow.c.lib as lib
 
 
-def test_set_max_workers():
-    current_max_workers = _compute.set_max_workers(123)
-    assert _compute._max_workers == 123
-    assert _compute.set_max_workers(current_max_workers) == 123
-
-
 def test_as_array_or_chunked():
     wkt_array = ga.array(["POINT (0 1)"])
     assert _compute.obj_as_array_or_chunked(wkt_array) is wkt_array
@@ -31,8 +25,6 @@ def test_as_array_or_chunked():
 
 
 def test_push_all():
-    current_max_workers = _compute.set_max_workers(1)
-
     wkt_array = ga.array(["POINT (0 1)"])
     wkt_chunked0 = pa.chunked_array([], type=wkt_array.type)
     wkt_chunked1 = pa.chunked_array([wkt_array])
@@ -51,13 +43,6 @@ def test_push_all():
     result_chunked2 = _compute.push_all(_kernel.Kernel.as_wkt, wkt_chunked2)
     for result_chunk, wkt_chunk in zip(result_chunked2.chunks, wkt_chunked2.chunks):
         assert result_chunk.storage == wkt_chunk.storage
-
-    _compute.set_max_workers(2)
-    result_chunked2 = _compute.push_all(_kernel.Kernel.as_wkt, wkt_chunked2)
-    for result_chunk, wkt_chunk in zip(result_chunked2.chunks, wkt_chunked2.chunks):
-        assert result_chunk.storage == wkt_chunk.storage
-
-    _compute.set_max_workers(current_max_workers)
 
 
 def test_parse_all():
