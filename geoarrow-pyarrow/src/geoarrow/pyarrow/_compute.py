@@ -1,5 +1,3 @@
-from concurrent.futures import ThreadPoolExecutor, wait
-
 import pyarrow as pa
 import pyarrow.compute as pc
 
@@ -7,18 +5,6 @@ from geoarrow.c.lib import GeometryType, Dimensions, CoordType, EdgeType
 from geoarrow.pyarrow import _type
 from geoarrow.pyarrow._array import array
 from geoarrow.pyarrow._kernel import Kernel
-
-_max_workers = 1
-
-
-def set_max_workers(max_workers=None):
-    global _max_workers
-    if max_workers is None:
-        max_workers = pa.cpu_count()
-
-    prev = _max_workers
-    _max_workers = max_workers
-    return prev
 
 
 def obj_as_array_or_chunked(obj_in):
@@ -42,44 +28,19 @@ def ensure_storage(obj):
         return obj.storage
 
 
-def construct_kernel_and_push1(kernel_constructor, obj, args):
-    kernel = kernel_constructor(obj.type, **args)
-    return kernel.push(obj)
-
-
 def push_all(
     kernel_constructor, obj, args=None, is_agg=False, max_workers=None, result=True
 ):
     if args is None:
         args = {}
 
+    kernel = kernel_constructor(obj.type, **args)
+
     if is_agg:
-        kernel = kernel_constructor(obj.type, **args)
         kernel.push(obj)
         return kernel.finish()
-
-    if max_workers is None:
-        max_workers = _max_workers
-
-    if isinstance(obj, pa.Array) or obj.num_chunks <= 1 or max_workers == 1:
-        return construct_kernel_and_push1(kernel_constructor, obj, args)
-
-    with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        futures = []
-        for chunk in obj.chunks:
-            future = executor.submit(
-                construct_kernel_and_push1, kernel_constructor, chunk, args
-            )
-            futures.append(future)
-
-        # TODO: This doesn't cancel on Control-C properly
-        done, not_done = 0, futures
-        while not_done:
-            done, not_done = wait(futures, 0.5, return_when="FIRST_EXCEPTION")
-
-        if result:
-            chunks_out = [future.result() for future in futures]
-            return pa.chunked_array(chunks_out)
+    else:
+        return kernel.push(obj)
 
 
 def parse_all(obj):
