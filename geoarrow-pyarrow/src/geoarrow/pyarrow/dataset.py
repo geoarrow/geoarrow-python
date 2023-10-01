@@ -499,7 +499,7 @@ def dataset(*args, geometry_columns=None, use_row_groups=None, **kwargs):
     """Construct a GeoDataset
 
     This constructor is intended to mirror `pyarrow.dataset()`, adding
-    geo-specific arguments. See :class:`geoarrow.pyarrow._dataset.GeoDataset` for
+    geo-specific arguments. See :class:`geoarrow.pyarrow.dataset.GeoDataset` for
     details.
 
     >>> import geoarrow.pyarrow.dataset as gads
