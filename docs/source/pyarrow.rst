@@ -9,11 +9,6 @@ geoarrow-pyarrow
 
     .. autofunction:: array
 
-    Dataset constructors
-    --------------------
-
-    .. autofunction:: dataset
-
     Type Constructors
     -----------------
 
@@ -103,6 +98,13 @@ geoarrow-pyarrow
 
     .. autoclass:: MultiPolygonType
         :members:
+
+Dataset constructors
+--------------------
+
+.. automodule:: geoarrow.pyarrow.dataset
+
+    .. autofunction:: dataset
 
     .. autoclass:: geoarrow.pyarrow._dataset.GeoDataset
         :members:
