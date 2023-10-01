@@ -106,8 +106,8 @@ Dataset constructors
 
     .. autofunction:: dataset
 
-    .. autoclass:: geoarrow.pyarrow._dataset.GeoDataset
+    .. autoclass:: geoarrow.pyarrow.dataset.GeoDataset
         :members:
 
-    .. autoclass:: geoarrow.pyarrow._dataset.ParquetRowGroupGeoDataset
+    .. autoclass:: geoarrow.pyarrow.dataset.ParquetRowGroupGeoDataset
         :members:
