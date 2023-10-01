@@ -366,24 +366,6 @@ similar behaviour.</p>
 </dd></dl>
 
 </section>
-<section id="dataset-constructors">
-<h2>Dataset constructors<a class="headerlink" href="#dataset-constructors" title="Link to this heading">#</a></h2>
-<dl class="py function">
-<dt class="sig sig-object py" id="geoarrow.pyarrow.dataset">
-<span class="sig-name descname"><span class="pre">dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geometry_columns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_row_groups</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pyarrow.dataset" title="Link to this definition">#</a></dt>
-<dd><p>Construct a GeoDataset</p>
-<p>This constructor is intended to mirror <cite>pyarrow.dataset()</cite>, adding
-geo-specific arguments. See <a class="reference internal" href="#geoarrow.pyarrow._dataset.GeoDataset" title="geoarrow.pyarrow._dataset.GeoDataset"><code class="xref py py-class docutils literal notranslate"><span class="pre">geoarrow.pyarrow._dataset.GeoDataset</span></code></a> for
-details.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">geoarrow.pyarrow</span> <span class="k">as</span> <span class="nn">ga</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyarrow</span> <span class="k">as</span> <span class="nn">pa</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">table</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">table</span><span class="p">([</span><span class="n">ga</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="s2">&quot;POINT (0.5 1.5)&quot;</span><span class="p">])],</span> <span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">dataset</span> <span class="o">=</span> <span class="n">ga</span><span class="o">.</span><span class="n">dataset</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
-</pre></div>
-</div>
-</dd></dl>
-
-</section>
 <section id="type-constructors">
 <h2>Type Constructors<a class="headerlink" href="#type-constructors" title="Link to this heading">#</a></h2>
 <dl class="py function">
@@ -1148,9 +1130,32 @@ for this type.</p>
 
 </dd></dl>
 
+</section>
+<section id="module-geoarrow.pyarrow.dataset">
+<span id="dataset-constructors"></span><h2>Dataset constructors<a class="headerlink" href="#module-geoarrow.pyarrow.dataset" title="Link to this heading">#</a></h2>
+<p>Experimental geospatial-agumented wrapper around a <code class="docutils literal notranslate"><span class="pre">pyarrow.dataset</span></code>.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">geoarrow.pyarrow.dataset</span> <span class="k">as</span> <span class="nn">gads</span>
+</pre></div>
+</div>
+<dl class="py function">
+<dt class="sig sig-object py" id="geoarrow.pyarrow.dataset.dataset">
+<span class="sig-name descname"><span class="pre">dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geometry_columns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_row_groups</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pyarrow.dataset.dataset" title="Link to this definition">#</a></dt>
+<dd><p>Construct a GeoDataset</p>
+<p>This constructor is intended to mirror <cite>pyarrow.dataset()</cite>, adding
+geo-specific arguments. See <a class="reference internal" href="#geoarrow.pyarrow.dataset.GeoDataset" title="geoarrow.pyarrow.dataset.GeoDataset"><code class="xref py py-class docutils literal notranslate"><span class="pre">geoarrow.pyarrow.dataset.GeoDataset</span></code></a> for
+details.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">geoarrow.pyarrow.dataset</span> <span class="k">as</span> <span class="nn">gads</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">geoarrow.pyarrow</span> <span class="k">as</span> <span class="nn">ga</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyarrow</span> <span class="k">as</span> <span class="nn">pa</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">table</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">table</span><span class="p">([</span><span class="n">ga</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="s2">&quot;POINT (0.5 1.5)&quot;</span><span class="p">])],</span> <span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dataset</span> <span class="o">=</span> <span class="n">gads</span><span class="o">.</span><span class="n">dataset</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
 <dl class="py class">
-<dt class="sig sig-object py" id="geoarrow.pyarrow._dataset.GeoDataset">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">GeoDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geometry_columns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pyarrow._dataset.GeoDataset" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="geoarrow.pyarrow.dataset.GeoDataset">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">GeoDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geometry_columns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pyarrow.dataset.GeoDataset" title="Link to this definition">#</a></dt>
 <dd><p>Geospatial-augmented Dataset</p>
 <p>EXPERIMENTAL</p>
 <p>The GeoDataset wraps a pyarrow.Dataset containing one or more geometry columns
@@ -1163,8 +1168,8 @@ text columns will be parsed as WKT; binary columns will be parsed as WKB
 has been written such that features in the fragment are close together
 in space (e.g., one file or row group per state).</p>
 <dl class="py method">
-<dt class="sig sig-object py" id="geoarrow.pyarrow._dataset.GeoDataset.filter_fragments">
-<span class="sig-name descname"><span class="pre">filter_fragments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pyarrow._dataset.GeoDataset.filter_fragments" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="geoarrow.pyarrow.dataset.GeoDataset.filter_fragments">
+<span class="sig-name descname"><span class="pre">filter_fragments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pyarrow.dataset.GeoDataset.filter_fragments" title="Link to this definition">#</a></dt>
 <dd><p>Push down a spatial query into a GeoDataset</p>
 <p>Returns a potentially simplified dataset based on the geometry of
 target. Currently this uses <cite>geoarrow.pyarrow.box_agg()</cite> on <cite>target</cite>
@@ -1177,10 +1182,11 @@ of the columns.</p>
 <p>Note that datasets with large row groups/fragments and/or datasets that
 were not written with fragments with spatial significance may return
 most or all of the fragments in the parent dataset.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">geoarrow.pyarrow</span> <span class="k">as</span> <span class="nn">ga</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">geoarrow.pyarrow.dataset</span> <span class="k">as</span> <span class="nn">gads</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">geoarrow.pyarrow</span> <span class="k">as</span> <span class="nn">ga</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyarrow</span> <span class="k">as</span> <span class="nn">pa</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">table</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">table</span><span class="p">([</span><span class="n">ga</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="s2">&quot;POINT (0.5 1.5)&quot;</span><span class="p">])],</span> <span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">dataset</span> <span class="o">=</span> <span class="n">ga</span><span class="o">.</span><span class="n">dataset</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dataset</span> <span class="o">=</span> <span class="n">gads</span><span class="o">.</span><span class="n">dataset</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">dataset</span><span class="o">.</span><span class="n">filter_fragments</span><span class="p">(</span><span class="s2">&quot;POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">to_table</span><span class="p">()</span>
 <span class="go">pyarrow.Table</span>
 <span class="go">geometry: extension&lt;geoarrow.wkt&lt;WktType&gt;&gt;</span>
@@ -1196,13 +1202,14 @@ most or all of the fragments in the parent dataset.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="geoarrow.pyarrow._dataset.GeoDataset.geometry_columns">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">geometry_columns</span></span><a class="headerlink" href="#geoarrow.pyarrow._dataset.GeoDataset.geometry_columns" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="geoarrow.pyarrow.dataset.GeoDataset.geometry_columns">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">geometry_columns</span></span><a class="headerlink" href="#geoarrow.pyarrow.dataset.GeoDataset.geometry_columns" title="Link to this definition">#</a></dt>
 <dd><p>Get a tuple of geometry column names</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">geoarrow.pyarrow</span> <span class="k">as</span> <span class="nn">ga</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">geoarrow.pyarrow.dataset</span> <span class="k">as</span> <span class="nn">gads</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">geoarrow.pyarrow</span> <span class="k">as</span> <span class="nn">ga</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyarrow</span> <span class="k">as</span> <span class="nn">pa</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">table</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">table</span><span class="p">([</span><span class="n">ga</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="s2">&quot;POINT (0.5 1.5)&quot;</span><span class="p">])],</span> <span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">dataset</span> <span class="o">=</span> <span class="n">ga</span><span class="o">.</span><span class="n">dataset</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dataset</span> <span class="o">=</span> <span class="n">gads</span><span class="o">.</span><span class="n">dataset</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">dataset</span><span class="o">.</span><span class="n">geometry_columns</span>
 <span class="go">(&#39;geometry&#39;,)</span>
 </pre></div>
@@ -1210,17 +1217,18 @@ most or all of the fragments in the parent dataset.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="geoarrow.pyarrow._dataset.GeoDataset.geometry_types">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">geometry_types</span></span><a class="headerlink" href="#geoarrow.pyarrow._dataset.GeoDataset.geometry_types" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="geoarrow.pyarrow.dataset.GeoDataset.geometry_types">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">geometry_types</span></span><a class="headerlink" href="#geoarrow.pyarrow.dataset.GeoDataset.geometry_types" title="Link to this definition">#</a></dt>
 <dd><p>Resolve a tuple of geometry column types</p>
 <p>This will convert any primitive types to the corresponding
 geo-enabled type (e.g., binary to wkb) and check that geometry
 columns actually refer a field that can be interpreted as
 geometry.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">geoarrow.pyarrow</span> <span class="k">as</span> <span class="nn">ga</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">geoarrow.pyarrow.dataset</span> <span class="k">as</span> <span class="nn">gads</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">geoarrow.pyarrow</span> <span class="k">as</span> <span class="nn">ga</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyarrow</span> <span class="k">as</span> <span class="nn">pa</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">table</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">table</span><span class="p">([</span><span class="n">ga</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="s2">&quot;POINT (0.5 1.5)&quot;</span><span class="p">])],</span> <span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">dataset</span> <span class="o">=</span> <span class="n">ga</span><span class="o">.</span><span class="n">dataset</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dataset</span> <span class="o">=</span> <span class="n">gads</span><span class="o">.</span><span class="n">dataset</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">dataset</span><span class="o">.</span><span class="n">geometry_types</span>
 <span class="go">(WktType(geoarrow.wkt),)</span>
 </pre></div>
@@ -1228,15 +1236,15 @@ geometry.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="geoarrow.pyarrow._dataset.GeoDataset.get_fragments">
-<span class="sig-name descname"><span class="pre">get_fragments</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pyarrow._dataset.GeoDataset.get_fragments" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="geoarrow.pyarrow.dataset.GeoDataset.get_fragments">
+<span class="sig-name descname"><span class="pre">get_fragments</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pyarrow.dataset.GeoDataset.get_fragments" title="Link to this definition">#</a></dt>
 <dd><p>Resolve the list of fragments in the dataset</p>
 <p>This is identical to the list of fragments of its parent.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="geoarrow.pyarrow._dataset.GeoDataset.index_fragments">
-<span class="sig-name descname"><span class="pre">index_fragments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_threads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pyarrow._dataset.GeoDataset.index_fragments" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="geoarrow.pyarrow.dataset.GeoDataset.index_fragments">
+<span class="sig-name descname"><span class="pre">index_fragments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_threads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pyarrow.dataset.GeoDataset.index_fragments" title="Link to this definition">#</a></dt>
 <dd><p>Resolve a simplified geometry for each fragment</p>
 <p>Currently the simplified geometry is a box in the form of a
 struct array with fields xmin, xmax, ymin, and ymax. The
@@ -1244,10 +1252,11 @@ fragment index is curently a table whose first column is the fragment
 index and whose subsequent columns are named with the geometry column
 name. A future implementation may handle spherical edges using a type
 of simplified geometry more suitable to a spherical comparison.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">geoarrow.pyarrow</span> <span class="k">as</span> <span class="nn">ga</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">geoarrow.pyarrow.dataset</span> <span class="k">as</span> <span class="nn">gads</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">geoarrow.pyarrow</span> <span class="k">as</span> <span class="nn">ga</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyarrow</span> <span class="k">as</span> <span class="nn">pa</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">table</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">table</span><span class="p">([</span><span class="n">ga</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="s2">&quot;POINT (0.5 1.5)&quot;</span><span class="p">])],</span> <span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">dataset</span> <span class="o">=</span> <span class="n">ga</span><span class="o">.</span><span class="n">dataset</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dataset</span> <span class="o">=</span> <span class="n">gads</span><span class="o">.</span><span class="n">dataset</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">dataset</span><span class="o">.</span><span class="n">index_fragments</span><span class="p">()</span><span class="o">.</span><span class="n">to_pylist</span><span class="p">()</span>
 <span class="go">[{&#39;_fragment_index&#39;: 0, &#39;geometry&#39;: {&#39;xmin&#39;: 0.5, &#39;xmax&#39;: 0.5, &#39;ymin&#39;: 1.5, &#39;ymax&#39;: 1.5}}]</span>
 </pre></div>
@@ -1255,14 +1264,15 @@ of simplified geometry more suitable to a spherical comparison.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="geoarrow.pyarrow._dataset.GeoDataset.parent">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parent</span></span><a class="headerlink" href="#geoarrow.pyarrow._dataset.GeoDataset.parent" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="geoarrow.pyarrow.dataset.GeoDataset.parent">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parent</span></span><a class="headerlink" href="#geoarrow.pyarrow.dataset.GeoDataset.parent" title="Link to this definition">#</a></dt>
 <dd><p>Get the parent Dataset</p>
 <p>Returns the (non geo-aware) parent pyarrow.Dataset.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">geoarrow.pyarrow</span> <span class="k">as</span> <span class="nn">ga</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">geoarrow.pyarrow.dataset</span> <span class="k">as</span> <span class="nn">gads</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">geoarrow.pyarrow</span> <span class="k">as</span> <span class="nn">ga</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyarrow</span> <span class="k">as</span> <span class="nn">pa</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">table</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">table</span><span class="p">([</span><span class="n">ga</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="s2">&quot;POINT (0.5 1.5)&quot;</span><span class="p">])],</span> <span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">dataset</span> <span class="o">=</span> <span class="n">ga</span><span class="o">.</span><span class="n">dataset</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dataset</span> <span class="o">=</span> <span class="n">gads</span><span class="o">.</span><span class="n">dataset</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">type</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>
 <span class="go">&lt;class &#39;pyarrow._dataset.InMemoryDataset&#39;&gt;</span>
 </pre></div>
@@ -1270,14 +1280,15 @@ of simplified geometry more suitable to a spherical comparison.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="geoarrow.pyarrow._dataset.GeoDataset.schema">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">schema</span></span><a class="headerlink" href="#geoarrow.pyarrow._dataset.GeoDataset.schema" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="geoarrow.pyarrow.dataset.GeoDataset.schema">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">schema</span></span><a class="headerlink" href="#geoarrow.pyarrow.dataset.GeoDataset.schema" title="Link to this definition">#</a></dt>
 <dd><p>Get the dataset schema</p>
 <p>The schema of a GeoDataset is identical to that of its parent.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">geoarrow.pyarrow</span> <span class="k">as</span> <span class="nn">ga</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">geoarrow.pyarrow.dataset</span> <span class="k">as</span> <span class="nn">gads</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">geoarrow.pyarrow</span> <span class="k">as</span> <span class="nn">ga</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyarrow</span> <span class="k">as</span> <span class="nn">pa</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">table</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">table</span><span class="p">([</span><span class="n">ga</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="s2">&quot;POINT (0.5 1.5)&quot;</span><span class="p">])],</span> <span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">dataset</span> <span class="o">=</span> <span class="n">ga</span><span class="o">.</span><span class="n">dataset</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dataset</span> <span class="o">=</span> <span class="n">gads</span><span class="o">.</span><span class="n">dataset</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">dataset</span><span class="o">.</span><span class="n">schema</span>
 <span class="go">geometry: extension&lt;geoarrow.wkt&lt;WktType&gt;&gt;</span>
 </pre></div>
@@ -1287,8 +1298,8 @@ of simplified geometry more suitable to a spherical comparison.</p>
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="geoarrow.pyarrow._dataset.ParquetRowGroupGeoDataset">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ParquetRowGroupGeoDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">row_group_fragments</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">row_group_ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geometry_columns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_column_statistics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pyarrow._dataset.ParquetRowGroupGeoDataset" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="geoarrow.pyarrow.dataset.ParquetRowGroupGeoDataset">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ParquetRowGroupGeoDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">row_group_fragments</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">row_group_ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geometry_columns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_column_statistics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pyarrow.dataset.ParquetRowGroupGeoDataset" title="Link to this definition">#</a></dt>
 <dd><p>Geospatial-augmented Parquet dataset using row groups</p>
 <p>An implementation of the GeoDataset that can leverage potentially
 more efficient indexing and more specific filtering. Notably, this
@@ -1347,10 +1358,6 @@ this capability.</p>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#examples">Examples</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#array-constructors">Array constructors</a><ul class="visible nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow.array"><code class="docutils literal notranslate"><span class="pre">array()</span></code></a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#dataset-constructors">Dataset constructors</a><ul class="visible nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow.dataset"><code class="docutils literal notranslate"><span class="pre">dataset()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#type-constructors">Type Constructors</a><ul class="visible nav section-nav flex-column">
@@ -1438,17 +1445,21 @@ this capability.</p>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow.MultiPolygonType.from_geobuffers"><code class="docutils literal notranslate"><span class="pre">MultiPolygonType.from_geobuffers()</span></code></a></li>
 </ul>
 </li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow._dataset.GeoDataset"><code class="docutils literal notranslate"><span class="pre">GeoDataset</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow._dataset.GeoDataset.filter_fragments"><code class="docutils literal notranslate"><span class="pre">GeoDataset.filter_fragments()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow._dataset.GeoDataset.geometry_columns"><code class="docutils literal notranslate"><span class="pre">GeoDataset.geometry_columns</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow._dataset.GeoDataset.geometry_types"><code class="docutils literal notranslate"><span class="pre">GeoDataset.geometry_types</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow._dataset.GeoDataset.get_fragments"><code class="docutils literal notranslate"><span class="pre">GeoDataset.get_fragments()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow._dataset.GeoDataset.index_fragments"><code class="docutils literal notranslate"><span class="pre">GeoDataset.index_fragments()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow._dataset.GeoDataset.parent"><code class="docutils literal notranslate"><span class="pre">GeoDataset.parent</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow._dataset.GeoDataset.schema"><code class="docutils literal notranslate"><span class="pre">GeoDataset.schema</span></code></a></li>
 </ul>
 </li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow._dataset.ParquetRowGroupGeoDataset"><code class="docutils literal notranslate"><span class="pre">ParquetRowGroupGeoDataset</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-geoarrow.pyarrow.dataset">Dataset constructors</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow.dataset.dataset"><code class="docutils literal notranslate"><span class="pre">dataset()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow.dataset.GeoDataset"><code class="docutils literal notranslate"><span class="pre">GeoDataset</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow.dataset.GeoDataset.filter_fragments"><code class="docutils literal notranslate"><span class="pre">GeoDataset.filter_fragments()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow.dataset.GeoDataset.geometry_columns"><code class="docutils literal notranslate"><span class="pre">GeoDataset.geometry_columns</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow.dataset.GeoDataset.geometry_types"><code class="docutils literal notranslate"><span class="pre">GeoDataset.geometry_types</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow.dataset.GeoDataset.get_fragments"><code class="docutils literal notranslate"><span class="pre">GeoDataset.get_fragments()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow.dataset.GeoDataset.index_fragments"><code class="docutils literal notranslate"><span class="pre">GeoDataset.index_fragments()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow.dataset.GeoDataset.parent"><code class="docutils literal notranslate"><span class="pre">GeoDataset.parent</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow.dataset.GeoDataset.schema"><code class="docutils literal notranslate"><span class="pre">GeoDataset.schema</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow.dataset.ParquetRowGroupGeoDataset"><code class="docutils literal notranslate"><span class="pre">ParquetRowGroupGeoDataset</span></code></a></li>
 </ul>
 </li>
 </ul>
