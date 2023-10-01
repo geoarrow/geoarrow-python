@@ -1,3 +1,9 @@
+"""
+Experimental geospatial-agumented wrapper around a ``pyarrow.dataset``.
+
+>>> import geoarrow.pyarrow.dataset as gads
+"""
+
 from concurrent.futures import ThreadPoolExecutor, wait
 
 import pyarrow as _pa
