@@ -50,6 +50,7 @@ class GeoDataset:
         Returns the (non geo-aware) parent pyarrow.Dataset.
 
         >>> import geoarrow.pyarrow.dataset as gads
+        >>> import geoarrow as ga
         >>> import pyarrow as pa
         >>> table = pa.table([ga.array(["POINT (0.5 1.5)"])], ["geometry"])
         >>> dataset = gads.dataset(table)
@@ -68,6 +69,7 @@ class GeoDataset:
         The schema of a GeoDataset is identical to that of its parent.
 
         >>> import geoarrow.pyarrow.dataset as gads
+        >>> import geoarrow as ga
         >>> import pyarrow as pa
         >>> table = pa.table([ga.array(["POINT (0.5 1.5)"])], ["geometry"])
         >>> dataset = gads.dataset(table)
@@ -90,6 +92,7 @@ class GeoDataset:
         """Get a tuple of geometry column names
 
         >>> import geoarrow.pyarrow.dataset as gads
+        >>> import geoarrow as ga
         >>> import pyarrow as pa
         >>> table = pa.table([ga.array(["POINT (0.5 1.5)"])], ["geometry"])
         >>> dataset = gads.dataset(table)
@@ -116,6 +119,7 @@ class GeoDataset:
         geometry.
 
         >>> import geoarrow.pyarrow.dataset as gads
+        >>> import geoarrow as ga
         >>> import pyarrow as pa
         >>> table = pa.table([ga.array(["POINT (0.5 1.5)"])], ["geometry"])
         >>> dataset = gads.dataset(table)
@@ -150,6 +154,7 @@ class GeoDataset:
         of simplified geometry more suitable to a spherical comparison.
 
         >>> import geoarrow.pyarrow.dataset as gads
+        >>> import geoarrow as ga
         >>> import pyarrow as pa
         >>> table = pa.table([ga.array(["POINT (0.5 1.5)"])], ["geometry"])
         >>> dataset = gads.dataset(table)
@@ -188,6 +193,7 @@ class GeoDataset:
         most or all of the fragments in the parent dataset.
 
         >>> import geoarrow.pyarrow.dataset as gads
+        >>> import geoarrow as ga
         >>> import pyarrow as pa
         >>> table = pa.table([ga.array(["POINT (0.5 1.5)"])], ["geometry"])
         >>> dataset = gads.dataset(table)
@@ -497,6 +503,7 @@ def dataset(*args, geometry_columns=None, use_row_groups=None, **kwargs):
     details.
 
     >>> import geoarrow.pyarrow.dataset as gads
+    >>> import geoarrow as ga
     >>> import pyarrow as pa
     >>> table = pa.table([ga.array(["POINT (0.5 1.5)"])], ["geometry"])
     >>> dataset = gads.dataset(table)
