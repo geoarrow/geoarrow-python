@@ -1,3 +1,9 @@
+"""
+Experimental geospatial-agumented wrapper around a ``pyarrow.dataset``.
+
+>>> import geoarrow.pyarrow.dataset as gads
+"""
+
 from concurrent.futures import ThreadPoolExecutor, wait
 
 import pyarrow as _pa
@@ -43,10 +49,11 @@ class GeoDataset:
 
         Returns the (non geo-aware) parent pyarrow.Dataset.
 
+        >>> import geoarrow.pyarrow.dataset as gads
         >>> import geoarrow.pyarrow as ga
         >>> import pyarrow as pa
         >>> table = pa.table([ga.array(["POINT (0.5 1.5)"])], ["geometry"])
-        >>> dataset = ga.dataset(table)
+        >>> dataset = gads.dataset(table)
         >>> type(dataset.parent)
         <class 'pyarrow._dataset.InMemoryDataset'>
         """
@@ -61,10 +68,11 @@ class GeoDataset:
 
         The schema of a GeoDataset is identical to that of its parent.
 
+        >>> import geoarrow.pyarrow.dataset as gads
         >>> import geoarrow.pyarrow as ga
         >>> import pyarrow as pa
         >>> table = pa.table([ga.array(["POINT (0.5 1.5)"])], ["geometry"])
-        >>> dataset = ga.dataset(table)
+        >>> dataset = gads.dataset(table)
         >>> dataset.schema
         geometry: extension<geoarrow.wkt<WktType>>
         """
@@ -83,10 +91,11 @@ class GeoDataset:
     def geometry_columns(self):
         """Get a tuple of geometry column names
 
+        >>> import geoarrow.pyarrow.dataset as gads
         >>> import geoarrow.pyarrow as ga
         >>> import pyarrow as pa
         >>> table = pa.table([ga.array(["POINT (0.5 1.5)"])], ["geometry"])
-        >>> dataset = ga.dataset(table)
+        >>> dataset = gads.dataset(table)
         >>> dataset.geometry_columns
         ('geometry',)
         """
@@ -109,10 +118,11 @@ class GeoDataset:
         columns actually refer a field that can be interpreted as
         geometry.
 
+        >>> import geoarrow.pyarrow.dataset as gads
         >>> import geoarrow.pyarrow as ga
         >>> import pyarrow as pa
         >>> table = pa.table([ga.array(["POINT (0.5 1.5)"])], ["geometry"])
-        >>> dataset = ga.dataset(table)
+        >>> dataset = gads.dataset(table)
         >>> dataset.geometry_types
         (WktType(geoarrow.wkt),)
         """
@@ -143,10 +153,11 @@ class GeoDataset:
         name. A future implementation may handle spherical edges using a type
         of simplified geometry more suitable to a spherical comparison.
 
+        >>> import geoarrow.pyarrow.dataset as gads
         >>> import geoarrow.pyarrow as ga
         >>> import pyarrow as pa
         >>> table = pa.table([ga.array(["POINT (0.5 1.5)"])], ["geometry"])
-        >>> dataset = ga.dataset(table)
+        >>> dataset = gads.dataset(table)
         >>> dataset.index_fragments().to_pylist()
         [{'_fragment_index': 0, 'geometry': {'xmin': 0.5, 'xmax': 0.5, 'ymin': 1.5, 'ymax': 1.5}}]
         """
@@ -181,10 +192,11 @@ class GeoDataset:
         were not written with fragments with spatial significance may return
         most or all of the fragments in the parent dataset.
 
+        >>> import geoarrow.pyarrow.dataset as gads
         >>> import geoarrow.pyarrow as ga
         >>> import pyarrow as pa
         >>> table = pa.table([ga.array(["POINT (0.5 1.5)"])], ["geometry"])
-        >>> dataset = ga.dataset(table)
+        >>> dataset = gads.dataset(table)
         >>> dataset.filter_fragments("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))").to_table()
         pyarrow.Table
         geometry: extension<geoarrow.wkt<WktType>>
@@ -480,3 +492,32 @@ class ParquetRowGroupGeoDataset(GeoDataset):
         else:
             fields_before.append((path + (field.name,), count))
             return count + 1
+
+
+# Use a lazy import here to avoid requiring pyarrow.dataset
+def dataset(*args, geometry_columns=None, use_row_groups=None, **kwargs):
+    """Construct a GeoDataset
+
+    This constructor is intended to mirror `pyarrow.dataset()`, adding
+    geo-specific arguments. See :class:`geoarrow.pyarrow.dataset.GeoDataset` for
+    details.
+
+    >>> import geoarrow.pyarrow.dataset as gads
+    >>> import geoarrow.pyarrow as ga
+    >>> import pyarrow as pa
+    >>> table = pa.table([ga.array(["POINT (0.5 1.5)"])], ["geometry"])
+    >>> dataset = gads.dataset(table)
+    """
+
+    parent = _ds.dataset(*args, **kwargs)
+
+    if use_row_groups is None:
+        use_row_groups = isinstance(parent, _ds.FileSystemDataset) and isinstance(
+            parent.format, _ds.ParquetFileFormat
+        )
+    if use_row_groups:
+        return ParquetRowGroupGeoDataset.create(
+            parent, geometry_columns=geometry_columns
+        )
+    else:
+        return GeoDataset(parent, geometry_columns=geometry_columns)
