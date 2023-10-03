@@ -9,19 +9,12 @@ testing and documenting the GeoArrow format and encodings.
 import geoarrow.pyarrow as _ga
 
 
-def read_pyogrio_table(
-    *args,
-    geoarrow_type=None,
-    geoarrow_coord_type=None,
-    geoarrow_promote_multi=False,
-    **kwargs
-):
+def read_pyogrio_table(*args, **kwargs):
     """Read a file using GDAL/OGR
 
-    Reads a file as a ``pyarrow.Table`` using ``pyogrio.raw.read_arrow()``,
-    applying :func:`geoarrow.pyarrow.as_geoarrow` to the geometry column.
-    This aggressively parses the geometry column into a geoarrow-native
-    encoding: to prevent this, use ``geoarrow_type=geoarrow.pyarrow.wkb()``.
+    Reads a file as a ``pyarrow.Table`` using ``pyogrio.raw.read_arrow()``.
+    This does not parse the input, which OGR returns as
+    :func:`geoarrow.pyarrow.wkb`.
 
     >>> from geoarrow.pyarrow import io
     >>> import tempfile
@@ -33,16 +26,10 @@ def read_pyogrio_table(
     ...         geometry=geopandas.GeoSeries.from_wkt(["POINT (0 1)"],
     ...         crs="OGC:CRS84")
     ...     ).to_file(temp_gpkg)
-    ...     io.read_pyogrio_table(temp_gpkg)
-    pyarrow.Table
-    geom: extension<geoarrow.point<PointType>>
-    ----
-    geom: [  -- is_valid: all not null
-      -- child 0 type: double
-    [0]
-      -- child 1 type: double
-    [1]]
-
+    ...     table = io.read_pyogrio_table(temp_gpkg)
+    ...     table.column("geom").chunk(0)
+    VectorArray:WkbType(geoarrow.wkb <{"$schema":"https://proj.org/schem...>)[1]
+    <POINT (0 1)>
     """
     from pyogrio.raw import read_arrow
     import pyproj
@@ -52,8 +39,8 @@ def read_pyogrio_table(
     # Maybe not always true? meta["geometry_name"] is occasionally `""`
     geometry_name = meta["geometry_name"] if meta["geometry_name"] else "wkb_geometry"
 
-    # Create the geoarrow-enabled geometry column with a crs attribute
-    prj = pyproj.CRS(meta["crs"])
+    # Get the JSON representation of the CRS
+    prj_as_json = pyproj.CRS(meta["crs"]).to_json()
 
     # Apply geoarrow type to geometry column. This doesn't scale to multiple geometry
     # columns, but it's unclear if other columns would share the same CRS.
@@ -61,13 +48,8 @@ def read_pyogrio_table(
         if nm == geometry_name:
             geometry = table.column(i)
             geometry = _ga.wkb().wrap_array(geometry)
-            geometry = _ga.as_geoarrow(
-                geometry,
-                type=geoarrow_type,
-                coord_type=geoarrow_coord_type,
-                promote_multi=geoarrow_promote_multi,
-            )
-            table = table.set_column(i, nm, _ga.with_crs(geometry, prj.to_json()))
+            geometry = _ga.with_crs(geometry, prj_as_json)
+            table = table.set_column(i, nm, geometry)
             break
 
     return table
