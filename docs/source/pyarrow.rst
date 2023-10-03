@@ -99,6 +99,14 @@ geoarrow-pyarrow
     .. autoclass:: MultiPolygonType
         :members:
 
+IO helpers
+--------------------
+
+.. automodule:: geoarrow.pyarrow.io
+
+    .. autofunction:: read_pyogrio_table
+
+
 Dataset constructors
 --------------------
 
