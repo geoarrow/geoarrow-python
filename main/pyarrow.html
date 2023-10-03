@@ -1131,6 +1131,40 @@ for this type.</p>
 </dd></dl>
 
 </section>
+<section id="module-geoarrow.pyarrow.io">
+<span id="io-helpers"></span><h2>IO helpers<a class="headerlink" href="#module-geoarrow.pyarrow.io" title="Link to this heading">#</a></h2>
+<p>GeoArrow IO helpers</p>
+<p>A module wrapping IO functionality from external libraries to simplify
+testing and documenting the GeoArrow format and encodings.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">geoarrow.pyarrow</span> <span class="kn">import</span> <span class="n">io</span>
+</pre></div>
+</div>
+<dl class="py function">
+<dt class="sig sig-object py" id="geoarrow.pyarrow.io.read_pyogrio_table">
+<span class="sig-name descname"><span class="pre">read_pyogrio_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pyarrow.io.read_pyogrio_table" title="Link to this definition">#</a></dt>
+<dd><p>Read a file using GDAL/OGR</p>
+<p>Reads a file as a <code class="docutils literal notranslate"><span class="pre">pyarrow.Table</span></code> using <code class="docutils literal notranslate"><span class="pre">pyogrio.raw.read_arrow()</span></code>.
+This does not parse the input, which OGR returns as
+<a class="reference internal" href="#geoarrow.pyarrow.wkb" title="geoarrow.pyarrow.wkb"><code class="xref py py-func docutils literal notranslate"><span class="pre">geoarrow.pyarrow.wkb()</span></code></a>.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">geoarrow.pyarrow</span> <span class="kn">import</span> <span class="n">io</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">tempfile</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">geopandas</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">os</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span> <span class="k">as</span> <span class="n">tmpdir</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">temp_gpkg</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">,</span> <span class="s2">&quot;test.gpkg&quot;</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">geopandas</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span>
+<span class="gp">... </span>        <span class="n">geometry</span><span class="o">=</span><span class="n">geopandas</span><span class="o">.</span><span class="n">GeoSeries</span><span class="o">.</span><span class="n">from_wkt</span><span class="p">([</span><span class="s2">&quot;POINT (0 1)&quot;</span><span class="p">],</span>
+<span class="gp">... </span>        <span class="n">crs</span><span class="o">=</span><span class="s2">&quot;OGC:CRS84&quot;</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="p">)</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">temp_gpkg</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">table</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">read_pyogrio_table</span><span class="p">(</span><span class="n">temp_gpkg</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">table</span><span class="o">.</span><span class="n">column</span><span class="p">(</span><span class="s2">&quot;geom&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">chunk</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="go">VectorArray:WkbType(geoarrow.wkb &lt;{&quot;$schema&quot;:&quot;https://proj.org/schem...&gt;)[1]</span>
+<span class="go">&lt;POINT (0 1)&gt;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
 <section id="module-geoarrow.pyarrow.dataset">
 <span id="dataset-constructors"></span><h2>Dataset constructors<a class="headerlink" href="#module-geoarrow.pyarrow.dataset" title="Link to this heading">#</a></h2>
 <p>Experimental geospatial-agumented wrapper around a <code class="docutils literal notranslate"><span class="pre">pyarrow.dataset</span></code>.</p>
@@ -1445,6 +1479,10 @@ this capability.</p>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow.MultiPolygonType.from_geobuffers"><code class="docutils literal notranslate"><span class="pre">MultiPolygonType.from_geobuffers()</span></code></a></li>
 </ul>
 </li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-geoarrow.pyarrow.io">IO helpers</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow.io.read_pyogrio_table"><code class="docutils literal notranslate"><span class="pre">read_pyogrio_table()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-geoarrow.pyarrow.dataset">Dataset constructors</a><ul class="visible nav section-nav flex-column">
