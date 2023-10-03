@@ -118,8 +118,3 @@ class Kernel:
             bytes += v.encode("UTF-8")
 
         return bytes
-
-
-# Inject _make_validate_kernel exactly once to avoid circular import
-if VectorType._make_validate_kernel is None:
-    VectorType._make_validate_kernel = Kernel.visit_void_agg

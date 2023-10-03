@@ -129,8 +129,7 @@ def test_array():
     assert array.type == ga.wkt()
     assert array.type.storage_type == pa.utf8()
 
-    # Validation not yet supported for large types
-    array = ga.array(["POINT (30 10)"], ga.large_wkt(), validate=False)
+    array = ga.array(["POINT (30 10)"], ga.large_wkt())
     assert array.type == ga.large_wkt()
     assert array.type.storage_type == pa.large_utf8()
 
@@ -138,8 +137,7 @@ def test_array():
     assert array.type == ga.wkb()
     assert array.type.storage_type == pa.binary()
 
-    # Validation not yet supported for large types
-    array = ga.array([wkb_item], ga.large_wkb(), validate=False)
+    array = ga.array([wkb_item], ga.large_wkb())
     assert array.type == ga.large_wkb()
     assert array.type.storage_type == pa.large_binary()
 
@@ -160,7 +158,7 @@ def test_array_repr():
     array_repr = repr(array)
     assert "...>" in array_repr
 
-    array = ga.array(["THIS IS TOTALLY INVALID WKT"], validate=False)
+    array = ga.array(["THIS IS TOTALLY INVALID WKT"])
     array_repr = repr(array)
     assert array_repr.startswith("VectorArray")
     assert "* 1 or more display values failed to parse" in array_repr
@@ -259,9 +257,7 @@ def test_kernel_visit_void():
     assert out.type == pa.null()
     assert len(out) == 1
 
-    array = ga.array(
-        ["POINT (30 10)", "NOT VALID WKT AT ALL"], ga.wkt(), validate=False
-    )
+    array = ga.array(["POINT (30 10)", "NOT VALID WKT AT ALL"], ga.wkt())
     kernel = ga.Kernel.visit_void_agg(array.type)
     with pytest.raises(lib.GeoArrowCException):
         kernel.push(array)

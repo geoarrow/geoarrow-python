@@ -117,7 +117,7 @@ if VectorType._array_cls_from_name is None:
     VectorType._array_cls_from_name = array_cls_from_name
 
 
-def array(obj, type_=None, *args, validate=True, **kwargs) -> VectorArray:
+def array(obj, type_=None, *args, **kwargs) -> VectorArray:
     """Attempt to create an Array or ChunkedArray with a geoarrow extension type
     from ``obj``. This constructor attempts to perform the fewest transformations
     possible (i.e., WKB is left as WKB, WKT is left as WKT), whereas
@@ -156,13 +156,13 @@ def array(obj, type_=None, *args, validate=True, **kwargs) -> VectorArray:
         if isinstance(arr.type, VectorType):
             return arr
         elif arr.type == pa.utf8():
-            return wkt().wrap_array(arr, validate=validate)
+            return wkt().wrap_array(arr)
         elif arr.type == pa.large_utf8():
-            return large_wkt().wrap_array(arr, validate=validate)
+            return large_wkt().wrap_array(arr)
         elif arr.type == pa.binary():
-            return wkb().wrap_array(arr, validate=validate)
+            return wkb().wrap_array(arr)
         elif arr.type == pa.large_binary():
-            return large_wkb().wrap_array(arr, validate=validate)
+            return large_wkb().wrap_array(arr)
         else:
             raise TypeError(
                 f"Can't create geoarrow.array from Arrow array of type {type_}"
@@ -177,7 +177,7 @@ def array(obj, type_=None, *args, validate=True, **kwargs) -> VectorArray:
 
     if type_is_geoarrow and type_is_wkb_or_wkt:
         arr = arr.cast(type_.storage_type)
-        return type_.wrap_array(arr, validate=validate)
+        return type_.wrap_array(arr)
 
     # Eventually we will be able to handle more types (e.g., parse wkt or wkb
     # into a geoarrow type)

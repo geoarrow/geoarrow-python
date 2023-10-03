@@ -13,7 +13,7 @@ def obj_as_array_or_chunked(obj_in):
     ) and isinstance(obj_in.type, _type.VectorType):
         return obj_in
     else:
-        return array(obj_in, validate=False)
+        return array(obj_in)
 
 
 def ensure_storage(obj):

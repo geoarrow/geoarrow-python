@@ -13,7 +13,6 @@ class VectorType(pa.ExtensionType):
     # use this module directly (import geoarrow.pyarrow first).
     _array_cls_from_name = None
     _scalar_cls_from_name = None
-    _make_validate_kernel = None
 
     def __init__(self, c_vector_type):
         if not isinstance(c_vector_type, lib.CVectorType):
@@ -68,15 +67,6 @@ class VectorType(pa.ExtensionType):
         return cls.__arrow_ext_deserialize__(
             storage_type, c_vector_type.extension_metadata
         )
-
-    def wrap_array(self, obj, validate=False):
-        out = super().wrap_array(obj)
-        if validate:
-            validator = VectorType._make_validate_kernel(self)
-            validator.push(out)
-            validator.finish()
-
-        return out
 
     def __arrow_ext_class__(self):
         return VectorType._array_cls_from_name(self.extension_name)
@@ -276,9 +266,6 @@ class WkbType(VectorType):
 
     _extension_name = "geoarrow.wkb"
 
-    def wrap_array(self, obj, validate=True):
-        return super().wrap_array(obj, validate=validate)
-
 
 class WktType(VectorType):
     """Extension type whose storage is a utf8 or large utf8 array of
@@ -286,9 +273,6 @@ class WktType(VectorType):
     """
 
     _extension_name = "geoarrow.wkt"
-
-    def wrap_array(self, obj, validate=True):
-        return super().wrap_array(obj, validate=validate)
 
 
 class PointType(VectorType):
