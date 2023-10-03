@@ -346,7 +346,7 @@ document.write(`
 <h2>Array constructors<a class="headerlink" href="#array-constructors" title="Link to this heading">#</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="geoarrow.pyarrow.array">
-<span class="sig-name descname"><span class="pre">array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">VectorArray</span></span></span><a class="headerlink" href="#geoarrow.pyarrow.array" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">VectorArray</span></span></span><a class="headerlink" href="#geoarrow.pyarrow.array" title="Link to this definition">#</a></dt>
 <dd><p>Attempt to create an Array or ChunkedArray with a geoarrow extension type
 from <code class="docutils literal notranslate"><span class="pre">obj</span></code>. This constructor attempts to perform the fewest transformations
 possible (i.e., WKB is left as WKB, WKT is left as WKT), whereas
@@ -977,23 +977,6 @@ types where this is not constant (i.e., WKT and WKB).</p>
 </div>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="geoarrow.pyarrow.VectorType.wrap_array">
-<span class="sig-name descname"><span class="pre">wrap_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">storage</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pyarrow.VectorType.wrap_array" title="Link to this definition">#</a></dt>
-<dd><p>Wrap the given storage array as an extension array.</p>
-<section id="parameters">
-<h3>Parameters<a class="headerlink" href="#parameters" title="Link to this heading">#</a></h3>
-<p>storage : Array or ChunkedArray</p>
-</section>
-<section id="returns">
-<h3>Returns<a class="headerlink" href="#returns" title="Link to this heading">#</a></h3>
-<dl class="simple">
-<dt>array<span class="classifier">Array or ChunkedArray</span></dt><dd><p>Extension array wrapping the storage array</p>
-</dd>
-</dl>
-</section>
-</dd></dl>
-
 </dd></dl>
 
 <dl class="py class">
@@ -1002,23 +985,6 @@ types where this is not constant (i.e., WKT and WKB).</p>
 <dd><p>Extension type whose storage is a binary or large binary array of
 well-known binary. Even though the draft specification currently mandates
 ISO well-known binary, EWKB is supported by the parser.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="geoarrow.pyarrow.WkbType.wrap_array">
-<span class="sig-name descname"><span class="pre">wrap_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">storage</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pyarrow.WkbType.wrap_array" title="Link to this definition">#</a></dt>
-<dd><p>Wrap the given storage array as an extension array.</p>
-<section id="id2">
-<h3>Parameters<a class="headerlink" href="#id2" title="Link to this heading">#</a></h3>
-<p>storage : Array or ChunkedArray</p>
-</section>
-<section id="id3">
-<h3>Returns<a class="headerlink" href="#id3" title="Link to this heading">#</a></h3>
-<dl class="simple">
-<dt>array<span class="classifier">Array or ChunkedArray</span></dt><dd><p>Extension array wrapping the storage array</p>
-</dd>
-</dl>
-</section>
-</dd></dl>
-
 </dd></dl>
 
 <dl class="py class">
@@ -1026,23 +992,6 @@ ISO well-known binary, EWKB is supported by the parser.</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">WktType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">c_vector_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pyarrow.WktType" title="Link to this definition">#</a></dt>
 <dd><p>Extension type whose storage is a utf8 or large utf8 array of
 well-known text.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="geoarrow.pyarrow.WktType.wrap_array">
-<span class="sig-name descname"><span class="pre">wrap_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">storage</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pyarrow.WktType.wrap_array" title="Link to this definition">#</a></dt>
-<dd><p>Wrap the given storage array as an extension array.</p>
-<section id="id4">
-<h3>Parameters<a class="headerlink" href="#id4" title="Link to this heading">#</a></h3>
-<p>storage : Array or ChunkedArray</p>
-</section>
-<section id="id5">
-<h3>Returns<a class="headerlink" href="#id5" title="Link to this heading">#</a></h3>
-<dl class="simple">
-<dt>array<span class="classifier">Array or ChunkedArray</span></dt><dd><p>Extension array wrapping the storage array</p>
-</dd>
-</dl>
-</section>
-</dd></dl>
-
 </dd></dl>
 
 <dl class="py class">
@@ -1444,17 +1393,10 @@ this capability.</p>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow.VectorType.with_edge_type"><code class="docutils literal notranslate"><span class="pre">VectorType.with_edge_type()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow.VectorType.with_geometry_type"><code class="docutils literal notranslate"><span class="pre">VectorType.with_geometry_type()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow.VectorType.with_metadata"><code class="docutils literal notranslate"><span class="pre">VectorType.with_metadata()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow.VectorType.wrap_array"><code class="docutils literal notranslate"><span class="pre">VectorType.wrap_array()</span></code></a></li>
 </ul>
 </li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow.WkbType"><code class="docutils literal notranslate"><span class="pre">WkbType</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow.WkbType.wrap_array"><code class="docutils literal notranslate"><span class="pre">WkbType.wrap_array()</span></code></a></li>
-</ul>
-</li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow.WktType"><code class="docutils literal notranslate"><span class="pre">WktType</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow.WktType.wrap_array"><code class="docutils literal notranslate"><span class="pre">WktType.wrap_array()</span></code></a></li>
-</ul>
-</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow.WkbType"><code class="docutils literal notranslate"><span class="pre">WkbType</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow.WktType"><code class="docutils literal notranslate"><span class="pre">WktType</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow.PointType"><code class="docutils literal notranslate"><span class="pre">PointType</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow.PointType.from_geobuffers"><code class="docutils literal notranslate"><span class="pre">PointType.from_geobuffers()</span></code></a></li>
 </ul>
