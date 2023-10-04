@@ -12,7 +12,7 @@ from geoarrow.pyarrow._type import (
 )
 
 
-class VectorArray(pa.ExtensionArray):
+class GeometryExtensionArray(pa.ExtensionArray):
     def geobuffers(self):
         import numpy as np
 
@@ -67,35 +67,35 @@ class VectorArray(pa.ExtensionArray):
         return f"{type_name}:{repr(self.type)}[{len(self)}]\n{items_str}".strip()
 
 
-class PointArray(VectorArray):
+class PointArray(GeometryExtensionArray):
     pass
 
 
-class LinestringArray(VectorArray):
+class LinestringArray(GeometryExtensionArray):
     pass
 
 
-class PolygonArray(VectorArray):
+class PolygonArray(GeometryExtensionArray):
     pass
 
 
-class MultiPointArray(VectorArray):
+class MultiPointArray(GeometryExtensionArray):
     pass
 
 
-class MultiLinestringArray(VectorArray):
+class MultiLinestringArray(GeometryExtensionArray):
     pass
 
 
-class MultiPolygonArray(VectorArray):
+class MultiPolygonArray(GeometryExtensionArray):
     pass
 
 
 def array_cls_from_name(name):
     if name == "geoarrow.wkb":
-        return VectorArray
+        return GeometryExtensionArray
     elif name == "geoarrow.wkt":
-        return VectorArray
+        return GeometryExtensionArray
     elif name == "geoarrow.point":
         return PointArray
     elif name == "geoarrow.linestring":
@@ -117,7 +117,7 @@ if GeometryExtensionType._array_cls_from_name is None:
     GeometryExtensionType._array_cls_from_name = array_cls_from_name
 
 
-def array(obj, type_=None, *args, **kwargs) -> VectorArray:
+def array(obj, type_=None, *args, **kwargs) -> GeometryExtensionArray:
     """Attempt to create an Array or ChunkedArray with a geoarrow extension type
     from ``obj``. This constructor attempts to perform the fewest transformations
     possible (i.e., WKB is left as WKB, WKT is left as WKT), whereas

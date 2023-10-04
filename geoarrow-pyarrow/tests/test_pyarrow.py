@@ -145,7 +145,7 @@ def test_array():
 def test_array_repr():
     array = ga.array(["POINT (30 10)"])
     array_repr = repr(array)
-    assert array_repr.startswith("VectorArray")
+    assert array_repr.startswith("GeometryExtensionArray")
     assert "<POINT (30 10)>" in array_repr
 
     array = ga.array(["POINT (30 10)"] * 12)
@@ -160,7 +160,7 @@ def test_array_repr():
 
     array = ga.array(["THIS IS TOTALLY INVALID WKT"])
     array_repr = repr(array)
-    assert array_repr.startswith("VectorArray")
+    assert array_repr.startswith("GeometryExtensionArray")
     assert "* 1 or more display values failed to parse" in array_repr
 
 
@@ -189,14 +189,14 @@ def test_kernel_as():
     out = kernel.push(array)
     assert out.type.extension_name == "geoarrow.wkt"
     assert out.type.crs == "EPSG:1234"
-    assert isinstance(out, _array.VectorArray)
+    assert isinstance(out, _array.GeometryExtensionArray)
 
     array = ga.array(["POINT (30 10)"], ga.wkt().with_crs("EPSG:1234"))
     kernel = ga.Kernel.as_wkb(array.type)
     out = kernel.push(array)
     assert out.type.extension_name == "geoarrow.wkb"
     assert out.type.crs == "EPSG:1234"
-    assert isinstance(out, _array.VectorArray)
+    assert isinstance(out, _array.GeometryExtensionArray)
 
     if sys.byteorder == "little":
         wkb_item = b"\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x3e\x40\x00\x00\x00\x00\x00\x00\x24\x40"

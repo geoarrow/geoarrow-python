@@ -3,7 +3,7 @@ import pyarrow as pa
 from geoarrow.pyarrow._type import GeometryExtensionType
 
 
-class VectorScalar(pa.ExtensionScalar):
+class GeometryExtensionScalar(pa.ExtensionScalar):
     def to_shapely(self):
         """
         Convert an array item to a shapely geometry
@@ -30,27 +30,27 @@ class WkbScalar(pa.ExtensionScalar):
         return from_wkb(self.value.as_py())
 
 
-class PointScalar(VectorScalar):
+class PointScalar(GeometryExtensionScalar):
     pass
 
 
-class LinestringScalar(VectorScalar):
+class LinestringScalar(GeometryExtensionScalar):
     pass
 
 
-class PolygonScalar(VectorScalar):
+class PolygonScalar(GeometryExtensionScalar):
     pass
 
 
-class MultiPointScalar(VectorScalar):
+class MultiPointScalar(GeometryExtensionScalar):
     pass
 
 
-class MultiLinestringScalar(VectorScalar):
+class MultiLinestringScalar(GeometryExtensionScalar):
     pass
 
 
-class MultiPolygonScalar(VectorScalar):
+class MultiPolygonScalar(GeometryExtensionScalar):
     pass
 
 
