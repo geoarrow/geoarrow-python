@@ -203,7 +203,7 @@ def test_kernel_as():
         assert out[0].as_py() == wkb_item
 
     array = ga.array(["POINT (30 10)"], ga.wkt().with_crs("EPSG:1234"))
-    kernel = ga.Kernel.as_geoarrow(array.type, ga.point().id)
+    kernel = ga.Kernel.as_geoarrow(array.type, ga.point().geoarrow_id)
     out = kernel.push(array)
     assert out.type.extension_name == "geoarrow.point"
     assert out.type.crs == "EPSG:1234"

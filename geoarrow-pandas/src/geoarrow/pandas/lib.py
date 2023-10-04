@@ -211,7 +211,7 @@ class GeoArrowExtensionArray(_pd.api.extensions.ExtensionArray):
                 for chunk in data.chunks:
                     chunks.append(chunk)
             else:
-                chunks.append(item)
+                chunks.append(_pa.array(item))
 
         if all(type == common_type for type in types):
             return GeoArrowExtensionArray(_pa.chunked_array(chunks, common_type))

@@ -103,11 +103,11 @@ class GeometryExtensionType(pa.ExtensionType):
         return pa.Array._import_from_c(carray._addr(), self)
 
     @property
-    def id(self):
+    def geoarrow_id(self):
         """A unique identifier for the memory layout of this type.
 
         >>> import geoarrow.pyarrow as ga
-        >>> int(ga.wkb().id)
+        >>> int(ga.wkb().geoarrow_id)
         100001
         """
         return self._type.id
