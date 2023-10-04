@@ -72,7 +72,7 @@ geoarrow-pyarrow
     Class Reference
     ---------------
 
-    .. autoclass:: VectorType
+    .. autoclass:: GeometryExtensionType
         :members:
 
     .. autoclass:: WkbType
