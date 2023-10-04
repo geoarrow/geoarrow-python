@@ -266,11 +266,6 @@ class WkbType(GeometryExtensionType):
 
     _extension_name = "geoarrow.wkb"
 
-    def to_pandas_dtype(self):
-        from geoarrow.pandas import GeoArrowExtensionDtype
-
-        return GeoArrowExtensionDtype(self)
-
 
 class WktType(GeometryExtensionType):
     """Extension type whose storage is a utf8 or large utf8 array of
@@ -278,11 +273,6 @@ class WktType(GeometryExtensionType):
     """
 
     _extension_name = "geoarrow.wkt"
-
-    def to_pandas_dtype(self):
-        from geoarrow.pandas import GeoArrowExtensionDtype
-
-        return GeoArrowExtensionDtype(self)
 
 
 class PointType(GeometryExtensionType):
@@ -332,11 +322,6 @@ class PolygonType(GeometryExtensionType):
 
     _extension_name = "geoarrow.polygon"
 
-    def to_pandas_dtype(self):
-        from geoarrow.pandas import GeoArrowExtensionDtype
-
-        return GeoArrowExtensionDtype(self)
-
     def from_geobuffers(
         self, validity, ring_offsets, coord_offsets, x, y=None, z_or_m=None, m=None
     ):
@@ -360,11 +345,6 @@ class MultiPointType(GeometryExtensionType):
 
     _extension_name = "geoarrow.multipoint"
 
-    def to_pandas_dtype(self):
-        from geoarrow.pandas import GeoArrowExtensionDtype
-
-        return GeoArrowExtensionDtype(self)
-
     def from_geobuffers(self, validity, coord_offsets, x, y=None, z_or_m=None, m=None):
         buffers = [
             (0, "uint8", validity),
@@ -384,11 +364,6 @@ class MultiLinestringType(GeometryExtensionType):
     """
 
     _extension_name = "geoarrow.multilinestring"
-
-    def to_pandas_dtype(self):
-        from geoarrow.pandas import GeoArrowExtensionDtype
-
-        return GeoArrowExtensionDtype(self)
 
     def from_geobuffers(
         self,
@@ -419,11 +394,6 @@ class MultiPolygonType(GeometryExtensionType):
     """
 
     _extension_name = "geoarrow.multipolygon"
-
-    def to_pandas_dtype(self):
-        from geoarrow.pandas import GeoArrowExtensionDtype
-
-        return GeoArrowExtensionDtype(self)
 
     def from_geobuffers(
         self,
