@@ -871,6 +871,17 @@ for this type.</p>
 </dd></dl>
 
 <dl class="py property">
+<dt class="sig sig-object py" id="geoarrow.pyarrow.GeometryExtensionType.geoarrow_id">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">geoarrow_id</span></span><a class="headerlink" href="#geoarrow.pyarrow.GeometryExtensionType.geoarrow_id" title="Link to this definition">#</a></dt>
+<dd><p>A unique identifier for the memory layout of this type.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">geoarrow.pyarrow</span> <span class="k">as</span> <span class="nn">ga</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">int</span><span class="p">(</span><span class="n">ga</span><span class="o">.</span><span class="n">wkb</span><span class="p">()</span><span class="o">.</span><span class="n">geoarrow_id</span><span class="p">)</span>
+<span class="go">100001</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py property">
 <dt class="sig sig-object py" id="geoarrow.pyarrow.GeometryExtensionType.geometry_type">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">geometry_type</span></span><a class="headerlink" href="#geoarrow.pyarrow.GeometryExtensionType.geometry_type" title="Link to this definition">#</a></dt>
 <dd><p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">geoarrow.GeometryType</span></code> of this type or <code class="docutils literal notranslate"><span class="pre">GEOMETRY</span></code> for
@@ -880,17 +891,6 @@ types where this is not constant (i.e., WKT and WKB).</p>
 <span class="go">True</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ga</span><span class="o">.</span><span class="n">linestring</span><span class="p">()</span><span class="o">.</span><span class="n">geometry_type</span> <span class="o">==</span> <span class="n">ga</span><span class="o">.</span><span class="n">GeometryType</span><span class="o">.</span><span class="n">LINESTRING</span>
 <span class="go">True</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="geoarrow.pyarrow.GeometryExtensionType.id">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">id</span></span><a class="headerlink" href="#geoarrow.pyarrow.GeometryExtensionType.id" title="Link to this definition">#</a></dt>
-<dd><p>A unique identifier for the memory layout of this type.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">geoarrow.pyarrow</span> <span class="k">as</span> <span class="nn">ga</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">int</span><span class="p">(</span><span class="n">ga</span><span class="o">.</span><span class="n">wkb</span><span class="p">()</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
-<span class="go">100001</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -1384,8 +1384,8 @@ this capability.</p>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow.GeometryExtensionType.dimensions"><code class="docutils literal notranslate"><span class="pre">GeometryExtensionType.dimensions</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow.GeometryExtensionType.edge_type"><code class="docutils literal notranslate"><span class="pre">GeometryExtensionType.edge_type</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow.GeometryExtensionType.from_geobuffers"><code class="docutils literal notranslate"><span class="pre">GeometryExtensionType.from_geobuffers()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow.GeometryExtensionType.geoarrow_id"><code class="docutils literal notranslate"><span class="pre">GeometryExtensionType.geoarrow_id</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow.GeometryExtensionType.geometry_type"><code class="docutils literal notranslate"><span class="pre">GeometryExtensionType.geometry_type</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow.GeometryExtensionType.id"><code class="docutils literal notranslate"><span class="pre">GeometryExtensionType.id</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow.GeometryExtensionType.to_pandas_dtype"><code class="docutils literal notranslate"><span class="pre">GeometryExtensionType.to_pandas_dtype()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow.GeometryExtensionType.with_coord_type"><code class="docutils literal notranslate"><span class="pre">GeometryExtensionType.with_coord_type()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow.GeometryExtensionType.with_crs"><code class="docutils literal notranslate"><span class="pre">GeometryExtensionType.with_crs()</span></code></a></li>
