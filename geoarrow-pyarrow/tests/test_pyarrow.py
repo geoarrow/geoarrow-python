@@ -11,7 +11,7 @@ import geoarrow.pyarrow._type as _type
 import geoarrow.pyarrow._array as _array
 
 
-def test_vector_type_basic():
+def test_geometry_type_basic():
     ctype = lib.CVectorType.Make(
         ga.GeometryType.POINT, ga.Dimensions.XY, ga.CoordType.SEPARATE
     )
@@ -31,7 +31,7 @@ def test_vector_type_basic():
         _type.LinestringType(ctype)
 
 
-def test_vector_type_with():
+def test_geometry_type_with():
     ctype = lib.CVectorType.Make(
         ga.GeometryType.POINT, ga.Dimensions.XY, ga.CoordType.SEPARATE
     )
@@ -67,7 +67,7 @@ def test_constructors():
     assert ga.multilinestring().extension_name == "geoarrow.multilinestring"
     assert ga.multipolygon().extension_name == "geoarrow.multipolygon"
 
-    generic = ga.vector_type(
+    generic = ga.extension_type(
         ga.GeometryType.POINT,
         ga.Dimensions.XYZ,
         ga.CoordType.INTERLEAVED,
@@ -83,10 +83,10 @@ def test_constructors():
 
 
 def test_type_common():
-    assert ga.vector_type_common([]) == ga.wkb()
-    assert ga.vector_type_common([ga.wkt()]) == ga.wkt()
-    assert ga.vector_type_common([ga.point(), ga.point()]) == ga.point()
-    assert ga.vector_type_common([ga.point(), ga.linestring()]) == ga.wkb()
+    assert ga.geometry_type_common([]) == ga.wkb()
+    assert ga.geometry_type_common([ga.wkt()]) == ga.wkt()
+    assert ga.geometry_type_common([ga.point(), ga.point()]) == ga.point()
+    assert ga.geometry_type_common([ga.point(), ga.linestring()]) == ga.wkb()
 
 
 def test_register_extension_types():
@@ -145,7 +145,7 @@ def test_array():
 def test_array_repr():
     array = ga.array(["POINT (30 10)"])
     array_repr = repr(array)
-    assert array_repr.startswith("VectorArray")
+    assert array_repr.startswith("GeometryExtensionArray")
     assert "<POINT (30 10)>" in array_repr
 
     array = ga.array(["POINT (30 10)"] * 12)
@@ -160,7 +160,7 @@ def test_array_repr():
 
     array = ga.array(["THIS IS TOTALLY INVALID WKT"])
     array_repr = repr(array)
-    assert array_repr.startswith("VectorArray")
+    assert array_repr.startswith("GeometryExtensionArray")
     assert "* 1 or more display values failed to parse" in array_repr
 
 
@@ -189,14 +189,14 @@ def test_kernel_as():
     out = kernel.push(array)
     assert out.type.extension_name == "geoarrow.wkt"
     assert out.type.crs == "EPSG:1234"
-    assert isinstance(out, _array.VectorArray)
+    assert isinstance(out, _array.GeometryExtensionArray)
 
     array = ga.array(["POINT (30 10)"], ga.wkt().with_crs("EPSG:1234"))
     kernel = ga.Kernel.as_wkb(array.type)
     out = kernel.push(array)
     assert out.type.extension_name == "geoarrow.wkb"
     assert out.type.crs == "EPSG:1234"
-    assert isinstance(out, _array.VectorArray)
+    assert isinstance(out, _array.GeometryExtensionArray)
 
     if sys.byteorder == "little":
         wkb_item = b"\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x3e\x40\x00\x00\x00\x00\x00\x00\x24\x40"

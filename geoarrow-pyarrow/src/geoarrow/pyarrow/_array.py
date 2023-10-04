@@ -4,7 +4,7 @@ from geoarrow.c import lib
 
 from geoarrow.pyarrow._kernel import Kernel
 from geoarrow.pyarrow._type import (
-    VectorType,
+    GeometryExtensionType,
     wkb,
     wkt,
     large_wkb,
@@ -12,7 +12,7 @@ from geoarrow.pyarrow._type import (
 )
 
 
-class VectorArray(pa.ExtensionArray):
+class GeometryExtensionArray(pa.ExtensionArray):
     def geobuffers(self):
         import numpy as np
 
@@ -67,35 +67,35 @@ class VectorArray(pa.ExtensionArray):
         return f"{type_name}:{repr(self.type)}[{len(self)}]\n{items_str}".strip()
 
 
-class PointArray(VectorArray):
+class PointArray(GeometryExtensionArray):
     pass
 
 
-class LinestringArray(VectorArray):
+class LinestringArray(GeometryExtensionArray):
     pass
 
 
-class PolygonArray(VectorArray):
+class PolygonArray(GeometryExtensionArray):
     pass
 
 
-class MultiPointArray(VectorArray):
+class MultiPointArray(GeometryExtensionArray):
     pass
 
 
-class MultiLinestringArray(VectorArray):
+class MultiLinestringArray(GeometryExtensionArray):
     pass
 
 
-class MultiPolygonArray(VectorArray):
+class MultiPolygonArray(GeometryExtensionArray):
     pass
 
 
 def array_cls_from_name(name):
     if name == "geoarrow.wkb":
-        return VectorArray
+        return GeometryExtensionArray
     elif name == "geoarrow.wkt":
-        return VectorArray
+        return GeometryExtensionArray
     elif name == "geoarrow.point":
         return PointArray
     elif name == "geoarrow.linestring":
@@ -113,11 +113,11 @@ def array_cls_from_name(name):
 
 
 # Inject array_cls_from_name exactly once to avoid circular import
-if VectorType._array_cls_from_name is None:
-    VectorType._array_cls_from_name = array_cls_from_name
+if GeometryExtensionType._array_cls_from_name is None:
+    GeometryExtensionType._array_cls_from_name = array_cls_from_name
 
 
-def array(obj, type_=None, *args, **kwargs) -> VectorArray:
+def array(obj, type_=None, *args, **kwargs) -> GeometryExtensionArray:
     """Attempt to create an Array or ChunkedArray with a geoarrow extension type
     from ``obj``. This constructor attempts to perform the fewest transformations
     possible (i.e., WKB is left as WKB, WKT is left as WKT), whereas
@@ -128,7 +128,7 @@ def array(obj, type_=None, *args, **kwargs) -> VectorArray:
 
     >>> import geoarrow.pyarrow as ga
     >>> ga.array(["POINT (0 1)"])
-    VectorArray:WktType(geoarrow.wkt)[1]
+    GeometryExtensionArray:WktType(geoarrow.wkt)[1]
     <POINT (0 1)>
     >>> ga.as_geoarrow(["POINT (0 1)"])
     PointArray:PointType(geoarrow.point)[1]
@@ -153,7 +153,7 @@ def array(obj, type_=None, *args, **kwargs) -> VectorArray:
 
     # Handle the case where we get to pick the type
     if type_ is None:
-        if isinstance(arr.type, VectorType):
+        if isinstance(arr.type, GeometryExtensionType):
             return arr
         elif arr.type == pa.utf8():
             return wkt().wrap_array(arr)
@@ -172,7 +172,7 @@ def array(obj, type_=None, *args, **kwargs) -> VectorArray:
     if type_ == arr.type:
         return arr
 
-    type_is_geoarrow = isinstance(type_, VectorType)
+    type_is_geoarrow = isinstance(type_, GeometryExtensionType)
     type_is_wkb_or_wkt = type_.extension_name in ("geoarrow.wkt", "geoarrow.wkb")
 
     if type_is_geoarrow and type_is_wkb_or_wkt:

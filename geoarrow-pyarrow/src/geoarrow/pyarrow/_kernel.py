@@ -3,7 +3,7 @@ import sys
 import pyarrow as pa
 
 from geoarrow.c import lib
-from geoarrow.pyarrow._type import VectorType
+from geoarrow.pyarrow._type import GeometryExtensionType
 
 
 class Kernel:
@@ -22,7 +22,7 @@ class Kernel:
         options = Kernel._pack_options(kwargs)
 
         type_out_schema = self._kernel.start(type_in_schema, options)
-        self._type_out = VectorType._import_from_c(type_out_schema._addr())
+        self._type_out = GeometryExtensionType._import_from_c(type_out_schema._addr())
         self._type_in = type_in
 
     def push(self, arr):

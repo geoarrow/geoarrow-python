@@ -1,9 +1,9 @@
 import pyarrow as pa
 
-from geoarrow.pyarrow._type import VectorType
+from geoarrow.pyarrow._type import GeometryExtensionType
 
 
-class VectorScalar(pa.ExtensionScalar):
+class GeometryExtensionScalar(pa.ExtensionScalar):
     def to_shapely(self):
         """
         Convert an array item to a shapely geometry
@@ -30,27 +30,27 @@ class WkbScalar(pa.ExtensionScalar):
         return from_wkb(self.value.as_py())
 
 
-class PointScalar(VectorScalar):
+class PointScalar(GeometryExtensionScalar):
     pass
 
 
-class LinestringScalar(VectorScalar):
+class LinestringScalar(GeometryExtensionScalar):
     pass
 
 
-class PolygonScalar(VectorScalar):
+class PolygonScalar(GeometryExtensionScalar):
     pass
 
 
-class MultiPointScalar(VectorScalar):
+class MultiPointScalar(GeometryExtensionScalar):
     pass
 
 
-class MultiLinestringScalar(VectorScalar):
+class MultiLinestringScalar(GeometryExtensionScalar):
     pass
 
 
-class MultiPolygonScalar(VectorScalar):
+class MultiPolygonScalar(GeometryExtensionScalar):
     pass
 
 
@@ -76,5 +76,5 @@ def scalar_cls_from_name(name):
 
 
 # Inject array_cls_from_name exactly once to avoid circular import
-if VectorType._scalar_cls_from_name is None:
-    VectorType._scalar_cls_from_name = scalar_cls_from_name
+if GeometryExtensionType._scalar_cls_from_name is None:
+    GeometryExtensionType._scalar_cls_from_name = scalar_cls_from_name

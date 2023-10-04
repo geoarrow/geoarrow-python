@@ -10,7 +10,7 @@ Examples
 from geoarrow.c.lib import GeometryType, Dimensions, CoordType, EdgeType, CrsType
 
 from geoarrow.pyarrow._type import (
-    VectorType,
+    GeometryExtensionType,
     WktType,
     WkbType,
     PointType,
@@ -29,8 +29,8 @@ from geoarrow.pyarrow._type import (
     multipoint,
     multilinestring,
     multipolygon,
-    vector_type,
-    vector_type_common,
+    extension_type,
+    geometry_type_common,
     register_extension_types,
     unregister_extension_types,
 )
@@ -41,7 +41,7 @@ from geoarrow.pyarrow._array import array
 
 from geoarrow.pyarrow import _scalar
 
-from ._compute import (
+from geoarrow.pyarrow._compute import (
     parse_all,
     as_wkt,
     as_wkb,

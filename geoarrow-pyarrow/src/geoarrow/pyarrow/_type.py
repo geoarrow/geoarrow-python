@@ -3,7 +3,7 @@ import pyarrow as pa
 from geoarrow.c import lib
 
 
-class VectorType(pa.ExtensionType):
+class GeometryExtensionType(pa.ExtensionType):
     """Extension type base class for vector geometry types."""
 
     _extension_name = None
@@ -69,10 +69,10 @@ class VectorType(pa.ExtensionType):
         )
 
     def __arrow_ext_class__(self):
-        return VectorType._array_cls_from_name(self.extension_name)
+        return GeometryExtensionType._array_cls_from_name(self.extension_name)
 
     def __arrow_ext_scalar_class__(self):
-        return VectorType._scalar_cls_from_name(self.extension_name)
+        return GeometryExtensionType._scalar_cls_from_name(self.extension_name)
 
     def to_pandas_dtype(self):
         from geoarrow.pandas import GeoArrowExtensionDtype
@@ -258,7 +258,7 @@ class VectorType(pa.ExtensionType):
         return _ctype_to_extension_type(ctype)
 
 
-class WkbType(VectorType):
+class WkbType(GeometryExtensionType):
     """Extension type whose storage is a binary or large binary array of
     well-known binary. Even though the draft specification currently mandates
     ISO well-known binary, EWKB is supported by the parser.
@@ -267,7 +267,7 @@ class WkbType(VectorType):
     _extension_name = "geoarrow.wkb"
 
 
-class WktType(VectorType):
+class WktType(GeometryExtensionType):
     """Extension type whose storage is a utf8 or large utf8 array of
     well-known text.
     """
@@ -275,7 +275,7 @@ class WktType(VectorType):
     _extension_name = "geoarrow.wkt"
 
 
-class PointType(VectorType):
+class PointType(GeometryExtensionType):
     """Extension type whose storage is an array of points stored
     as either a struct with one child per dimension or a fixed-size
     list whose single child is composed of interleaved ordinate values.
@@ -295,7 +295,7 @@ class PointType(VectorType):
         return self._from_geobuffers_internal(buffers)
 
 
-class LinestringType(VectorType):
+class LinestringType(GeometryExtensionType):
     """Extension type whose storage is an array of linestrings stored
     as a list of points as described in :class:`PointType`.
     """
@@ -315,7 +315,7 @@ class LinestringType(VectorType):
         return self._from_geobuffers_internal(buffers)
 
 
-class PolygonType(VectorType):
+class PolygonType(GeometryExtensionType):
     """Extension type whose storage is an array of polygons stored
     as a list of a list of points as described in :class:`PointType`.
     """
@@ -338,7 +338,7 @@ class PolygonType(VectorType):
         return self._from_geobuffers_internal(buffers)
 
 
-class MultiPointType(VectorType):
+class MultiPointType(GeometryExtensionType):
     """Extension type whose storage is an array of polygons stored
     as a list of points as described in :class:`PointType`.
     """
@@ -358,7 +358,7 @@ class MultiPointType(VectorType):
         return self._from_geobuffers_internal(buffers)
 
 
-class MultiLinestringType(VectorType):
+class MultiLinestringType(GeometryExtensionType):
     """Extension type whose storage is an array of multilinestrings stored
     as a list of a list of points as described in :class:`PointType`.
     """
@@ -388,7 +388,7 @@ class MultiLinestringType(VectorType):
         return self._from_geobuffers_internal(buffers)
 
 
-class MultiPolygonType(VectorType):
+class MultiPolygonType(GeometryExtensionType):
     """Extension type whose storage is an array of multilinestrings stored
     as a list of a list of a list of points as described in :class:`PointType`.
     """
@@ -573,18 +573,18 @@ def multipolygon() -> MultiPolygonType:
     return _make_default(lib.GeometryType.MULTIPOLYGON, MultiPolygonType)
 
 
-def vector_type(
+def extension_type(
     geometry_type,
     dimensions=lib.Dimensions.XY,
     coord_type=lib.CoordType.SEPARATE,
     edge_type=lib.EdgeType.PLANAR,
     crs=None,
     crs_type=None,
-) -> VectorType:
+) -> GeometryExtensionType:
     """Generic vector geometry type constructor.
 
     >>> import geoarrow.pyarrow as ga
-    >>> ga.vector_type(ga.GeometryType.POINT, crs="EPSG:1234")
+    >>> ga.extension_type(ga.GeometryType.POINT, crs="EPSG:1234")
     PointType(geoarrow.point <EPSG:1234>)
     """
     ctype = lib.CVectorType.Make(geometry_type, dimensions, coord_type)
@@ -593,7 +593,9 @@ def vector_type(
 
 
 def _vector_type_common2(a, b):
-    if not isinstance(a, VectorType) or not isinstance(b, VectorType):
+    if not isinstance(a, GeometryExtensionType) or not isinstance(
+        b, GeometryExtensionType
+    ):
         raise ValueError(
             f"Can't compute common type between '{a}' and '{b}': non-geometry type"
         )
@@ -614,16 +616,16 @@ def _vector_type_common2(a, b):
     return wkb().with_metadata(metadata_a)
 
 
-def vector_type_common(types):
+def geometry_type_common(types):
     """Compute common type
 
     From a sequence of GeoArrow types, return a type to which all can be cast
     or error if this cannot occur.
 
     >>> import geoarrow.pyarrow as ga
-    >>> ga.vector_type_common([ga.wkb(), ga.point()])
+    >>> ga.geometry_type_common([ga.wkb(), ga.point()])
     WkbType(geoarrow.wkb)
-    >>> ga.vector_type_common([ga.point(), ga.point()])
+    >>> ga.geometry_type_common([ga.point(), ga.point()])
     PointType(geoarrow.point)
     """
     types = list(types)
