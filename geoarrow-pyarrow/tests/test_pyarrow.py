@@ -164,6 +164,37 @@ def test_array_repr():
     assert "* 1 or more display values failed to parse" in array_repr
 
 
+def test_scalar_wkt():
+    array = ga.array(["POINT (0 1)"])
+    assert array[0].wkt == "POINT (0 1)"
+    assert array[0].wkb == ga.as_wkb(array).storage[0].as_py()
+    assert repr(array[0]).startswith("WktScalar")
+
+
+def test_scalar_wkb():
+    array = ga.as_wkb(["POINT (0 1)"])
+    assert array[0].wkt == "POINT (0 1)"
+    assert array[0].wkb == ga.as_wkb(array).storage[0].as_py()
+    assert repr(array[0]).startswith("WkbScalar")
+
+
+def test_scalar_geoarrow():
+    array = ga.as_geoarrow(["POINT (0 1)"])
+    assert array[0].wkt == "POINT (0 1)"
+    assert array[0].wkb == ga.as_wkb(array).storage[0].as_py()
+    assert repr(array[0]).startswith("PointScalar")
+
+
+def test_scalar_repr():
+    array = ga.array(
+        ["LINESTRING (100000 100000, 100000 100000, 100000 100000, 100000 100000)"]
+    )
+    assert repr(array[0]).endswith("...>")
+
+    array = ga.array(["TOTALLY INVALID WKT"])
+    assert "value failed to parse" in repr(array[0])
+
+
 def test_kernel_void():
     with pytest.raises(TypeError):
         kernel = ga.Kernel.void(pa.int32())
