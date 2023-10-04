@@ -4,7 +4,7 @@ from geoarrow.c import lib
 
 from geoarrow.pyarrow._kernel import Kernel
 from geoarrow.pyarrow._type import (
-    VectorType,
+    GeometryExtensionType,
     wkb,
     wkt,
     large_wkb,
@@ -113,8 +113,8 @@ def array_cls_from_name(name):
 
 
 # Inject array_cls_from_name exactly once to avoid circular import
-if VectorType._array_cls_from_name is None:
-    VectorType._array_cls_from_name = array_cls_from_name
+if GeometryExtensionType._array_cls_from_name is None:
+    GeometryExtensionType._array_cls_from_name = array_cls_from_name
 
 
 def array(obj, type_=None, *args, **kwargs) -> VectorArray:
@@ -153,7 +153,7 @@ def array(obj, type_=None, *args, **kwargs) -> VectorArray:
 
     # Handle the case where we get to pick the type
     if type_ is None:
-        if isinstance(arr.type, VectorType):
+        if isinstance(arr.type, GeometryExtensionType):
             return arr
         elif arr.type == pa.utf8():
             return wkt().wrap_array(arr)
@@ -172,7 +172,7 @@ def array(obj, type_=None, *args, **kwargs) -> VectorArray:
     if type_ == arr.type:
         return arr
 
-    type_is_geoarrow = isinstance(type_, VectorType)
+    type_is_geoarrow = isinstance(type_, GeometryExtensionType)
     type_is_wkb_or_wkt = type_.extension_name in ("geoarrow.wkt", "geoarrow.wkb")
 
     if type_is_geoarrow and type_is_wkb_or_wkt:

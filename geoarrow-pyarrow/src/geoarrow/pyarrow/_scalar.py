@@ -1,6 +1,6 @@
 import pyarrow as pa
 
-from geoarrow.pyarrow._type import VectorType
+from geoarrow.pyarrow._type import GeometryExtensionType
 
 
 class VectorScalar(pa.ExtensionScalar):
@@ -76,5 +76,5 @@ def scalar_cls_from_name(name):
 
 
 # Inject array_cls_from_name exactly once to avoid circular import
-if VectorType._scalar_cls_from_name is None:
-    VectorType._scalar_cls_from_name = scalar_cls_from_name
+if GeometryExtensionType._scalar_cls_from_name is None:
+    GeometryExtensionType._scalar_cls_from_name = scalar_cls_from_name

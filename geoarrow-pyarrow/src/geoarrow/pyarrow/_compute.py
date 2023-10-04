@@ -10,7 +10,7 @@ from geoarrow.pyarrow._kernel import Kernel
 def obj_as_array_or_chunked(obj_in):
     if (
         isinstance(obj_in, pa.Array) or isinstance(obj_in, pa.ChunkedArray)
-    ) and isinstance(obj_in.type, _type.VectorType):
+    ) and isinstance(obj_in.type, _type.GeometryExtensionType):
         return obj_in
     else:
         return array(obj_in)

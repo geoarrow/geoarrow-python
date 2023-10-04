@@ -12,7 +12,7 @@ import pyarrow.dataset as _ds
 import pyarrow.compute as _compute
 import pyarrow.parquet as _pq
 from geoarrow.c.lib import CoordType
-from geoarrow.pyarrow._type import wkt, wkb, VectorType
+from geoarrow.pyarrow._type import wkt, wkb, GeometryExtensionType
 from geoarrow.pyarrow._kernel import Kernel
 
 
@@ -103,7 +103,7 @@ class GeoDataset:
             schema = self.schema
             geometry_columns = []
             for name, type in zip(schema.names, schema.types):
-                if isinstance(type, VectorType):
+                if isinstance(type, GeometryExtensionType):
                     geometry_columns.append(name)
             self._geometry_columns = tuple(geometry_columns)
 
@@ -130,7 +130,7 @@ class GeoDataset:
             geometry_types = []
             for col in self.geometry_columns:
                 type = self.schema.field(col).type
-                if isinstance(type, VectorType):
+                if isinstance(type, GeometryExtensionType):
                     geometry_types.append(type)
                 elif _types.is_binary(type):
                     geometry_types.append(wkb())

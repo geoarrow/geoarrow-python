@@ -10,7 +10,7 @@ Examples
 from geoarrow.c.lib import GeometryType, Dimensions, CoordType, EdgeType, CrsType
 
 from geoarrow.pyarrow._type import (
-    VectorType,
+    GeometryExtensionType,
     WktType,
     WkbType,
     PointType,
