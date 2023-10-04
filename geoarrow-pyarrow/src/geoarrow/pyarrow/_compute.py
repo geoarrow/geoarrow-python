@@ -194,7 +194,7 @@ def infer_type_common(obj, coord_type=None, promote_multi=False):
     if promote_multi and geometry_type <= GeometryType.POLYGON:
         geometry_type += 3
 
-    return _type.vector_type(
+    return _type.extension_type(
         geometry_type,
         dimensions,
         coord_type,

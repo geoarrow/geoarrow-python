@@ -573,7 +573,7 @@ def multipolygon() -> MultiPolygonType:
     return _make_default(lib.GeometryType.MULTIPOLYGON, MultiPolygonType)
 
 
-def vector_type(
+def extension_type(
     geometry_type,
     dimensions=lib.Dimensions.XY,
     coord_type=lib.CoordType.SEPARATE,
@@ -584,7 +584,7 @@ def vector_type(
     """Generic vector geometry type constructor.
 
     >>> import geoarrow.pyarrow as ga
-    >>> ga.vector_type(ga.GeometryType.POINT, crs="EPSG:1234")
+    >>> ga.extension_type(ga.GeometryType.POINT, crs="EPSG:1234")
     PointType(geoarrow.point <EPSG:1234>)
     """
     ctype = lib.CVectorType.Make(geometry_type, dimensions, coord_type)
@@ -616,16 +616,16 @@ def _vector_type_common2(a, b):
     return wkb().with_metadata(metadata_a)
 
 
-def vector_type_common(types):
+def geometry_type_common(types):
     """Compute common type
 
     From a sequence of GeoArrow types, return a type to which all can be cast
     or error if this cannot occur.
 
     >>> import geoarrow.pyarrow as ga
-    >>> ga.vector_type_common([ga.wkb(), ga.point()])
+    >>> ga.geometry_type_common([ga.wkb(), ga.point()])
     WkbType(geoarrow.wkb)
-    >>> ga.vector_type_common([ga.point(), ga.point()])
+    >>> ga.geometry_type_common([ga.point(), ga.point()])
     PointType(geoarrow.point)
     """
     types = list(types)

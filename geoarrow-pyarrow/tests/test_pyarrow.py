@@ -11,7 +11,7 @@ import geoarrow.pyarrow._type as _type
 import geoarrow.pyarrow._array as _array
 
 
-def test_vector_type_basic():
+def test_geometry_type_basic():
     ctype = lib.CVectorType.Make(
         ga.GeometryType.POINT, ga.Dimensions.XY, ga.CoordType.SEPARATE
     )
@@ -31,7 +31,7 @@ def test_vector_type_basic():
         _type.LinestringType(ctype)
 
 
-def test_vector_type_with():
+def test_geometry_type_with():
     ctype = lib.CVectorType.Make(
         ga.GeometryType.POINT, ga.Dimensions.XY, ga.CoordType.SEPARATE
     )
@@ -67,7 +67,7 @@ def test_constructors():
     assert ga.multilinestring().extension_name == "geoarrow.multilinestring"
     assert ga.multipolygon().extension_name == "geoarrow.multipolygon"
 
-    generic = ga.vector_type(
+    generic = ga.extension_type(
         ga.GeometryType.POINT,
         ga.Dimensions.XYZ,
         ga.CoordType.INTERLEAVED,
@@ -83,10 +83,10 @@ def test_constructors():
 
 
 def test_type_common():
-    assert ga.vector_type_common([]) == ga.wkb()
-    assert ga.vector_type_common([ga.wkt()]) == ga.wkt()
-    assert ga.vector_type_common([ga.point(), ga.point()]) == ga.point()
-    assert ga.vector_type_common([ga.point(), ga.linestring()]) == ga.wkb()
+    assert ga.geometry_type_common([]) == ga.wkb()
+    assert ga.geometry_type_common([ga.wkt()]) == ga.wkt()
+    assert ga.geometry_type_common([ga.point(), ga.point()]) == ga.point()
+    assert ga.geometry_type_common([ga.point(), ga.linestring()]) == ga.wkb()
 
 
 def test_register_extension_types():

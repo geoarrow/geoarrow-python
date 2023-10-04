@@ -202,7 +202,7 @@ class GeoArrowExtensionArray(_pd.api.extensions.ExtensionArray):
             return items[0]
 
         types = [item._data.type for item in to_concat]
-        common_type = _ga.vector_type_common(types)
+        common_type = _ga.geometry_type_common(types)
 
         chunks = []
         for item in to_concat:
@@ -334,7 +334,7 @@ class GeoArrowExtensionDtype(_pd.api.extensions.ExtensionDtype):
         elif params["type"] == "wkt":
             base_type = _ga.wkt()
         else:
-            base_type = _ga.vector_type(geometry_type, dims, coord_type)
+            base_type = _ga.extension_type(geometry_type, dims, coord_type)
 
         try:
             if params["metadata"]:
