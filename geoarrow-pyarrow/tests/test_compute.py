@@ -119,30 +119,34 @@ def test_infer_type_common():
 
     already_geoarrow = ga.as_geoarrow(["POINT (0 1)"])
     common = _compute.infer_type_common(already_geoarrow)
-    assert common.id == already_geoarrow.type.id
+    assert common.geoarrow_id == already_geoarrow.type.geoarrow_id
     common_interleaved = _compute.infer_type_common(
         already_geoarrow, coord_type=ga.CoordType.INTERLEAVED
     )
     assert (
-        common_interleaved.id
-        == already_geoarrow.type.with_coord_type(ga.CoordType.INTERLEAVED).id
+        common_interleaved.geoarrow_id
+        == already_geoarrow.type.with_coord_type(ga.CoordType.INTERLEAVED).geoarrow_id
     )
 
     point = ga.wkt().with_crs("EPSG:1234").wrap_array(pa.array(["POINT (0 1)"]))
     common = _compute.infer_type_common(point)
-    assert common.id == ga.point().id
+    assert common.geoarrow_id == ga.point().geoarrow_id
     assert common.crs == "EPSG:1234"
 
     common_promote_multi = _compute.infer_type_common(point, promote_multi=True)
-    assert common_promote_multi.id == ga.multipoint().id
+    assert common_promote_multi.geoarrow_id == ga.multipoint().geoarrow_id
 
     point_z_and_zm = ga.array(["POINT (0 1)", "POINT ZM (0 1 2 3)"])
     common = _compute.infer_type_common(point_z_and_zm)
-    assert common.id == ga.point().with_dimensions(ga.Dimensions.XYZM).id
+    assert (
+        common.geoarrow_id == ga.point().with_dimensions(ga.Dimensions.XYZM).geoarrow_id
+    )
 
     point_m_and_z = ga.array(["POINT M (0 1 2)", "POINT Z (0 1 2)"])
     common = _compute.infer_type_common(point_m_and_z)
-    assert common.id == ga.point().with_dimensions(ga.Dimensions.XYZM).id
+    assert (
+        common.geoarrow_id == ga.point().with_dimensions(ga.Dimensions.XYZM).geoarrow_id
+    )
 
     mixed = (
         ga.wkt()
@@ -150,44 +154,50 @@ def test_infer_type_common():
         .wrap_array(pa.array(["POINT (0 1)", "LINESTRING (0 1, 2 3)"]))
     )
     common = _compute.infer_type_common(mixed)
-    assert common.id == ga.wkb().id
+    assert common.geoarrow_id == ga.wkb().geoarrow_id
     assert common.crs == "EPSG:1234"
 
     point_and_multi = ga.array(["POINT (0 1)", "MULTIPOINT (2 3)"])
     common = _compute.infer_type_common(point_and_multi)
-    assert common.id == ga.multipoint().id
+    assert common.geoarrow_id == ga.multipoint().geoarrow_id
 
     linestring_and_multi = ga.array(
         ["LINESTRING (0 1, 2 3)", "MULTILINESTRING ((0 1, 2 3))"]
     )
     common = _compute.infer_type_common(linestring_and_multi)
-    assert common.id == ga.multilinestring().id
+    assert common.geoarrow_id == ga.multilinestring().geoarrow_id
 
     polygon_and_multi = ga.array(
         ["POLYGON ((0 0, 0 1, 1 0, 0 0))", "MULTIPOLYGON (((0 0, 0 1, 1 0, 0 0)))"]
     )
     common = _compute.infer_type_common(polygon_and_multi)
-    assert common.id == ga.multipolygon().id
+    assert common.geoarrow_id == ga.multipolygon().geoarrow_id
 
 
 def test_as_geoarrow():
     array = _compute.as_geoarrow(["POINT (0 1)"])
-    assert array.type.id == ga.point().id
+    assert array.type.geoarrow_id == ga.point().geoarrow_id
 
     array2 = _compute.as_geoarrow(array)
     assert array2 is array
 
     array2 = _compute.as_geoarrow(array, coord_type=ga.CoordType.INTERLEAVED)
-    assert array2.type.id == ga.point().with_coord_type(ga.CoordType.INTERLEAVED).id
+    assert (
+        array2.type.geoarrow_id
+        == ga.point().with_coord_type(ga.CoordType.INTERLEAVED).geoarrow_id
+    )
 
     array = _compute.as_geoarrow(["POINT (0 1)"], coord_type=ga.CoordType.INTERLEAVED)
-    assert array.type.id == ga.point().with_coord_type(ga.CoordType.INTERLEAVED).id
+    assert (
+        array.type.geoarrow_id
+        == ga.point().with_coord_type(ga.CoordType.INTERLEAVED).geoarrow_id
+    )
 
     array = _compute.as_geoarrow(["POINT (0 1)"], type=ga.multipoint())
-    assert array.type.id == ga.multipoint().id
+    assert array.type.geoarrow_id == ga.multipoint().geoarrow_id
 
     array = _compute.as_geoarrow(["POINT (0 1)", "LINESTRING (0 1, 2 3)"])
-    assert array.type.id == ga.wkb().id
+    assert array.type.geoarrow_id == ga.wkb().geoarrow_id
 
 
 def test_box():

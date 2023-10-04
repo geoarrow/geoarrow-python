@@ -245,10 +245,10 @@ def as_geoarrow(obj, type=None, coord_type=None, promote_multi=False):
             obj, coord_type=coord_type, promote_multi=promote_multi
         )
 
-    if obj.type.id == type.id:
+    if obj.type.geoarrow_id == type.geoarrow_id:
         return obj
 
-    return push_all(Kernel.as_geoarrow, obj, args={"type_id": type.id})
+    return push_all(Kernel.as_geoarrow, obj, args={"type_id": type.geoarrow_id})
 
 
 def format_wkt(obj, precision=None, max_element_size_bytes=None):
