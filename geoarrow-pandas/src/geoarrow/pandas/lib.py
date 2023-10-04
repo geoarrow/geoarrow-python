@@ -245,7 +245,8 @@ class GeoArrowExtensionDtype(_pd.api.extensions.ExtensionDtype):
 
     The dtype object for geoarrow-encoded arrays that are converted
     to pandas. Use the ``pyarrow_dtype`` property to return the underlying
-    ``VectorType`` (e.g., to query the ``crs`` or ``dimensions``).
+    :class:`geoarrow.pyarrow.GeometryExtensionType` (e.g., to query the
+    ``crs`` or ``dimensions``).
     """
 
     _match = _re.compile(

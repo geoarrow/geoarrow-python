@@ -128,7 +128,7 @@ def array(obj, type_=None, *args, **kwargs) -> GeometryExtensionArray:
 
     >>> import geoarrow.pyarrow as ga
     >>> ga.array(["POINT (0 1)"])
-    VectorArray:WktType(geoarrow.wkt)[1]
+    GeometryExtensionArray:WktType(geoarrow.wkt)[1]
     <POINT (0 1)>
     >>> ga.as_geoarrow(["POINT (0 1)"])
     PointArray:PointType(geoarrow.point)[1]

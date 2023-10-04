@@ -23,7 +23,7 @@ class GeoDataset:
 
     The GeoDataset wraps a pyarrow.Dataset containing one or more geometry columns
     and provides indexing and IO capability. If `geometry_columns` is `None`,
-    it will include all columns that inherit from `geoarrow.pyarrow.VectorType`.
+    it will include all columns that inherit from `geoarrow.pyarrow.GeometryExtensionType`.
     The `geometry_columns` are not required to be geoarrow extension type columns:
     text columns will be parsed as WKT; binary columns will be parsed as WKB
     (but are not detected automatically).

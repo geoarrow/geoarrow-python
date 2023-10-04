@@ -125,7 +125,7 @@ def unique_geometry_types(obj):
 
 
 def infer_type_common(obj, coord_type=None, promote_multi=False):
-    """Infer a common :class:`geoarrow.pyarrow.VectorType` for the
+    """Infer a common :class:`geoarrow.pyarrow.GeometryExtensionType` for the
     geometries in ``obj``, preferring geoarrow-encoded types and falling back
     to well-known binary.
 
@@ -210,7 +210,7 @@ def as_wkt(obj):
     >>> import geoarrow.pyarrow as ga
     >>> points = ga.as_geoarrow(["POINT (0 1)"])
     >>> ga.as_wkt(points)
-    VectorArray:WktType(geoarrow.wkt)[1]
+    GeometryExtensionArray:WktType(geoarrow.wkt)[1]
     <POINT (0 1)>
     """
     return as_geoarrow(obj, _type.wkt())
@@ -222,7 +222,7 @@ def as_wkb(obj):
     >>> import geoarrow.pyarrow as ga
     >>> points = ga.as_geoarrow(["POINT (0 1)"])
     >>> ga.as_wkb(points)
-    VectorArray:WkbType(geoarrow.wkb)[1]
+    GeometryExtensionArray:WkbType(geoarrow.wkb)[1]
     <POINT (0 1)>
     """
     return as_geoarrow(obj, _type.wkb())
@@ -441,7 +441,7 @@ def with_edge_type(obj, edge_type):
 
     >>> import geoarrow.pyarrow as ga
     >>> ga.with_edge_type(["LINESTRING (0 1, 2 3)"], ga.EdgeType.SPHERICAL)
-    VectorArray:WktType(spherical geoarrow.wkt)[1]
+    GeometryExtensionArray:WktType(spherical geoarrow.wkt)[1]
     <LINESTRING (0 1, 2 3)>
     """
     obj = obj_as_array_or_chunked(obj)
@@ -454,7 +454,7 @@ def with_crs(obj, crs, crs_type=None):
 
     >>> import geoarrow.pyarrow as ga
     >>> ga.with_crs(["POINT (0 1)"], "EPSG:1234")
-    VectorArray:WktType(geoarrow.wkt <EPSG:1234>)[1]
+    GeometryExtensionArray:WktType(geoarrow.wkt <EPSG:1234>)[1]
     <POINT (0 1)>
     """
     obj = obj_as_array_or_chunked(obj)
