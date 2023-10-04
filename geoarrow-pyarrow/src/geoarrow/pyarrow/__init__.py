@@ -41,7 +41,7 @@ from geoarrow.pyarrow._array import array
 
 from geoarrow.pyarrow import _scalar
 
-from ._compute import (
+from geoarrow.pyarrow._compute import (
     parse_all,
     as_wkt,
     as_wkb,
