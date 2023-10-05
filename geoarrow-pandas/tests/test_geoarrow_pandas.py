@@ -113,6 +113,7 @@ def test_array_basic_methods():
         ),
     )
 
+
 def test_array_basic_methods_chunked_data():
     pa_array = ga.array(["POINT (0 1)", "POINT (1 2)", None])
     array = gapd.GeoArrowExtensionArray(pa.chunked_array([pa_array]))
