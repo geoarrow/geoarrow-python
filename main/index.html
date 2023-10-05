@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>geoarrow for Python &#8212; geoarrow  documentation</title>
+    <title>GeoArrow for Python &#8212; geoarrow  documentation</title>
   
   
   
@@ -307,18 +307,22 @@ document.write(`
                 <article class="bd-article" role="main">
                   
   <section id="geoarrow-for-python">
-<h1>geoarrow for Python<a class="headerlink" href="#geoarrow-for-python" title="Link to this heading">#</a></h1>
-<p>The geoarrow Python packages provide an implementation of the <a class="reference external" href="https://github.com/geoarrow/geoarrow">GeoArrow
+<h1>GeoArrow for Python<a class="headerlink" href="#geoarrow-for-python" title="Link to this heading">#</a></h1>
+<p>The GeoArrow Python packages provide an implementation of the <a class="reference external" href="https://github.com/geoarrow/geoarrow">GeoArrow
 specification</a> that integrates
 with <a class="reference external" href="https://arrow.apache.org/docs/python">pyarrow</a> and
-<a class="reference external" href="https://pandas.pydata.org/">pandas</a>. The geoarrow Python bindings
+<a class="reference external" href="https://pandas.pydata.org/">pandas</a>. The GeoArrow Python bindings
 enable input/output to/from Arrow-friendly formats (e.g., Parquet, Arrow
 Stream, Arrow File) and general-purpose coordinate shuffling tools among
 GeoArrow, WKT, and WKB encodings.</p>
 <section id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Link to this heading">#</a></h2>
-<p>Python bindings for geoarrow are not yet available on PyPI. You can
-install via URL:</p>
+<p>Python bindings for GeoArrow are available on PyPI. You can install them
+with:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>geoarrow-pyarrow<span class="w"> </span>geoarrow-pandas
+</pre></div>
+</div>
+<p>You can install the latest development versions with:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;git+https://github.com/geoarrow/geoarrow-python.git#egg=geoarrow-pyarrow&amp;subdirectory=geoarrow-pyarrow&quot;</span>
 pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;git+https://github.com/geoarrow/geoarrow-python.git#egg=geoarrow-pandas&amp;subdirectory=geoarrow-pandas&quot;</span>
 </pre></div>
