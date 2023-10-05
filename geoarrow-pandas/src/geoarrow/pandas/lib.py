@@ -191,7 +191,16 @@ class GeoArrowExtensionArray(_pd.api.extensions.ExtensionArray):
             return out.to_numpy(zero_copy_only=False)
 
     def copy(self):
-        return GeoArrowExtensionArray._from_sequence(self, dtype=self._dtype)
+        if isinstance(self._data, _pa.ChunkedArray):
+            storage_chunks = []
+            for chunk in self._data.chunks:
+                storage_chunks.append(_pa.concat_arrays([chunk.storage]))
+
+            storage = _pa.chunked_array(storage_chunks, self._data.type.storage_type)
+            return GeoArrowExtensionArray(self._data.type.wrap_array(storage))
+        else:
+            storage = _pa.concat_arrays([self._data.storage])
+            return GeoArrowExtensionArray(self._data.type.wrap_array(storage))
 
     @classmethod
     def _concat_same_type(cls, to_concat):
