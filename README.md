@@ -1,10 +1,16 @@
-# geoarrow for Python
+# GeoArrow for Python
 
-The geoarrow Python packages provide an implementation of the [GeoArrow specification](https://github.com/geoarrow/geoarrow) that integrates with [pyarrow](https://arrow.apache.org/docs/python) and [pandas](https://pandas.pydata.org/). The geoarrow Python bindings enable input/output to/from Arrow-friendly formats (e.g., Parquet, Arrow Stream, Arrow File) and general-purpose coordinate shuffling tools among GeoArrow, WKT, and WKB encodings. 
+The GeoArrow Python packages provide an implementation of the [GeoArrow specification](https://github.com/geoarrow/geoarrow) that integrates with [pyarrow](https://arrow.apache.org/docs/python) and [pandas](https://pandas.pydata.org/). The GeoArrow Python bindings enable input/output to/from Arrow-friendly formats (e.g., Parquet, Arrow Stream, Arrow File) and general-purpose coordinate shuffling tools among GeoArrow, WKT, and WKB encodings. 
 
 ## Installation
 
-Python bindings for geoarrow are not yet available on PyPI. You can install via URL:
+Python bindings for GeoArrow are available on PyPI. You can install them with:
+
+```bash
+pip install geoarrow-pyarrow geoarrow-pandas
+```
+
+You can install the latest development versions with:
 
 ```bash
 pip install "git+https://github.com/geoarrow/geoarrow-python.git#egg=geoarrow-pyarrow&subdirectory=geoarrow-pyarrow"
