@@ -25,6 +25,34 @@ def test_readpyogrio_table():
         assert ga.format_wkt(table.column("geom")).to_pylist() == ["POINT (0 1)"]
 
 
+def test_write_geoparquet_table():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        temp_pq = os.path.join(tmpdir, "test.parquet")
+        tab = pa.table([ga.array(["POINT (0 1)"])], names=["geometry"])
+        io.write_geoparquet_table(tab, temp_pq)
+        tab2 = parquet.read_table(temp_pq)
+        assert b"geo" in tab2.schema.metadata
+        assert tab2.schema.types[0] == pa.binary()
+
+
+def test_read_geoparquet_table():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        temp_pq = os.path.join(tmpdir, "test.parquet")
+
+        # With "geo" metadata key
+        tab = pa.table([ga.array(["POINT (0 1)"])], names=["geometry"])
+        io.write_geoparquet_table(tab, temp_pq)
+        tab2 = io.read_geoparquet_table(temp_pq)
+        assert isinstance(tab2["geometry"].type, ga.GeometryExtensionType)
+        assert b"geo" not in tab2.schema.metadata
+
+        # Without "geo" metadata key
+        tab = pa.table([pa.array(["POINT (0 1)"])], names=["geometry"])
+        parquet.write_table(tab, temp_pq)
+        tab2 = io.read_geoparquet_table(temp_pq)
+        assert isinstance(tab2["geometry"].type, ga.GeometryExtensionType)
+
+
 def test_geoparquet_column_spec_from_type_geom_type():
     spec_wkb = io._geoparquet_column_spec_from_type(ga.wkb())
     assert spec_wkb["geometry_types"] == []
@@ -90,12 +118,10 @@ def test_geoparquet_guess_primary_geometry_column():
         == "geometry"
     )
 
-    assert (
+    with pytest.raises(ValueError, match="at least one geometry column"):
         io._geoparquet_guess_primary_geometry_column(
             pa.schema([pa.field("not_geom", pa.binary())])
         )
-        is None
-    )
 
     assert (
         io._geoparquet_guess_primary_geometry_column(
@@ -132,16 +158,6 @@ def test_geoparquet_metadata_from_schema():
     assert metadata["version"] == "1.0.0"
     assert metadata["primary_column"] == "col_a"
     assert list(metadata["columns"].keys()) == ["col_a"]
-
-
-def test_write_geoparquet_table():
-    with tempfile.TemporaryDirectory() as tmpdir:
-        temp_pq = os.path.join(tmpdir, "test.parquet")
-        tab = pa.table([ga.array(["POINT (0 1)"])], names=["geometry"])
-        io.write_geoparquet_table(tab, temp_pq)
-        tab2 = parquet.read_table(temp_pq)
-        assert b"geo" in tab2.schema.metadata
-        assert tab2.schema.types[0] == pa.binary()
 
 
 def test_guess_geometry_columns():
@@ -220,3 +236,11 @@ def test_chunked_array_to_geoarrow_edges():
         item_binary, {"encoding": "WKB", "edges": "spherical"}
     )
     assert item_spherical.type.edge_type == ga.EdgeType.SPHERICAL
+
+
+def test_table_to_geoarrow():
+    tab = pa.table([pa.array([], pa.binary())], names=["col_name"])
+    tab_geo = io._geoparquet_table_to_geoarrow(tab, {"col_name": {"encoding": "WKB"}})
+    assert "col_name" in tab_geo.schema.names
+    assert isinstance(tab_geo["col_name"].type, ga.GeometryExtensionType)
+    assert tab_geo["col_name"].type.crs_type == ga.CrsType.PROJJSON

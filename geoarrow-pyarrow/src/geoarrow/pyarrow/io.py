@@ -113,8 +113,12 @@ def _geoparquet_chunked_array_to_geoarrow(item, spec):
 
 
 def _geoparquet_table_to_geoarrow(tab, columns):
+    tab_names = set(tab.schema.names)
     for col_name, spec in columns.items():
-        # col_name might not exist if columns was passed
+        # col_name might not exist if only a subset of columns were read from file
+        if col_name not in tab_names:
+            continue
+
         col_i = tab.schema.get_field_index(col_name)
         new_geometry = _geoparquet_chunked_array_to_geoarrow(tab[col_i], spec)
         tab = tab.set_column(col_i, col_name, new_geometry)
@@ -124,14 +128,15 @@ def _geoparquet_table_to_geoarrow(tab, columns):
 
 def read_geoparquet_table(*args, **kwargs):
     tab = _pq.read_table(*args, **kwargs)
-    if b"geo" not in tab.schema.metadata:
-        return tab
-
-    geo_meta = json.loads(tab.schema.metadata[b"geo"])
+    tab_metadata = tab.schema.metadata if tab.schema.metadata else {}
+    if b"geo" in tab_metadata:
+        geo_meta = json.loads(tab_metadata[b"geo"])
+    else:
+        geo_meta = {}
 
     # Remove "geo" schema metadata key since after this transformation
     # it will no longer contain valid encodings
-    non_geo_meta = {k: v for k, v in tab.schema.metadata if k != b"geo"}
+    non_geo_meta = {k: v for k, v in tab_metadata.items() if k != b"geo"}
     tab = tab.replace_schema_metadata(non_geo_meta)
 
     # Assign extension types to columns
@@ -156,7 +161,9 @@ def _geoparquet_guess_primary_geometry_column(schema, primary_geometry_column=No
         if isinstance(type, _ga.GeometryExtensionType):
             return name
 
-    return None
+    raise ValueError(
+        "write_geoparquet_table() requires source with at least one geometry column"
+    )
 
 
 def _geoparquet_column_spec_from_type(type):
