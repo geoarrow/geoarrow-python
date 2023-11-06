@@ -23,7 +23,49 @@ def test_readpyogrio_table():
         assert table.column("geom").type == ga.wkb().with_crs(crs_json)
         assert ga.format_wkt(table.column("geom")).to_pylist() == ["POINT (0 1)"]
 
+
+def test_geoparquet_column_spec_from_type_geom_type():
+    spec_wkb = io._geoparquet_column_spec_from_type(ga.wkb())
+    assert spec_wkb["geometry_types"] == []
+
+    spec_point = io._geoparquet_column_spec_from_type(ga.point())
+    assert spec_point["geometry_types"] == ["Point"]
+
+    spec_linestring = io._geoparquet_column_spec_from_type(ga.linestring())
+    assert spec_linestring["geometry_types"] == ["LineString"]
+
+    spec_polygon = io._geoparquet_column_spec_from_type(ga.polygon())
+    assert spec_polygon["geometry_types"] == ["Polygon"]
+
+    spec_multipoint = io._geoparquet_column_spec_from_type(ga.multipoint())
+    assert spec_multipoint["geometry_types"] == ["MultiPoint"]
+
+    spec_multilinestring = io._geoparquet_column_spec_from_type(ga.multilinestring())
+    assert spec_multilinestring["geometry_types"] == ["MultiLineString"]
+
+    spec_multipolygon = io._geoparquet_column_spec_from_type(ga.multipolygon())
+    assert spec_multipolygon["geometry_types"] == ["MultiPolygon"]
+
+
+def test_geoparquet_column_spec_from_type_crs():
+    spec_storage = io._geoparquet_column_spec_from_type(pa.binary())
+    assert "crs" not in spec_storage
+
+    spec_none = io._geoparquet_column_spec_from_type(ga.wkb())
+    assert spec_none["crs"] is None
+
+    spec_projjson = io._geoparquet_column_spec_from_type(
+        ga.wkb().with_crs("{}", ga.CrsType.PROJJSON)
+    )
+    assert spec_projjson["crs"] == {}
+
+    pytest.importorskip("pyproj")
+    spec_not_projjson = io._geoparquet_column_spec_from_type(
+        ga.wkb().with_crs("OGC:CRS84")
+    )
+    assert spec_not_projjson["crs"]["id"]["code"] == "CRS84"
+
+
 def test_read_geoparquet_table():
     with tempfile.TemporaryDirectory() as tmpdir:
         temp_pq = os.path.join(tmpdir, "test.parquet")
-
