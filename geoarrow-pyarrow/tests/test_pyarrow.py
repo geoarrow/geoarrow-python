@@ -50,9 +50,38 @@ def test_geometry_type_with():
     type_spherical = type_obj.with_edge_type(ga.EdgeType.SPHERICAL)
     assert type_spherical.edge_type == ga.EdgeType.SPHERICAL
 
+    # Explicit type
     type_crs = type_obj.with_crs("EPSG:1234", ga.CrsType.UNKNOWN)
     assert type_crs.crs_type == ga.CrsType.UNKNOWN
     assert type_crs.crs == "EPSG:1234"
+
+    type_crs = type_obj.with_crs(b"EPSG:1234", ga.CrsType.UNKNOWN)
+    assert type_crs.crs_type == ga.CrsType.UNKNOWN
+    assert type_crs.crs == "EPSG:1234"
+
+    type_crs = type_obj.with_crs({}, ga.CrsType.UNKNOWN)
+    assert type_crs.crs_type == ga.CrsType.UNKNOWN
+    assert type_crs.crs == "{}"
+
+    type_crs = type_obj.with_crs("{}", ga.CrsType.PROJJSON)
+    assert type_crs.crs_type == ga.CrsType.PROJJSON
+    assert type_crs.crs == "{}"
+
+    with pytest.raises(TypeError, match="Unknown type for crs object"):
+        type_obj.with_crs(pa.array([]), ga.CrsType.UNKNOWN)
+
+    # Implicit type
+    type_crs = type_obj.with_crs("EPSG:1234")
+    assert type_crs.crs_type == ga.CrsType.UNKNOWN
+    assert type_crs.crs == "EPSG:1234"
+
+    type_crs = type_obj.with_crs(b"EPSG:1234")
+    assert type_crs.crs_type == ga.CrsType.UNKNOWN
+    assert type_crs.crs == "EPSG:1234"
+
+    type_crs = type_obj.with_crs({})
+    assert type_crs.crs_type == ga.CrsType.PROJJSON
+    assert type_crs.crs == "{}"
 
 
 def test_constructors():
