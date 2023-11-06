@@ -66,6 +66,16 @@ def test_geoparquet_column_spec_from_type_crs():
     assert spec_not_projjson["crs"]["id"]["code"] == "CRS84"
 
 
+def test_geoparquet_column_spec_from_type_edges():
+    spec_planar = io._geoparquet_column_spec_from_type(ga.wkb())
+    assert "edges" not in spec_planar
+
+    spec_spherical = io._geoparquet_column_spec_from_type(
+        ga.wkb().with_edge_type(ga.EdgeType.SPHERICAL)
+    )
+    assert spec_spherical["edges"] == "spherical"
+
+
 def test_read_geoparquet_table():
     with tempfile.TemporaryDirectory() as tmpdir:
         temp_pq = os.path.join(tmpdir, "test.parquet")

@@ -150,7 +150,7 @@ def _geoparquet_guess_primary_geometry_column(schema, primary_geometry_column=No
 
 
 def _geoparquet_column_spec_from_type(type):
-    # We always encode to WKB since it's the only supported
+    # We always encode to WKB since it's the only supported value
     spec = {"encoding": "WKB", "geometry_types": []}
 
     if isinstance(type, _ga.GeometryExtensionType):
