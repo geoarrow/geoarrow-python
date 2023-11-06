@@ -76,6 +76,34 @@ def test_geoparquet_column_spec_from_type_edges():
     assert spec_spherical["edges"] == "spherical"
 
 
+def test_geoparquet_guess_primary_geometry_column():
+    assert (
+        io._geoparquet_guess_primary_geometry_column(pa.schema([]), "explicit_name")
+        == "explicit_name"
+    )
+
+    assert (
+        io._geoparquet_guess_primary_geometry_column(
+            pa.schema([pa.field("geometry", pa.binary())])
+        )
+        == "geometry"
+    )
+
+    assert (
+        io._geoparquet_guess_primary_geometry_column(
+            pa.schema([pa.field("not_geom", pa.binary())])
+        )
+        is None
+    )
+
+    assert (
+        io._geoparquet_guess_primary_geometry_column(
+            pa.schema([pa.field("first_def_geom", ga.wkb())])
+        )
+        == "first_def_geom"
+    )
+
+
 def test_read_geoparquet_table():
     with tempfile.TemporaryDirectory() as tmpdir:
         temp_pq = os.path.join(tmpdir, "test.parquet")

@@ -98,8 +98,18 @@ def _geoparquet_chunked_array_to_geoarrow(item, spec):
     else:
         crs = spec["crs"]
 
+    if "edges" not in spec or spec["edges"] == "planar":
+        edge_type = None
+    elif spec["edges"] == "spherical":
+        edge_type = _ga.EdgeType.SPHERICAL
+    else:
+        raise ValueError("Invalid GeoParuqet edges value")
+
     if crs is not None:
-        return _ga.with_crs(crs)
+        item = _ga.with_crs(item, crs)
+
+    if edge_type is not None:
+        item = _ga.with_edge_type(item, edge_type)
 
     return item
 
@@ -139,9 +149,11 @@ def _geoparquet_guess_primary_geometry_column(schema, primary_geometry_column=No
     if primary_geometry_column is not None:
         return primary_geometry_column
 
+    # If there's a "geometry" column, pick that one
     if "geometry" in schema.names:
         return "geometry"
 
+    # Otherwise, pick the first thing we know is actually geometry
     for name, type in zip(schema.names, schema.types):
         if isinstance(type, _ga.GeometryExtensionType):
             return name
@@ -153,6 +165,7 @@ def _geoparquet_column_spec_from_type(type):
     # We always encode to WKB since it's the only supported value
     spec = {"encoding": "WKB", "geometry_types": []}
 
+    # Pass along extra information from GeoArrow extension type metadata
     if isinstance(type, _ga.GeometryExtensionType):
         if type.crs_type == _ga.CrsType.PROJJSON:
             spec["crs"] = json.loads(type.crs)
