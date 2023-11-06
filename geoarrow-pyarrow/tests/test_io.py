@@ -3,6 +3,7 @@ import tempfile
 import os
 
 import pyarrow as pa
+from pyarrow import parquet
 import geoarrow.pyarrow as ga
 from geoarrow.pyarrow import io
 
@@ -133,6 +134,89 @@ def test_geoparquet_metadata_from_schema():
     assert list(metadata["columns"].keys()) == ["col_a"]
 
 
-def test_read_geoparquet_table():
+def test_write_geoparquet_table():
     with tempfile.TemporaryDirectory() as tmpdir:
         temp_pq = os.path.join(tmpdir, "test.parquet")
+        tab = pa.table([ga.array(["POINT (0 1)"])], names=["geometry"])
+        io.write_geoparquet_table(tab, temp_pq)
+        tab2 = parquet.read_table(temp_pq)
+        assert b"geo" in tab2.schema.metadata
+        assert tab2.schema.types[0] == pa.binary()
+
+
+def test_guess_geometry_columns():
+    assert io._geoparquet_guess_geometry_columns(pa.schema([])) == {}
+
+    guessed_wkb = io._geoparquet_guess_geometry_columns(
+        pa.schema([pa.field("geometry", pa.binary())])
+    )
+    assert list(guessed_wkb.keys()) == ["geometry"]
+    assert guessed_wkb["geometry"] == {"encoding": "WKB"}
+
+    guessed_wkt = io._geoparquet_guess_geometry_columns(
+        pa.schema([pa.field("geometry", pa.utf8())])
+    )
+    assert list(guessed_wkt.keys()) == ["geometry"]
+    assert guessed_wkt["geometry"] == {"encoding": "WKT"}
+
+
+def test_chunked_array_to_geoarrow_encodings():
+    item_already_geoarrow = pa.chunked_array([ga.array(["POINT (0 1)"])])
+    assert (
+        io._geoparquet_chunked_array_to_geoarrow(item_already_geoarrow, {})
+        is item_already_geoarrow
+    )
+
+    with pytest.raises(ValueError, match="missing 'encoding'"):
+        io._geoparquet_chunked_array_to_geoarrow(pa.array([]), {})
+
+    with pytest.raises(ValueError, match="Invalid GeoParquet encoding"):
+        io._geoparquet_chunked_array_to_geoarrow(
+            pa.array([]), {"encoding": "NotAnEncoding"}
+        )
+
+    item_binary = pa.chunked_array([ga.as_wkb(["POINT (0 1)"]).storage])
+    item_geoarrow = io._geoparquet_chunked_array_to_geoarrow(
+        item_binary, {"encoding": "WKB", "crs": None}
+    )
+    assert item_geoarrow.type == ga.wkb()
+
+    item_wkt = pa.chunked_array([ga.as_wkt(["POINT (0 1)"]).storage])
+    item_geoarrow = io._geoparquet_chunked_array_to_geoarrow(
+        item_wkt, {"encoding": "WKT", "crs": None}
+    )
+    assert item_geoarrow.type == ga.wkt()
+
+
+def test_chunked_array_to_geoarrow_crs():
+    item_binary = pa.chunked_array([ga.as_wkb(["POINT (0 1)"]).storage])
+
+    item_missing_crs = io._geoparquet_chunked_array_to_geoarrow(
+        item_binary, {"encoding": "WKB"}
+    )
+    assert item_missing_crs.type.crs_type == ga.CrsType.PROJJSON
+
+    item_explicit_crs = io._geoparquet_chunked_array_to_geoarrow(
+        item_binary, {"encoding": "WKB", "crs": {}}
+    )
+    assert item_explicit_crs.type.crs_type == ga.CrsType.PROJJSON
+    assert item_explicit_crs.type.crs == "{}"
+
+
+def test_chunked_array_to_geoarrow_edges():
+    item_binary = pa.chunked_array([ga.as_wkb(["POINT (0 1)"]).storage])
+
+    item_planar_default = io._geoparquet_chunked_array_to_geoarrow(
+        item_binary, {"encoding": "WKB"}
+    )
+    assert item_planar_default.type.edge_type == ga.EdgeType.PLANAR
+
+    item_planar_explicit = io._geoparquet_chunked_array_to_geoarrow(
+        item_binary, {"encoding": "WKB", "edges": "planar"}
+    )
+    assert item_planar_explicit.type.edge_type == ga.EdgeType.PLANAR
+
+    item_spherical = io._geoparquet_chunked_array_to_geoarrow(
+        item_binary, {"encoding": "WKB", "edges": "spherical"}
+    )
+    assert item_spherical.type.edge_type == ga.EdgeType.SPHERICAL

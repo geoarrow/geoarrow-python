@@ -1,3 +1,5 @@
+import json
+
 import pyarrow as pa
 
 from geoarrow.c import lib
@@ -247,9 +249,18 @@ class GeometryExtensionType(pa.ExtensionType):
         if crs_type is None and crs is None:
             ctype = self._type.with_crs(b"", lib.CrsType.NONE)
         elif crs_type is None:
-            if not isinstance(crs, bytes):
+            if isinstance(crs, str):
                 crs = crs.encode("UTF-8")
-            ctype = self._type.with_crs(crs, lib.CrsType.UNKNOWN)
+                crs_type = lib.CrsType.UNKNOWN
+            elif isinstance(crs, bytes):
+                crs_type = lib.CrsType.UNKNOWN
+            elif isinstance(crs, dict):
+                crs = json.dumps(crs).encode("UTF-8")
+                crs_type = lib.CrsType.PROJJSON
+            else:
+                raise TypeError("Unknown crs value")
+
+            ctype = self._type.with_crs(crs, crs_type)
         else:
             if not isinstance(crs, bytes):
                 crs = crs.encode("UTF-8")
