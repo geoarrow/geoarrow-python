@@ -2,14 +2,15 @@ import pytest
 import tempfile
 import os
 
-pyogrio = pytest.importorskip("pyogrio")
-geopandas = pytest.importorskip("geopandas")
-
+import pyarrow as pa
 import geoarrow.pyarrow as ga
 from geoarrow.pyarrow import io
 
 
 def test_readpyogrio_table():
+    pyogrio = pytest.importorskip("pyogrio")
+    geopandas = pytest.importorskip("geopandas")
+
     with tempfile.TemporaryDirectory() as tmpdir:
         temp_gpkg = os.path.join(tmpdir, "test.gpkg")
         df = geopandas.GeoDataFrame(
@@ -21,3 +22,8 @@ def test_readpyogrio_table():
         table = io.read_pyogrio_table(temp_gpkg)
         assert table.column("geom").type == ga.wkb().with_crs(crs_json)
         assert ga.format_wkt(table.column("geom")).to_pylist() == ["POINT (0 1)"]
+
+def test_read_geoparquet_table():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        temp_pq = os.path.join(tmpdir, "test.parquet")
+
