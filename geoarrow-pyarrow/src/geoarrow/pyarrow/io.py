@@ -236,6 +236,7 @@ def _geoparquet_metadata_from_schema(
 
 
 def _geoparquet_encode_chunked_array(item, spec):
+    # ...because we're currently only ever encoding using WKB
     item = _ga.as_wkb(item)
     return ensure_storage(item)
 

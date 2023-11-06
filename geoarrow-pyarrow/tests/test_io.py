@@ -104,6 +104,35 @@ def test_geoparquet_guess_primary_geometry_column():
     )
 
 
+def test_geoparquet_columns_from_schema():
+    schema = pa.schema([pa.field("col_a", ga.wkb()), pa.field("col_b", pa.binary())])
+
+    # Guessing should just return GeoArrow columns
+    cols = io._geoparquet_columns_from_schema(schema)
+    assert list(cols.keys()) == ["col_a"]
+    assert cols["col_a"] == {"encoding": "WKB", "geometry_types": [], "crs": None}
+
+    # Explicit should just return specified columns
+    cols_explicit = io._geoparquet_columns_from_schema(schema, ["col_b"])
+    assert list(cols_explicit.keys()) == ["col_b"]
+    assert cols_explicit["col_b"] == {"encoding": "WKB", "geometry_types": []}
+
+    # Guessing should always include primary geometry column
+    cols_primary = io._geoparquet_columns_from_schema(
+        schema, primary_geometry_column="col_b"
+    )
+    assert list(cols_primary.keys()) == ["col_a", "col_b"]
+
+
+def test_geoparquet_metadata_from_schema():
+    schema = pa.schema([pa.field("col_a", ga.wkb()), pa.field("col_b", pa.binary())])
+    metadata = io._geoparquet_metadata_from_schema(schema)
+    assert list(metadata.keys()) == ["version", "primary_column", "columns"]
+    assert metadata["version"] == "1.0.0"
+    assert metadata["primary_column"] == "col_a"
+    assert list(metadata["columns"].keys()) == ["col_a"]
+
+
 def test_read_geoparquet_table():
     with tempfile.TemporaryDirectory() as tmpdir:
         temp_pq = os.path.join(tmpdir, "test.parquet")
