@@ -115,7 +115,13 @@ def read_geoparquet_table(*args, **kwargs):
 
 
 def write_geoparquet_table(
-    table, *args, primary_geometry_column=None, geometry_columns=None, **kwargs
+    table,
+    *args,
+    primary_geometry_column=None,
+    geometry_columns=None,
+    write_bbox=False,
+    write_geometry_types=False,
+    **kwargs,
 ):
     """Write GeoParquet using PyArrow
 
@@ -125,6 +131,9 @@ def write_geoparquet_table(
     implementation, using ``pyarrow.parquet.write_parquet()`` will preserve
     geometry types/metadata and is usually faster.
 
+    Note that passing ``write_bbox=True`` and/or ``write_geometry_types=True``
+    may be computationally expensive for large input.
+
     See :func:`read_geoparquet_table()` for examples.
     """
     geo_meta = _geoparquet_metadata_from_schema(
@@ -132,12 +141,19 @@ def write_geoparquet_table(
         primary_geometry_column=primary_geometry_column,
         geometry_columns=geometry_columns,
     )
+
+    # Note: this will also update geo_meta with geometry_types and bbox if requested
     for i, name in enumerate(table.schema.names):
         if name in geo_meta["columns"]:
             table = table.set_column(
                 i,
                 name,
-                _geoparquet_encode_chunked_array(table[i], geo_meta["columns"][name]),
+                _geoparquet_encode_chunked_array(
+                    table[i],
+                    geo_meta["columns"][name],
+                    add_geometry_types=write_geometry_types,
+                    add_bbox=write_bbox,
+                ),
             )
 
     metadata = table.schema.metadata if table.schema.metadata else {}
@@ -250,18 +266,10 @@ def _geoparquet_column_spec_from_type(type):
             spec["edges"] = "spherical"
 
         # GeoArrow-encoded types can confidently declare a single geometry type
-        if type.geometry_type == _ga.GeometryType.POINT:
-            spec["geometry_types"] = ["Point"]
-        elif type.geometry_type == _ga.GeometryType.LINESTRING:
-            spec["geometry_types"] = ["LineString"]
-        elif type.geometry_type == _ga.GeometryType.POLYGON:
-            spec["geometry_types"] = ["Polygon"]
-        elif type.geometry_type == _ga.GeometryType.MULTIPOINT:
-            spec["geometry_types"] = ["MultiPoint"]
-        elif type.geometry_type == _ga.GeometryType.MULTILINESTRING:
-            spec["geometry_types"] = ["MultiLineString"]
-        elif type.geometry_type == _ga.GeometryType.MULTIPOLYGON:
-            spec["geometry_types"] = ["MultiPolygon"]
+        if type.geometry_type != _ga.GeometryType.GEOMETRY:
+            spec["geometry_types"] = [
+                _GEOPARQUET_GEOMETRY_TYPE_LABELS[type.geometry_type]
+            ]
 
     return spec
 
@@ -305,11 +313,58 @@ def _geoparquet_metadata_from_schema(
     }
 
 
-def _geoparquet_encode_chunked_array(item, spec):
-    # ...because we're currently only ever encoding using WKB
-    item = _ga.as_wkb(item)
-    return ensure_storage(item)
+def _geoparquet_update_spec_geometry_types(item, spec):
+    geometry_type_labels = []
+    for element in _ga.unique_geometry_types(item).to_pylist():
+        geometry_type = _GEOPARQUET_GEOMETRY_TYPE_LABELS[element["geometry_type"]]
+        dimensions = _GEOPARQUET_DIMENSION_LABELS[element["dimensions"]]
+        geometry_type_labels.append(f"{geometry_type}{dimensions}")
 
+    spec["geometry_types"] = geometry_type_labels
+
+
+def _geoparquet_update_spec_bbox(item, spec):
+    box = _ga.box_agg(item).as_py()
+    spec["bbox"] = [box["xmin"], box["ymin"], box["xmax"], box["ymax"]]
+
+
+def _geoparquet_encode_chunked_array(
+    item, spec, add_geometry_types=False, add_bbox=False
+):
+    # ...because we're currently only ever encoding using WKB
+    if spec["encoding"] == "WKB":
+        item_out = _ga.as_wkb(item)
+    else:
+        encoding = spec["encoding"]
+        raise ValueError(f"Expected column encoding 'WKB' but got '{encoding}'")
+
+    # For everything except a well-known text-encoded column, we want to do
+    # calculations on the pre-WKB-encoded value.
+    if spec["encoding"] == "WKT":
+        item_calc = item_out
+    else:
+        item_calc = item
+
+    if add_geometry_types:
+        _geoparquet_update_spec_geometry_types(item_calc, spec)
+
+    if add_bbox:
+        _geoparquet_update_spec_bbox(item_calc, spec)
+
+    return ensure_storage(item_out)
+
+
+_GEOPARQUET_GEOMETRY_TYPE_LABELS = [
+    "Geometry",
+    "Point",
+    "LineString",
+    "Polygon",
+    "MultiPoint",
+    "MultiLineString",
+    "MultiPolygon",
+]
+
+_GEOPARQUET_DIMENSION_LABELS = [None, "", " Z", " M", " ZM"]
 
 _CRS_LONLAT = {
     "$schema": "https://proj.org/schemas/v0.7/projjson.schema.json",

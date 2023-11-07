@@ -176,6 +176,28 @@ def test_guess_geometry_columns():
     assert guessed_wkt["geometry"] == {"encoding": "WKT"}
 
 
+def test_encode_chunked_array():
+    with pytest.raises(ValueError, match="Expected column encoding 'WKB'"):
+        io._geoparquet_encode_chunked_array(
+            ga.array("POINT (0 1)"), {"encoding": "NotAnEncoding"}
+        )
+
+    spec = {"encoding": "WKB"}
+    encoded = io._geoparquet_encode_chunked_array(ga.as_wkb(["POINT (0 1)"]), spec)
+    assert encoded.type == pa.binary()
+    assert spec == {"encoding": "WKB"}
+
+    encoded = io._geoparquet_encode_chunked_array(
+        ga.array(["POINT (0 -1)", "POINT Z (1 2 3)"]),
+        spec,
+        add_geometry_types=True,
+        add_bbox=True,
+    )
+    assert encoded.type == pa.binary()
+    assert spec["bbox"] == [0, -1, 1, 2]
+    assert spec["geometry_types"] == ["Point", "Point Z"]
+
+
 def test_chunked_array_to_geoarrow_encodings():
     item_already_geoarrow = pa.chunked_array([ga.array(["POINT (0 1)"])])
     assert (
