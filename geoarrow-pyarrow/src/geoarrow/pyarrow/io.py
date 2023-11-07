@@ -123,7 +123,7 @@ def write_geoparquet_table(
     readers to recreate geometry types. Note that if you are writing Parquet
     that will be read by an Arrow-based Parquet reader and a GeoArrow
     implementation, using ``pyarrow.parquet.write_parquet()`` will preserve
-    geometry columns and is usually faster.
+    geometry types/metadata and is usually faster.
 
     See :func:`read_geoparquet_table()` for examples.
     """
