@@ -101,7 +101,7 @@ def _geoparquet_chunked_array_to_geoarrow(item, spec):
     elif spec["edges"] == "spherical":
         edge_type = _ga.EdgeType.SPHERICAL
     else:
-        raise ValueError("Invalid GeoParuqet edges value")
+        raise ValueError("Invalid GeoParquet column edges value")
 
     if crs is not None:
         item = _ga.with_crs(item, crs)

@@ -237,6 +237,11 @@ def test_chunked_array_to_geoarrow_edges():
     )
     assert item_spherical.type.edge_type == ga.EdgeType.SPHERICAL
 
+    with pytest.raises(ValueError, match="Invalid GeoParquet column edges value"):
+        io._geoparquet_chunked_array_to_geoarrow(
+            item_binary, {"encoding": "WKB", "edges": "invalid_edges_value"}
+        )
+
 
 def test_table_to_geoarrow():
     tab = pa.table([pa.array([], pa.binary())], names=["col_name"])
@@ -244,3 +249,10 @@ def test_table_to_geoarrow():
     assert "col_name" in tab_geo.schema.names
     assert isinstance(tab_geo["col_name"].type, ga.GeometryExtensionType)
     assert tab_geo["col_name"].type.crs_type == ga.CrsType.PROJJSON
+
+    # Check with no columns selected
+    tab_no_cols = tab.drop_columns(["col_name"])
+    tab_no_cols_geo = io._geoparquet_table_to_geoarrow(
+        tab_no_cols, {"col_name": {"encoding": "WKB"}}
+    )
+    assert tab_no_cols_geo == tab_no_cols

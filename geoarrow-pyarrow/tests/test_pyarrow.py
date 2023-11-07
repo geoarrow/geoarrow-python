@@ -1,4 +1,5 @@
 import sys
+import json
 from math import inf
 
 import pyarrow as pa
@@ -82,6 +83,23 @@ def test_geometry_type_with():
     type_crs = type_obj.with_crs({})
     assert type_crs.crs_type == ga.CrsType.PROJJSON
     assert type_crs.crs == "{}"
+
+
+def test_type_with_crs_pyproj():
+    pyproj = pytest.importorskip("pyproj")
+    type_obj = ga.wkb()
+
+    # Implicit type
+    type_crs = type_obj.with_crs(pyproj.CRS("EPSG:32620"))
+    assert type_crs.crs_type == ga.CrsType.PROJJSON
+    crs_dict = json.loads(type_crs.crs)
+    assert crs_dict["id"]["code"] == 32620
+
+    # Explicit type
+    type_crs = type_obj.with_crs(pyproj.CRS("EPSG:32620"), ga.CrsType.PROJJSON)
+    assert type_crs.crs_type == ga.CrsType.PROJJSON
+    crs_dict = json.loads(type_crs.crs)
+    assert crs_dict["id"]["code"] == 32620
 
 
 def test_constructors():
