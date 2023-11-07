@@ -40,7 +40,8 @@ def read_pyogrio_table(*args, **kwargs):
 
     meta, table = read_arrow(*args, **kwargs)
 
-    # Maybe not always true? meta["geometry_name"] is occasionally `""`
+    # When meta["geometry_name"] is `""`, the geometry column name is wkb_geometry
+    # in GDAL's Arrow output
     geometry_name = meta["geometry_name"] if meta["geometry_name"] else "wkb_geometry"
 
     # Get the JSON representation of the CRS
@@ -57,6 +58,92 @@ def read_pyogrio_table(*args, **kwargs):
             break
 
     return table
+
+
+def read_geoparquet_table(*args, **kwargs):
+    """Read GeoParquet using PyArrow
+
+    A thin wrapper around ``pyarrow.parquet.read_parquet()`` that ensures any columns
+    marked as geometry are encoded as extension arrays. This will read Parquet files
+    with and without the ``geo`` metadata key as described in the GeoParquet format
+    and guidance on compatible Parquet. Briefly, this means that any valid GeoParquet
+    file (i.e., written by GDAL or :func:`write_geoparquet_table()`) or regular Parquet
+    file with a column named ``geometry`` can be read by ``read_geoparquet_table()``.
+    For regular Parquet files, a ``geometry`` column encoded as binary is assumed to
+    contain well-known binary and a ``geometry`` column encoded as text is assumed to
+    contain well-known text.
+
+    Because a ``pyarrow.Table`` has no concept of "primary geometry column", that
+    information is currently lost on read. To minimize the chances of misinterpreting
+    the primary geometry column, use ``geometry`` as the name of the column or
+    refer to columns explicitly.
+
+    >>> import geoarrow.pyarrow as ga
+    >>> from geoarrow.pyarrow import io
+    >>> import tempfile
+    >>> import os
+    >>> import pyarrow as pa
+    >>> with tempfile.TemporaryDirectory() as tmpdir:
+    ...     temp_pq = os.path.join(tmpdir, "test.parquet")
+    ...     tab = pa.table([ga.array(["POINT (0 1)"])], names=["geometry"])
+    ...     io.write_geoparquet_table(tab, temp_pq)
+    ...     tab2 = io.read_geoparquet_table(temp_pq)
+    ...     tab2["geometry"].chunk(0)
+    GeometryExtensionArray:WkbType(geoarrow.wkb)[1]
+    <POINT (0 1)>
+    """
+
+    tab = _pq.read_table(*args, **kwargs)
+    tab_metadata = tab.schema.metadata if tab.schema.metadata else {}
+    if b"geo" in tab_metadata:
+        geo_meta = json.loads(tab_metadata[b"geo"])
+    else:
+        geo_meta = {}
+
+    # Remove "geo" schema metadata key since after this transformation
+    # it will no longer contain valid encodings
+    non_geo_meta = {k: v for k, v in tab_metadata.items() if k != b"geo"}
+    tab = tab.replace_schema_metadata(non_geo_meta)
+
+    # Assign extension types to columns
+    if "columns" in geo_meta:
+        columns = geo_meta["columns"]
+    else:
+        columns = _geoparquet_guess_geometry_columns(tab.schema)
+
+    return _geoparquet_table_to_geoarrow(tab, columns)
+
+
+def write_geoparquet_table(
+    table, *args, primary_geometry_column=None, geometry_columns=None, **kwargs
+):
+    """Write GeoParquet using PyArrow
+
+    Writes a Parquet file with the ``geo`` metadata key used by GeoParquet
+    readers to recreate geometry types. Note that if you are writing Parquet
+    that will be read by an Arrow-based Parquet reader and a GeoArrow
+    implementation, using ``pyarrow.parquet.write_parquet()`` will preserve
+    geometry columns and is usually faster.
+
+    See :func:`read_geoparquet_table()` for examples.
+    """
+    geo_meta = _geoparquet_metadata_from_schema(
+        table.schema,
+        primary_geometry_column=primary_geometry_column,
+        geometry_columns=geometry_columns,
+    )
+    for i, name in enumerate(table.schema.names):
+        if name in geo_meta["columns"]:
+            table = table.set_column(
+                i,
+                name,
+                _geoparquet_encode_chunked_array(table[i], geo_meta["columns"][name]),
+            )
+
+    metadata = table.schema.metadata if table.schema.metadata else {}
+    metadata["geo"] = json.dumps(geo_meta)
+    table = table.replace_schema_metadata(metadata)
+    return _pq.write_table(table, *args, **kwargs)
 
 
 def _geoparquet_guess_geometry_columns(schema):
@@ -124,28 +211,6 @@ def _geoparquet_table_to_geoarrow(tab, columns):
         tab = tab.set_column(col_i, col_name, new_geometry)
 
     return tab
-
-
-def read_geoparquet_table(*args, **kwargs):
-    tab = _pq.read_table(*args, **kwargs)
-    tab_metadata = tab.schema.metadata if tab.schema.metadata else {}
-    if b"geo" in tab_metadata:
-        geo_meta = json.loads(tab_metadata[b"geo"])
-    else:
-        geo_meta = {}
-
-    # Remove "geo" schema metadata key since after this transformation
-    # it will no longer contain valid encodings
-    non_geo_meta = {k: v for k, v in tab_metadata.items() if k != b"geo"}
-    tab = tab.replace_schema_metadata(non_geo_meta)
-
-    # Assign extension types to columns
-    if "columns" in geo_meta:
-        columns = geo_meta["columns"]
-    else:
-        columns = _geoparquet_guess_geometry_columns(tab.schema)
-
-    return _geoparquet_table_to_geoarrow(tab, columns)
 
 
 def _geoparquet_guess_primary_geometry_column(schema, primary_geometry_column=None):
@@ -244,28 +309,6 @@ def _geoparquet_encode_chunked_array(item, spec):
     # ...because we're currently only ever encoding using WKB
     item = _ga.as_wkb(item)
     return ensure_storage(item)
-
-
-def write_geoparquet_table(
-    table, *args, primary_geometry_column=None, geometry_columns=None, **kwargs
-):
-    geo_meta = _geoparquet_metadata_from_schema(
-        table.schema,
-        primary_geometry_column=primary_geometry_column,
-        geometry_columns=geometry_columns,
-    )
-    for i, name in enumerate(table.schema.names):
-        if name in geo_meta["columns"]:
-            table = table.set_column(
-                i,
-                name,
-                _geoparquet_encode_chunked_array(table[i], geo_meta["columns"][name]),
-            )
-
-    metadata = table.schema.metadata if table.schema.metadata else {}
-    metadata["geo"] = json.dumps(geo_meta)
-    table = table.replace_schema_metadata(metadata)
-    return _pq.write_table(table, *args, **kwargs)
 
 
 _CRS_LONLAT = {
