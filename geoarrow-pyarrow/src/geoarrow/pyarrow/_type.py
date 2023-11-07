@@ -1,3 +1,5 @@
+import json
+
 import pyarrow as pa
 
 from geoarrow.c import lib
@@ -244,17 +246,27 @@ class GeometryExtensionType(pa.ExtensionType):
         >>> ga.linestring().with_crs("EPSG:1234")
         LinestringType(geoarrow.linestring <EPSG:1234>)
         """
-        if crs_type is None and crs is None:
-            ctype = self._type.with_crs(b"", lib.CrsType.NONE)
-        elif crs_type is None:
-            if not isinstance(crs, bytes):
-                crs = crs.encode("UTF-8")
-            ctype = self._type.with_crs(crs, lib.CrsType.UNKNOWN)
+        if crs is None:
+            crs = b""
+            default_crs_type = lib.CrsType.NONE
+        elif isinstance(crs, str):
+            crs = crs.encode("UTF-8")
+            default_crs_type = lib.CrsType.UNKNOWN
+        elif isinstance(crs, bytes):
+            default_crs_type = lib.CrsType.UNKNOWN
+        elif isinstance(crs, dict):
+            crs = json.dumps(crs).encode("UTF-8")
+            default_crs_type = lib.CrsType.PROJJSON
+        elif hasattr(crs, "to_json"):
+            crs = crs.to_json().encode("UTF-8")
+            default_crs_type = lib.CrsType.PROJJSON
         else:
-            if not isinstance(crs, bytes):
-                crs = crs.encode("UTF-8")
-            ctype = self._type.with_crs(crs, crs_type)
+            raise TypeError("Unknown type for crs object")
 
+        if crs_type is None:
+            crs_type = default_crs_type
+
+        ctype = self._type.with_crs(crs, crs_type)
         return _ctype_to_extension_type(ctype)
 
 
