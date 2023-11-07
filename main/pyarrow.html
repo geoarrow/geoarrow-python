@@ -18,12 +18,12 @@
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="_static/styles/theme.css?digest=ac02cc09edc035673794" rel="stylesheet" />
-<link href="_static/styles/bootstrap.css?digest=ac02cc09edc035673794" rel="stylesheet" />
-<link href="_static/styles/pydata-sphinx-theme.css?digest=ac02cc09edc035673794" rel="stylesheet" />
+  <link href="_static/styles/theme.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
+<link href="_static/styles/bootstrap.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
 
   
-  <link href="_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=ac02cc09edc035673794" rel="stylesheet" />
+  <link href="_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
   <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
@@ -31,11 +31,11 @@
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=ac02cc09edc035673794" />
-<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=ac02cc09edc035673794" />
-  <script src="_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=ac02cc09edc035673794"></script>
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=365ca57ee442770a23c6" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=365ca57ee442770a23c6" />
+  <script src="_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=365ca57ee442770a23c6"></script>
 
-    <script src="_static/documentation_options.js?v=8a448e45"></script>
+    <script src="_static/documentation_options.js?v=5929fcd5"></script>
     <script src="_static/doctools.js?v=888ff710"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'pyarrow';</script>
@@ -109,6 +109,7 @@
   
 
 <a class="navbar-brand logo" href="index.html">
+  
   
   
   
@@ -1113,6 +1114,54 @@ This does not parse the input, which OGR returns as
 </div>
 </dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="geoarrow.pyarrow.io.read_geoparquet_table">
+<span class="sig-name descname"><span class="pre">read_geoparquet_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pyarrow.io.read_geoparquet_table" title="Link to this definition">#</a></dt>
+<dd><p>Read GeoParquet using PyArrow</p>
+<p>A thin wrapper around <code class="docutils literal notranslate"><span class="pre">pyarrow.parquet.read_parquet()</span></code> that ensures any columns
+marked as geometry are encoded as extension arrays. This will read Parquet files
+with and without the <code class="docutils literal notranslate"><span class="pre">geo</span></code> metadata key as described in the GeoParquet format
+and guidance on compatible Parquet. Briefly, this means that any valid GeoParquet
+file (i.e., written by GDAL or <a class="reference internal" href="#geoarrow.pyarrow.io.write_geoparquet_table" title="geoarrow.pyarrow.io.write_geoparquet_table"><code class="xref py py-func docutils literal notranslate"><span class="pre">write_geoparquet_table()</span></code></a>) or regular Parquet
+file with a column named <code class="docutils literal notranslate"><span class="pre">geometry</span></code> can be read by <code class="docutils literal notranslate"><span class="pre">read_geoparquet_table()</span></code>.
+For regular Parquet files, a <code class="docutils literal notranslate"><span class="pre">geometry</span></code> column encoded as binary is assumed to
+contain well-known binary and a <code class="docutils literal notranslate"><span class="pre">geometry</span></code> column encoded as text is assumed to
+contain well-known text.</p>
+<p>Because a <code class="docutils literal notranslate"><span class="pre">pyarrow.Table</span></code> has no concept of “primary geometry column”, that
+information is currently lost on read. To minimize the chances of misinterpreting
+the primary geometry column, use <code class="docutils literal notranslate"><span class="pre">geometry</span></code> as the name of the column or
+refer to columns explicitly.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">geoarrow.pyarrow</span> <span class="k">as</span> <span class="nn">ga</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">geoarrow.pyarrow</span> <span class="kn">import</span> <span class="n">io</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">tempfile</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">os</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyarrow</span> <span class="k">as</span> <span class="nn">pa</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span> <span class="k">as</span> <span class="n">tmpdir</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">temp_pq</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">,</span> <span class="s2">&quot;test.parquet&quot;</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">tab</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">table</span><span class="p">([</span><span class="n">ga</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="s2">&quot;POINT (0 1)&quot;</span><span class="p">])],</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">])</span>
+<span class="gp">... </span>    <span class="n">io</span><span class="o">.</span><span class="n">write_geoparquet_table</span><span class="p">(</span><span class="n">tab</span><span class="p">,</span> <span class="n">temp_pq</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">tab2</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">read_geoparquet_table</span><span class="p">(</span><span class="n">temp_pq</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">tab2</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">chunk</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="go">GeometryExtensionArray:WkbType(geoarrow.wkb)[1]</span>
+<span class="go">&lt;POINT (0 1)&gt;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geoarrow.pyarrow.io.write_geoparquet_table">
+<span class="sig-name descname"><span class="pre">write_geoparquet_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">table</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">primary_geometry_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geometry_columns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">write_bbox</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">write_geometry_types</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pyarrow.io.write_geoparquet_table" title="Link to this definition">#</a></dt>
+<dd><p>Write GeoParquet using PyArrow</p>
+<p>Writes a Parquet file with the <code class="docutils literal notranslate"><span class="pre">geo</span></code> metadata key used by GeoParquet
+readers to recreate geometry types. Note that if you are writing Parquet
+that will be read by an Arrow-based Parquet reader and a GeoArrow
+implementation, using <code class="docutils literal notranslate"><span class="pre">pyarrow.parquet.write_parquet()</span></code> will preserve
+geometry types/metadata and is usually faster.</p>
+<p>Note that passing <code class="docutils literal notranslate"><span class="pre">write_bbox=True</span></code> and/or <code class="docutils literal notranslate"><span class="pre">write_geometry_types=True</span></code>
+may be computationally expensive for large input.</p>
+<p>See <a class="reference internal" href="#geoarrow.pyarrow.io.read_geoparquet_table" title="geoarrow.pyarrow.io.read_geoparquet_table"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_geoparquet_table()</span></code></a> for examples.</p>
+</dd></dl>
+
 </section>
 <section id="module-geoarrow.pyarrow.dataset">
 <span id="dataset-constructors"></span><h2>Dataset constructors<a class="headerlink" href="#module-geoarrow.pyarrow.dataset" title="Link to this heading">#</a></h2>
@@ -1425,6 +1474,8 @@ this capability.</p>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-geoarrow.pyarrow.io">IO helpers</a><ul class="visible nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow.io.read_pyogrio_table"><code class="docutils literal notranslate"><span class="pre">read_pyogrio_table()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow.io.read_geoparquet_table"><code class="docutils literal notranslate"><span class="pre">read_geoparquet_table()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow.io.write_geoparquet_table"><code class="docutils literal notranslate"><span class="pre">write_geoparquet_table()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-geoarrow.pyarrow.dataset">Dataset constructors</a><ul class="visible nav section-nav flex-column">
@@ -1481,8 +1532,8 @@ this capability.</p>
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="_static/scripts/bootstrap.js?digest=ac02cc09edc035673794"></script>
-<script src="_static/scripts/pydata-sphinx-theme.js?digest=ac02cc09edc035673794"></script>
+  <script src="_static/scripts/bootstrap.js?digest=365ca57ee442770a23c6"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=365ca57ee442770a23c6"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1512,7 +1563,7 @@ this capability.</p>
     <div class="footer-items__end">
       
         <div class="footer-item"><p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.14.1.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.14.3.
 </p></div>
       
     </div>

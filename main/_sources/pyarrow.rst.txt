@@ -106,6 +106,10 @@ IO helpers
 
     .. autofunction:: read_pyogrio_table
 
+    .. autofunction:: read_geoparquet_table
+
+    .. autofunction:: write_geoparquet_table
+
 
 Dataset constructors
 --------------------
