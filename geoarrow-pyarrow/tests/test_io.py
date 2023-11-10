@@ -160,6 +160,31 @@ def test_geoparquet_metadata_from_schema():
     assert list(metadata["columns"].keys()) == ["col_a"]
 
 
+def test_geoparquet_metadata_from_schema_geometry_types():
+    # GeoArrow encoding with add_geometry_types=False should not add geometry types
+    schema = pa.schema([pa.field("col_a", ga.point())])
+    metadata = io._geoparquet_metadata_from_schema(schema, add_geometry_types=False)
+    assert metadata["columns"]["col_a"]["geometry_types"] == []
+
+    # ...with None or True, it should be added
+    metadata = io._geoparquet_metadata_from_schema(schema, add_geometry_types=None)
+    assert metadata["columns"]["col_a"]["geometry_types"] == ["Point"]
+
+    metadata = io._geoparquet_metadata_from_schema(schema, add_geometry_types=True)
+    assert metadata["columns"]["col_a"]["geometry_types"] == ["Point"]
+
+    # For WKB type, all values of add_geometry_types should not add geometry types
+    schema = pa.schema([pa.field("col_a", ga.wkb())])
+    metadata = io._geoparquet_metadata_from_schema(schema, add_geometry_types=False)
+    assert metadata["columns"]["col_a"]["geometry_types"] == []
+
+    metadata = io._geoparquet_metadata_from_schema(schema, add_geometry_types=None)
+    assert metadata["columns"]["col_a"]["geometry_types"] == []
+
+    metadata = io._geoparquet_metadata_from_schema(schema, add_geometry_types=True)
+    assert metadata["columns"]["col_a"]["geometry_types"] == []
+
+
 def test_guess_geometry_columns():
     assert io._geoparquet_guess_geometry_columns(pa.schema([])) == {}
 
@@ -185,6 +210,7 @@ def test_guess_geography_columns():
     assert list(guessed_wkb.keys()) == ["geography"]
     assert guessed_wkb["geography"] == {"encoding": "WKB", "edges": "spherical"}
 
+
 def test_encode_chunked_array():
     with pytest.raises(ValueError, match="Expected column encoding 'WKB'"):
         io._geoparquet_encode_chunked_array(
@@ -196,6 +222,7 @@ def test_encode_chunked_array():
     assert encoded.type == pa.binary()
     assert spec == {"encoding": "WKB"}
 
+    spec = {"encoding": "WKB"}
     encoded = io._geoparquet_encode_chunked_array(
         ga.array(["POINT (0 -1)", "POINT Z (1 2 3)"]),
         spec,

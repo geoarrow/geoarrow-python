@@ -121,7 +121,7 @@ def write_geoparquet_table(
     primary_geometry_column=None,
     geometry_columns=None,
     write_bbox=False,
-    write_geometry_types=False,
+    write_geometry_types=None,
     **kwargs,
 ):
     """Write GeoParquet using PyArrow
@@ -133,7 +133,9 @@ def write_geoparquet_table(
     geometry types/metadata and is usually faster.
 
     Note that passing ``write_bbox=True`` and/or ``write_geometry_types=True``
-    may be computationally expensive for large input.
+    may be computationally expensive for large input. Use
+    `write_geometry_types=False`` to force omitting geometry types even when
+    this value is type-constant.
 
     See :func:`read_geoparquet_table()` for examples.
     """
@@ -141,6 +143,7 @@ def write_geoparquet_table(
         table.schema,
         primary_geometry_column=primary_geometry_column,
         geometry_columns=geometry_columns,
+        add_geometry_types=write_geometry_types,
     )
 
     # Note: this will also update geo_meta with geometry_types and bbox if requested
@@ -262,7 +265,7 @@ def _geoparquet_guess_primary_geometry_column(schema, primary_geometry_column=No
     )
 
 
-def _geoparquet_column_spec_from_type(type):
+def _geoparquet_column_spec_from_type(type, add_geometry_types=None):
     # We always encode to WKB since it's the only supported value
     spec = {"encoding": "WKB", "geometry_types": []}
 
@@ -281,16 +284,22 @@ def _geoparquet_column_spec_from_type(type):
             spec["edges"] = "spherical"
 
         # GeoArrow-encoded types can confidently declare a single geometry type
-        if type.geometry_type != _ga.GeometryType.GEOMETRY:
-            spec["geometry_types"] = [
-                _GEOPARQUET_GEOMETRY_TYPE_LABELS[type.geometry_type]
-            ]
+        maybe_known_geometry_type = type.geometry_type
+        maybe_known_dimensions = type.dimensions
+        if (
+            add_geometry_types is not False
+            and maybe_known_geometry_type != _ga.GeometryType.GEOMETRY
+            and maybe_known_dimensions != _ga.Dimensions.UNKNOWN
+        ):
+            geometry_type = _GEOPARQUET_GEOMETRY_TYPE_LABELS[maybe_known_geometry_type]
+            dimensions = _GEOPARQUET_DIMENSION_LABELS[maybe_known_dimensions]
+            spec["geometry_types"] = [f"{geometry_type}{dimensions}"]
 
     return spec
 
 
 def _geoparquet_columns_from_schema(
-    schema, geometry_columns=None, primary_geometry_column=None
+    schema, geometry_columns=None, primary_geometry_column=None, add_geometry_types=None
 ):
     schema_names = schema.names
     schema_types = schema.types
@@ -309,18 +318,22 @@ def _geoparquet_columns_from_schema(
     specs = {}
     for name, type in zip(schema_names, schema_types):
         if name in geometry_columns:
-            specs[name] = _geoparquet_column_spec_from_type(type)
+            specs[name] = _geoparquet_column_spec_from_type(
+                type, add_geometry_types=add_geometry_types
+            )
 
     return specs
 
 
 def _geoparquet_metadata_from_schema(
-    schema, geometry_columns=None, primary_geometry_column=None
+    schema, geometry_columns=None, primary_geometry_column=None, add_geometry_types=None
 ):
     primary_geometry_column = _geoparquet_guess_primary_geometry_column(
         schema, primary_geometry_column
     )
-    columns = _geoparquet_columns_from_schema(schema, geometry_columns)
+    columns = _geoparquet_columns_from_schema(
+        schema, geometry_columns, add_geometry_types=add_geometry_types
+    )
     return {
         "version": "1.0.0",
         "primary_column": primary_geometry_column,
@@ -344,7 +357,7 @@ def _geoparquet_update_spec_bbox(item, spec):
 
 
 def _geoparquet_encode_chunked_array(
-    item, spec, add_geometry_types=False, add_bbox=False
+    item, spec, add_geometry_types=None, add_bbox=False
 ):
     # ...because we're currently only ever encoding using WKB
     if spec["encoding"] == "WKB":
@@ -360,7 +373,9 @@ def _geoparquet_encode_chunked_array(
     else:
         item_calc = item
 
-    if add_geometry_types:
+    # geometry_types that are fixed at the data type level have already been
+    # added to the spec in an earlier step
+    if add_geometry_types is True and "geometry_types" not in spec:
         _geoparquet_update_spec_geometry_types(item_calc, spec)
 
     if add_bbox:
