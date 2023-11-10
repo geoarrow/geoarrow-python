@@ -176,6 +176,15 @@ def test_guess_geometry_columns():
     assert guessed_wkt["geometry"] == {"encoding": "WKT"}
 
 
+def test_guess_geography_columns():
+    assert io._geoparquet_guess_geometry_columns(pa.schema([])) == {}
+
+    guessed_wkb = io._geoparquet_guess_geometry_columns(
+        pa.schema([pa.field("geography", pa.binary())])
+    )
+    assert list(guessed_wkb.keys()) == ["geography"]
+    assert guessed_wkb["geography"] == {"encoding": "WKB", "edges": "spherical"}
+
 def test_encode_chunked_array():
     with pytest.raises(ValueError, match="Expected column encoding 'WKB'"):
         io._geoparquet_encode_chunked_array(
