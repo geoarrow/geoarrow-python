@@ -163,18 +163,30 @@ def write_geoparquet_table(
 
 
 def _geoparquet_guess_geometry_columns(schema):
+    # Only attempt guessing the "geometry" or "geography" column
     columns = {}
 
-    # Only attempt guessing the "geometry" column
-    if "geometry" in schema.names:
-        type = schema.field("geometry").type
+    for name in ("geometry", "geography"):
+        if name not in schema.names:
+            continue
+
+        spec = {}
+        type = schema.field(name).type
+
         if _types.is_binary(type) or _types.is_large_binary(type):
-            columns["geometry"] = {"encoding": "WKB"}
+            spec["encoding"] = "WKB"
         elif _types.is_string(type) or _types.is_large_string(type):
             # WKT is not actually a geoparquet encoding but the guidance on
             # putting geospatial things in parquet without metadata says you
             # can do it and this is the internal sentinel for that case.
-            columns["geometry"] = {"encoding": "WKT"}
+            spec["encoding"] = "WKT"
+
+        # A column named "geography" has spherical edges according to the
+        # compatible Parquet guidance.
+        if name == "geography":
+            spec["edges"] = "spherical"
+
+        columns[name] = spec
 
     return columns
 
@@ -233,9 +245,11 @@ def _geoparquet_guess_primary_geometry_column(schema, primary_geometry_column=No
     if primary_geometry_column is not None:
         return primary_geometry_column
 
-    # If there's a "geometry" column, pick that one
+    # If there's a "geometry" or "geography" column, pick that one
     if "geometry" in schema.names:
         return "geometry"
+    elif "geography" in schema.names:
+        return "geography"
 
     # Otherwise, pick the first thing we know is actually geometry
     for name, type in zip(schema.names, schema.types):
