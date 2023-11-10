@@ -100,8 +100,9 @@ def read_geoparquet_table(*args, **kwargs):
     else:
         geo_meta = {}
 
-    # Remove "geo" schema metadata key since after this transformation
-    # it will no longer contain valid encodings
+    # Remove "geo" schema metadata key since few transformations following
+    # the read operation check that schema metadata is valid (e.g., column
+    # subset or rename)
     non_geo_meta = {k: v for k, v in tab_metadata.items() if k != b"geo"}
     tab = tab.replace_schema_metadata(non_geo_meta)
 
