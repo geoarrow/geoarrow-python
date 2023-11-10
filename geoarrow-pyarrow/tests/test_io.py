@@ -127,6 +127,13 @@ def test_geoparquet_guess_primary_geometry_column():
         == "geometry"
     )
 
+    assert (
+        io._geoparquet_guess_primary_geometry_column(
+            pa.schema([pa.field("geography", pa.binary())])
+        )
+        == "geography"
+    )
+
     with pytest.raises(ValueError, match="at least one geometry column"):
         io._geoparquet_guess_primary_geometry_column(
             pa.schema([pa.field("not_geom", pa.binary())])

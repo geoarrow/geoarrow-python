@@ -393,8 +393,10 @@ def _geoparquet_encode_chunked_array(
         item_calc = item
 
     # geometry_types that are fixed at the data type level have already been
-    # added to the spec in an earlier step
-    if add_geometry_types is True and "geometry_types" not in spec:
+    # added to the spec in an earlier step. The unique_geometry_types()
+    # function is sufficiently optimized such that this potential
+    # re-computation is not expensive.
+    if add_geometry_types is True:
         _geoparquet_update_spec_geometry_types(item_calc, spec)
 
     if add_bbox:
