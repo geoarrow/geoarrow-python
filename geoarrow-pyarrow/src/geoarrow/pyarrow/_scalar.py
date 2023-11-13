@@ -1,5 +1,5 @@
 import pyarrow as pa
-import pyarrow_hotfix as _
+import pyarrow_hotfix as _  # noqa: F401
 from geoarrow.pyarrow._kernel import Kernel
 from geoarrow.pyarrow._type import GeometryExtensionType
 
@@ -18,7 +18,7 @@ class GeometryExtensionScalar(pa.ExtensionScalar):
             kernel = Kernel.format_wkt(self.type, max_element_size_bytes=max_width)
             array_formatted = kernel.push(self._array1())
             string_formatted = array_formatted[0].as_py()
-        except:
+        except Exception:
             string_formatted = "<value failed to parse>"
 
         if len(string_formatted) >= max_width:

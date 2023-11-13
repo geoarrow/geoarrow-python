@@ -1,8 +1,8 @@
 import pytest
+import geoarrow.pyarrow as ga
+
 
 geopandas = pytest.importorskip("geopandas")
-
-import geoarrow.pyarrow as ga
 
 
 def test_scalar_to_shapely():

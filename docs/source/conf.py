@@ -14,8 +14,6 @@ import os
 import sys
 import datetime
 
-import geoarrow.pyarrow
-import geoarrow.pandas
 
 sys.path.insert(0, os.path.abspath(".."))
 

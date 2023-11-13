@@ -15,3 +15,10 @@ from .lib import (
     GeoArrowExtensionArray,
     GeoArrowExtensionScalar,
 )
+
+__all__ = [
+    "GeoArrowAccessor",
+    "GeoArrowExtensionDtype",
+    "GeoArrowExtensionArray",
+    "GeoArrowExtensionScalar",
+]

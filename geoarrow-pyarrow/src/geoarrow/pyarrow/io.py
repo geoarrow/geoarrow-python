@@ -11,7 +11,7 @@ import json
 import geoarrow.pyarrow as _ga
 import pyarrow.parquet as _pq
 import pyarrow.types as _types
-import pyarrow_hotfix as _
+import pyarrow_hotfix as _  # noqa: F401
 from geoarrow.pyarrow._compute import ensure_storage
 
 

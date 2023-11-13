@@ -1,6 +1,6 @@
 import pyarrow as pa
 import pyarrow.compute as pc
-import pyarrow_hotfix as _
+import pyarrow_hotfix as _  # noqa: F401
 from geoarrow.c.lib import CoordType, Dimensions, EdgeType, GeometryType
 from geoarrow.pyarrow import _type
 from geoarrow.pyarrow._array import array

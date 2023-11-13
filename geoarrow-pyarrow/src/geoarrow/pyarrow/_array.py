@@ -1,5 +1,5 @@
 import pyarrow as pa
-import pyarrow_hotfix as _
+import pyarrow_hotfix as _  # noqa: F401
 
 from geoarrow.c import lib
 
@@ -140,7 +140,7 @@ def array(obj, type_=None, *args, **kwargs) -> GeometryExtensionArray:
         if obj.crs:
             try:
                 type_ = wkb().with_crs(obj.crs.to_json())
-            except:
+            except Exception:
                 type_ = wkb().with_crs(str(obj.crs))
         else:
             type_ = wkb()
