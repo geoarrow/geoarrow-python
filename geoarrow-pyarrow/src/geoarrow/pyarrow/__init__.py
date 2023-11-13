@@ -109,7 +109,7 @@ __all__ = [
     "rechunk",
     "point_coords",
     "to_geopandas",
-    "_scalar"
+    "_scalar",
 ]
 
 try:
