@@ -7,9 +7,11 @@ testing and documenting the GeoArrow format and encodings.
 """
 
 import json
+
+import geoarrow.pyarrow as _ga
 import pyarrow.parquet as _pq
 import pyarrow.types as _types
-import geoarrow.pyarrow as _ga
+import pyarrow_hotfix as _
 from geoarrow.pyarrow._compute import ensure_storage
 
 
@@ -35,8 +37,8 @@ def read_pyogrio_table(*args, **kwargs):
     GeometryExtensionArray:WkbType(geoarrow.wkb <{"$schema":"https://proj.org/schem...>)[1]
     <POINT (0 1)>
     """
-    from pyogrio.raw import read_arrow
     import pyproj
+    from pyogrio.raw import read_arrow
 
     meta, table = read_arrow(*args, **kwargs)
 

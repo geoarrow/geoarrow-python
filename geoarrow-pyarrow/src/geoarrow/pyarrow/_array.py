@@ -1,4 +1,5 @@
 import pyarrow as pa
+import pyarrow_hotfix as _
 
 from geoarrow.c import lib
 

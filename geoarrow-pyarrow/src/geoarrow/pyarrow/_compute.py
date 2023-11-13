@@ -1,7 +1,7 @@
 import pyarrow as pa
 import pyarrow.compute as pc
-
-from geoarrow.c.lib import GeometryType, Dimensions, CoordType, EdgeType
+import pyarrow_hotfix as _
+from geoarrow.c.lib import CoordType, Dimensions, EdgeType, GeometryType
 from geoarrow.pyarrow import _type
 from geoarrow.pyarrow._array import array
 from geoarrow.pyarrow._kernel import Kernel
@@ -546,8 +546,8 @@ def to_geopandas(obj):
     0    POINT (0.00000 1.00000)
     dtype: geometry
     """
-    import pandas as pd
     import geopandas
+    import pandas as pd
 
     # Ideally we will avoid serialization via geobuffers + from_ragged_array()
     wkb_array_or_chunked = as_wkb(obj)

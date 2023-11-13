@@ -7,13 +7,14 @@ Experimental geospatial-agumented wrapper around a ``pyarrow.dataset``.
 from concurrent.futures import ThreadPoolExecutor, wait
 
 import pyarrow as _pa
-import pyarrow.types as _types
-import pyarrow.dataset as _ds
 import pyarrow.compute as _compute
+import pyarrow.dataset as _ds
 import pyarrow.parquet as _pq
+import pyarrow.types as _types
+import pyarrow_hotfix as _
 from geoarrow.c.lib import CoordType
-from geoarrow.pyarrow._type import wkt, wkb, GeometryExtensionType
 from geoarrow.pyarrow._kernel import Kernel
+from geoarrow.pyarrow._type import GeometryExtensionType, wkb, wkt
 
 
 class GeoDataset:
