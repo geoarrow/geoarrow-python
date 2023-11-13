@@ -41,23 +41,42 @@ def read_pyogrio_table(*args, **kwargs):
     meta, table = read_arrow(*args, **kwargs)
 
     # When meta["geometry_name"] is `""`, the geometry column name is wkb_geometry
-    # in GDAL's Arrow output
+    # in GDAL's Arrow output. This occurs for sources like shapefile whose geometry
+    # has no source-provided name. When GDAL >=3.8 is available, we should pass
+    # GEOMETRY_METADATA_ENCODING=GEOARROW, which will ensure that columns are already
+    # GeoArrow-encoded.
     geometry_name = meta["geometry_name"] if meta["geometry_name"] else "wkb_geometry"
+    geometry_index = table.schema.get_field_index(geometry_name)
+
+    # Check that we actually have a geometry column
+    geometry_field = table.schema.field(geometry_index)
+    geometry_metadata = geometry_field.metadata
+    field_is_geometry = (
+        geometry_metadata
+        and b"ARROW:extension:name" in geometry_metadata
+        and geometry_metadata[b"ARROW:extension:name"] == b"ogc.wkb"
+    )
+    if not field_is_geometry:
+        raise ValueError(
+            f"Expected field {geometry_index} ({geometry_name})' to have extension "
+            f"name 'ogc.wkb' but got {geometry_field}"
+        )
+
+    # Rename wkb_geometry to geometry for consistency with GeoParquet and GeoPandas
+    if geometry_name == "wkb_geometry":
+        geometry_name_out = "geometry"
+    else:
+        geometry_name_out = geometry_name
 
     # Get the JSON representation of the CRS
     prj_as_json = pyproj.CRS(meta["crs"]).to_json()
 
     # Apply geoarrow type to geometry column. This doesn't scale to multiple geometry
     # columns, but it's unclear if other columns would share the same CRS.
-    for i, nm in enumerate(table.column_names):
-        if nm == geometry_name:
-            geometry = table.column(i)
-            geometry = _ga.wkb().wrap_array(geometry)
-            geometry = _ga.with_crs(geometry, prj_as_json)
-            table = table.set_column(i, nm, geometry)
-            break
-
-    return table
+    geometry = table.column(geometry_index)
+    geometry = _ga.wkb().wrap_array(geometry)
+    geometry = _ga.with_crs(geometry, prj_as_json)
+    return table.set_column(geometry_index, geometry_name_out, geometry)
 
 
 def read_geoparquet_table(*args, **kwargs):
@@ -100,8 +119,9 @@ def read_geoparquet_table(*args, **kwargs):
     else:
         geo_meta = {}
 
-    # Remove "geo" schema metadata key since after this transformation
-    # it will no longer contain valid encodings
+    # Remove "geo" schema metadata key since few transformations following
+    # the read operation check that schema metadata is valid (e.g., column
+    # subset or rename)
     non_geo_meta = {k: v for k, v in tab_metadata.items() if k != b"geo"}
     tab = tab.replace_schema_metadata(non_geo_meta)
 
@@ -120,7 +140,7 @@ def write_geoparquet_table(
     primary_geometry_column=None,
     geometry_columns=None,
     write_bbox=False,
-    write_geometry_types=False,
+    write_geometry_types=None,
     **kwargs,
 ):
     """Write GeoParquet using PyArrow
@@ -132,7 +152,9 @@ def write_geoparquet_table(
     geometry types/metadata and is usually faster.
 
     Note that passing ``write_bbox=True`` and/or ``write_geometry_types=True``
-    may be computationally expensive for large input.
+    may be computationally expensive for large input. Use
+    `write_geometry_types=False`` to force omitting geometry types even when
+    this value is type-constant.
 
     See :func:`read_geoparquet_table()` for examples.
     """
@@ -140,6 +162,7 @@ def write_geoparquet_table(
         table.schema,
         primary_geometry_column=primary_geometry_column,
         geometry_columns=geometry_columns,
+        add_geometry_types=write_geometry_types,
     )
 
     # Note: this will also update geo_meta with geometry_types and bbox if requested
@@ -163,18 +186,30 @@ def write_geoparquet_table(
 
 
 def _geoparquet_guess_geometry_columns(schema):
+    # Only attempt guessing the "geometry" or "geography" column
     columns = {}
 
-    # Only attempt guessing the "geometry" column
-    if "geometry" in schema.names:
-        type = schema.field("geometry").type
+    for name in ("geometry", "geography"):
+        if name not in schema.names:
+            continue
+
+        spec = {}
+        type = schema.field(name).type
+
         if _types.is_binary(type) or _types.is_large_binary(type):
-            columns["geometry"] = {"encoding": "WKB"}
+            spec["encoding"] = "WKB"
         elif _types.is_string(type) or _types.is_large_string(type):
             # WKT is not actually a geoparquet encoding but the guidance on
             # putting geospatial things in parquet without metadata says you
             # can do it and this is the internal sentinel for that case.
-            columns["geometry"] = {"encoding": "WKT"}
+            spec["encoding"] = "WKT"
+
+        # A column named "geography" has spherical edges according to the
+        # compatible Parquet guidance.
+        if name == "geography":
+            spec["edges"] = "spherical"
+
+        columns[name] = spec
 
     return columns
 
@@ -233,9 +268,11 @@ def _geoparquet_guess_primary_geometry_column(schema, primary_geometry_column=No
     if primary_geometry_column is not None:
         return primary_geometry_column
 
-    # If there's a "geometry" column, pick that one
+    # If there's a "geometry" or "geography" column, pick that one
     if "geometry" in schema.names:
         return "geometry"
+    elif "geography" in schema.names:
+        return "geography"
 
     # Otherwise, pick the first thing we know is actually geometry
     for name, type in zip(schema.names, schema.types):
@@ -247,7 +284,7 @@ def _geoparquet_guess_primary_geometry_column(schema, primary_geometry_column=No
     )
 
 
-def _geoparquet_column_spec_from_type(type):
+def _geoparquet_column_spec_from_type(type, add_geometry_types=None):
     # We always encode to WKB since it's the only supported value
     spec = {"encoding": "WKB", "geometry_types": []}
 
@@ -266,16 +303,22 @@ def _geoparquet_column_spec_from_type(type):
             spec["edges"] = "spherical"
 
         # GeoArrow-encoded types can confidently declare a single geometry type
-        if type.geometry_type != _ga.GeometryType.GEOMETRY:
-            spec["geometry_types"] = [
-                _GEOPARQUET_GEOMETRY_TYPE_LABELS[type.geometry_type]
-            ]
+        maybe_known_geometry_type = type.geometry_type
+        maybe_known_dimensions = type.dimensions
+        if (
+            add_geometry_types is not False
+            and maybe_known_geometry_type != _ga.GeometryType.GEOMETRY
+            and maybe_known_dimensions != _ga.Dimensions.UNKNOWN
+        ):
+            geometry_type = _GEOPARQUET_GEOMETRY_TYPE_LABELS[maybe_known_geometry_type]
+            dimensions = _GEOPARQUET_DIMENSION_LABELS[maybe_known_dimensions]
+            spec["geometry_types"] = [f"{geometry_type}{dimensions}"]
 
     return spec
 
 
 def _geoparquet_columns_from_schema(
-    schema, geometry_columns=None, primary_geometry_column=None
+    schema, geometry_columns=None, primary_geometry_column=None, add_geometry_types=None
 ):
     schema_names = schema.names
     schema_types = schema.types
@@ -294,18 +337,22 @@ def _geoparquet_columns_from_schema(
     specs = {}
     for name, type in zip(schema_names, schema_types):
         if name in geometry_columns:
-            specs[name] = _geoparquet_column_spec_from_type(type)
+            specs[name] = _geoparquet_column_spec_from_type(
+                type, add_geometry_types=add_geometry_types
+            )
 
     return specs
 
 
 def _geoparquet_metadata_from_schema(
-    schema, geometry_columns=None, primary_geometry_column=None
+    schema, geometry_columns=None, primary_geometry_column=None, add_geometry_types=None
 ):
     primary_geometry_column = _geoparquet_guess_primary_geometry_column(
         schema, primary_geometry_column
     )
-    columns = _geoparquet_columns_from_schema(schema, geometry_columns)
+    columns = _geoparquet_columns_from_schema(
+        schema, geometry_columns, add_geometry_types=add_geometry_types
+    )
     return {
         "version": "1.0.0",
         "primary_column": primary_geometry_column,
@@ -329,7 +376,7 @@ def _geoparquet_update_spec_bbox(item, spec):
 
 
 def _geoparquet_encode_chunked_array(
-    item, spec, add_geometry_types=False, add_bbox=False
+    item, spec, add_geometry_types=None, add_bbox=False
 ):
     # ...because we're currently only ever encoding using WKB
     if spec["encoding"] == "WKB":
@@ -345,7 +392,11 @@ def _geoparquet_encode_chunked_array(
     else:
         item_calc = item
 
-    if add_geometry_types:
+    # geometry_types that are fixed at the data type level have already been
+    # added to the spec in an earlier step. The unique_geometry_types()
+    # function is sufficiently optimized such that this potential
+    # re-computation is not expensive.
+    if add_geometry_types is True:
         _geoparquet_update_spec_geometry_types(item_calc, spec)
 
     if add_bbox:

@@ -8,11 +8,12 @@ import geoarrow.pyarrow as ga
 from geoarrow.pyarrow import io
 
 
-def test_readpyogrio_table():
+def test_readpyogrio_table_gpkg():
     pyogrio = pytest.importorskip("pyogrio")
     geopandas = pytest.importorskip("geopandas")
 
     with tempfile.TemporaryDirectory() as tmpdir:
+        # Check gpkg (which has internal geometry column name)
         temp_gpkg = os.path.join(tmpdir, "test.gpkg")
         df = geopandas.GeoDataFrame(
             geometry=geopandas.GeoSeries.from_wkt(["POINT (0 1)"], crs="OGC:CRS84")
@@ -23,6 +24,14 @@ def test_readpyogrio_table():
         table = io.read_pyogrio_table(temp_gpkg)
         assert table.column("geom").type == ga.wkb().with_crs(crs_json)
         assert ga.format_wkt(table.column("geom")).to_pylist() == ["POINT (0 1)"]
+
+        # Check fgb (which does not have an internal geometry column name)
+        temp_fgb = os.path.join(tmpdir, "test.fgb")
+        pyogrio.write_dataframe(df, temp_fgb)
+
+        table = io.read_pyogrio_table(temp_fgb)
+        assert table.column("geometry").type == ga.wkb().with_crs(crs_json)
+        assert ga.format_wkt(table.column("geometry")).to_pylist() == ["POINT (0 1)"]
 
 
 def test_write_geoparquet_table():
@@ -118,6 +127,13 @@ def test_geoparquet_guess_primary_geometry_column():
         == "geometry"
     )
 
+    assert (
+        io._geoparquet_guess_primary_geometry_column(
+            pa.schema([pa.field("geography", pa.binary())])
+        )
+        == "geography"
+    )
+
     with pytest.raises(ValueError, match="at least one geometry column"):
         io._geoparquet_guess_primary_geometry_column(
             pa.schema([pa.field("not_geom", pa.binary())])
@@ -160,6 +176,31 @@ def test_geoparquet_metadata_from_schema():
     assert list(metadata["columns"].keys()) == ["col_a"]
 
 
+def test_geoparquet_metadata_from_schema_geometry_types():
+    # GeoArrow encoding with add_geometry_types=False should not add geometry types
+    schema = pa.schema([pa.field("col_a", ga.point())])
+    metadata = io._geoparquet_metadata_from_schema(schema, add_geometry_types=False)
+    assert metadata["columns"]["col_a"]["geometry_types"] == []
+
+    # ...with None or True, it should be added
+    metadata = io._geoparquet_metadata_from_schema(schema, add_geometry_types=None)
+    assert metadata["columns"]["col_a"]["geometry_types"] == ["Point"]
+
+    metadata = io._geoparquet_metadata_from_schema(schema, add_geometry_types=True)
+    assert metadata["columns"]["col_a"]["geometry_types"] == ["Point"]
+
+    # For WKB type, all values of add_geometry_types should not add geometry types
+    schema = pa.schema([pa.field("col_a", ga.wkb())])
+    metadata = io._geoparquet_metadata_from_schema(schema, add_geometry_types=False)
+    assert metadata["columns"]["col_a"]["geometry_types"] == []
+
+    metadata = io._geoparquet_metadata_from_schema(schema, add_geometry_types=None)
+    assert metadata["columns"]["col_a"]["geometry_types"] == []
+
+    metadata = io._geoparquet_metadata_from_schema(schema, add_geometry_types=True)
+    assert metadata["columns"]["col_a"]["geometry_types"] == []
+
+
 def test_guess_geometry_columns():
     assert io._geoparquet_guess_geometry_columns(pa.schema([])) == {}
 
@@ -176,6 +217,16 @@ def test_guess_geometry_columns():
     assert guessed_wkt["geometry"] == {"encoding": "WKT"}
 
 
+def test_guess_geography_columns():
+    assert io._geoparquet_guess_geometry_columns(pa.schema([])) == {}
+
+    guessed_wkb = io._geoparquet_guess_geometry_columns(
+        pa.schema([pa.field("geography", pa.binary())])
+    )
+    assert list(guessed_wkb.keys()) == ["geography"]
+    assert guessed_wkb["geography"] == {"encoding": "WKB", "edges": "spherical"}
+
+
 def test_encode_chunked_array():
     with pytest.raises(ValueError, match="Expected column encoding 'WKB'"):
         io._geoparquet_encode_chunked_array(
@@ -187,6 +238,7 @@ def test_encode_chunked_array():
     assert encoded.type == pa.binary()
     assert spec == {"encoding": "WKB"}
 
+    spec = {"encoding": "WKB"}
     encoded = io._geoparquet_encode_chunked_array(
         ga.array(["POINT (0 -1)", "POINT Z (1 2 3)"]),
         spec,
