@@ -1,6 +1,7 @@
 import re as _re
 import pandas as _pd
 import pyarrow as _pa
+import pyarrow_hotfix as _
 import numpy as _np
 from geoarrow.c import lib
 import geoarrow.pyarrow as _ga

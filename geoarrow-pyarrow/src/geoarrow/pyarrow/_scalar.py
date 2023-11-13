@@ -1,7 +1,7 @@
 import pyarrow as pa
-
-from geoarrow.pyarrow._type import GeometryExtensionType
+import pyarrow_hotfix as _
 from geoarrow.pyarrow._kernel import Kernel
+from geoarrow.pyarrow._type import GeometryExtensionType
 
 
 class GeometryExtensionScalar(pa.ExtensionScalar):
