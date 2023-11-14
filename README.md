@@ -1,6 +1,6 @@
 # GeoArrow for Python
 
-The GeoArrow Python packages provide an implementation of the [GeoArrow specification](https://github.com/geoarrow/geoarrow) that integrates with [pyarrow](https://arrow.apache.org/docs/python) and [pandas](https://pandas.pydata.org/). The GeoArrow Python bindings enable input/output to/from Arrow-friendly formats (e.g., Parquet, Arrow Stream, Arrow File) and general-purpose coordinate shuffling tools among GeoArrow, WKT, and WKB encodings. 
+The GeoArrow Python packages provide an implementation of the [GeoArrow specification](https://github.com/geoarrow/geoarrow) that integrates with [pyarrow](https://arrow.apache.org/docs/python) and [pandas](https://pandas.pydata.org/). The GeoArrow Python bindings enable input/output to/from Arrow-friendly formats (e.g., Parquet, Arrow Stream, Arrow File) and general-purpose coordinate shuffling tools among GeoArrow, WKT, and WKB encodings.
 
 ## Installation
 
@@ -58,7 +58,7 @@ Alternatively, you can construct GeoArrow arrays directly from a series of buffe
 import numpy as np
 
 ga.point().from_geobuffers(
-    None, 
+    None,
     np.array([1.0, 2.0, 3.0]),
     np.array([3.0, 4.0, 5.0])
 )
@@ -139,7 +139,7 @@ array
 
 
 
-    MultiLinestringArray:MultiLinestringType(geoarrow.multilinestring <{"$schema":"https://proj.org/schem...>)[255]
+    MultiLinestringArray:MultiLinestringType(geoarrow.multilinestring <{"$schema":"https://proj.org/schema...>)[255]
     <MULTILINESTRING ((648686.210534334 5099183.050480807, 648626.2095...>
     <MULTILINESTRING ((687688.0166642987 5117030.253445747, 686766.217...>
     <MULTILINESTRING ((631355.7058094738 5122893.354471898, 631364.529...>
@@ -169,7 +169,7 @@ ga.to_geopandas(array)
     2      MULTILINESTRING ((631355.706 5122893.354, 6313...
     3      MULTILINESTRING ((665166.211 5138643.057, 6651...
     4      MULTILINESTRING ((673606.211 5162963.061, 6736...
-                                 ...                        
+                                 ...
     250    MULTILINESTRING ((681672.818 5078602.647, 6818...
     251    MULTILINESTRING ((414868.067 5093041.934, 4147...
     252    MULTILINESTRING ((414868.067 5093041.934, 4148...

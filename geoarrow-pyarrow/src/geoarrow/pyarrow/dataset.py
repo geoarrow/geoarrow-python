@@ -11,7 +11,7 @@ import pyarrow.compute as _compute
 import pyarrow.dataset as _ds
 import pyarrow.parquet as _pq
 import pyarrow.types as _types
-import pyarrow_hotfix as _
+import pyarrow_hotfix as _  # noqa: F401
 from geoarrow.c.lib import CoordType
 from geoarrow.pyarrow._kernel import Kernel
 from geoarrow.pyarrow._type import GeometryExtensionType, wkb, wkt

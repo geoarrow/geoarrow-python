@@ -1,7 +1,7 @@
 import sys
 
 import pyarrow as pa
-import pyarrow_hotfix as _
+import pyarrow_hotfix as _  # noqa: F401
 from geoarrow.c import lib
 from geoarrow.pyarrow._type import GeometryExtensionType
 
