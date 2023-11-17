@@ -4,6 +4,7 @@ import geoarrow.pyarrow as ga
 
 geopandas = pytest.importorskip("geopandas")
 
+
 def test_from_geopandas():
     geoseries = geopandas.GeoSeries.from_wkt(["POINT (30 10)"]).set_crs("OGC:CRS84")
     array = ga.array(geoseries)
@@ -11,6 +12,7 @@ def test_from_geopandas():
     assert array.type.crs_type == ga.CrsType.PROJJSON
     assert "CRS84" in array.type.crs
     assert ga.format_wkt(array)[0].as_py() == "POINT (30 10)"
+
 
 def test_scalar_to_shapely():
     array = ga.array(["POINT (30 10)"])
