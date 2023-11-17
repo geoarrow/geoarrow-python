@@ -81,6 +81,9 @@ def test_any_ewkb():
     # No ewkb in a zero-size array
     assert _compute._any_ewkb(pa.array([], pa.binary())) is False
 
+    # No ewkb in something that is not WKB
+    assert _compute._any_ewkb(ga.as_geoarrow(["POINT (0 1)"])) is False
+
     # Check size 1 array for both
     assert _compute._any_ewkb(pa.array([not_ewkb_item])) is False
     assert _compute._any_ewkb(pa.array([ewkb_item])) is True
