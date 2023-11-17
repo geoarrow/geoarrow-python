@@ -143,6 +143,7 @@ def write_geoparquet_table(
     geometry_columns=None,
     write_bbox=False,
     write_geometry_types=None,
+    check_wkb=True,
     **kwargs,
 ):
     """Write GeoParquet using PyArrow
@@ -178,6 +179,7 @@ def write_geoparquet_table(
                     geo_meta["columns"][name],
                     add_geometry_types=write_geometry_types,
                     add_bbox=write_bbox,
+                    check_wkb=check_wkb,
                 ),
             )
 
@@ -378,11 +380,11 @@ def _geoparquet_update_spec_bbox(item, spec):
 
 
 def _geoparquet_encode_chunked_array(
-    item, spec, add_geometry_types=None, add_bbox=False
+    item, spec, add_geometry_types=None, add_bbox=False, check_wkb=True
 ):
     # ...because we're currently only ever encoding using WKB
     if spec["encoding"] == "WKB":
-        item_out = _ga.as_wkb(item)
+        item_out = _ga.as_wkb(item, strict_iso_wkb=check_wkb)
     else:
         encoding = spec["encoding"]
         raise ValueError(f"Expected column encoding 'WKB' but got '{encoding}'")

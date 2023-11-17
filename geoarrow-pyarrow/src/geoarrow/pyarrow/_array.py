@@ -138,13 +138,12 @@ def array(obj, type_=None, *args, **kwargs) -> GeometryExtensionArray:
     # Convert GeoPandas to WKB
     if type(obj).__name__ == "GeoSeries":
         if obj.crs:
-            try:
-                type_ = wkb().with_crs(obj.crs.to_json())
-            except Exception:
-                type_ = wkb().with_crs(str(obj.crs))
+            type_ = wkb().with_crs(obj.crs.to_json(), lib.CrsType.PROJJSON)
         else:
             type_ = wkb()
-        obj = obj.to_wkb()
+
+        # Prefer ISO WKB
+        obj = obj.to_wkb(flavor="iso")
 
     # Convert obj to array if it isn't already one
     if isinstance(obj, pa.Array) or isinstance(obj, pa.ChunkedArray):
