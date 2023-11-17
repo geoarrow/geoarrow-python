@@ -225,9 +225,14 @@ def as_wkb(obj, strict_iso_wkb=False):
     GeometryExtensionArray:WkbType(geoarrow.wkb)[1]
     <POINT (0 1)>
     """
+    obj = obj_as_array_or_chunked(obj)
+
+    # If we're generating the WKB, we know it will be ISO, so no need to check
+    check_wkb = isinstance(obj.type, _type.WkbType)
+
     obj = as_geoarrow(obj, _type.wkb())
 
-    if strict_iso_wkb and _any_ewkb(obj):
+    if check_wkb and strict_iso_wkb and _any_ewkb(obj):
         return push_all(
             Kernel.as_geoarrow, obj, args={"type_id": _type.wkb().geoarrow_id}
         )

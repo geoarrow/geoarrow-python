@@ -144,7 +144,9 @@ def array(obj, type_=None, *args, **kwargs) -> GeometryExtensionArray:
                 type_ = wkb().with_crs(str(obj.crs))
         else:
             type_ = wkb()
-        obj = obj.to_wkb()
+
+        # Prefer ISO WKB
+        obj = obj.to_wkb(flavor="iso")
 
     # Convert obj to array if it isn't already one
     if isinstance(obj, pa.Array) or isinstance(obj, pa.ChunkedArray):
