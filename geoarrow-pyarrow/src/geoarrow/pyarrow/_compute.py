@@ -216,7 +216,7 @@ def as_wkt(obj):
     return as_geoarrow(obj, _type.wkt())
 
 
-def as_wkb(obj):
+def as_wkb(obj, strict_iso_wkb=False):
     """Encode ``obj`` as :func:`geoarrow.pyarrow.wkb`.
 
     >>> import geoarrow.pyarrow as ga
@@ -225,7 +225,36 @@ def as_wkb(obj):
     GeometryExtensionArray:WkbType(geoarrow.wkb)[1]
     <POINT (0 1)>
     """
-    return as_geoarrow(obj, _type.wkb())
+    obj = as_geoarrow(obj, _type.wkb())
+
+    if strict_iso_wkb and _any_ewkb(obj):
+        return push_all(
+            Kernel.as_geoarrow, obj, args={"type_id": _type.wkb().geoarrow_id}
+        )
+    else:
+        return obj
+
+
+def _any_ewkb(obj):
+    obj = obj_as_array_or_chunked(obj)
+    if not isinstance(obj.type, _type.WkbType):
+        return False
+
+    if len(obj) == 0:
+        return False
+
+    if len(obj) > 1 and _any_ewkb(obj[:1]):
+        return True
+
+    import pyarrow.compute as pc
+
+    obj = ensure_storage(obj)
+    endian = pc.binary_slice(obj, 0, 1)
+    is_little_endian = pc.equal(endian, b"\x01")
+    high_byte = pc.if_else(
+        is_little_endian, pc.binary_slice(obj, 4, 5), pc.binary_slice(obj, 1, 2)
+    )
+    return not pc.all(pc.equal(high_byte, b"\x00")).as_py()
 
 
 def as_geoarrow(obj, type=None, coord_type=None, promote_multi=False):

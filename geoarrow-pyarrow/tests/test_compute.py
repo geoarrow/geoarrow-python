@@ -68,6 +68,37 @@ def test_as_wkb():
     assert _compute.as_wkb(ga.as_wkb(wkb_array)).storage == wkb_array.storage
 
 
+def test_any_ewkb():
+    not_ewkb_item = (
+        b"\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x3e\x40"
+        b"\x00\x00\x00\x00\x00\x00\x24\x40"
+    )
+    ewkb_item = (
+        b"\x01\x01\x00\x00\x80\x00\x00\x00\x00\x00\x00\x3e\x40"
+        b"\x00\x00\x00\x00\x00\x00\x24\x40\x00\x00\x00\x00\x00\x00\x24\x40"
+    )
+
+    # No ewkb in a zero-size array
+    assert _compute._any_ewkb(pa.array([], pa.binary())) is False
+
+    # Check size 1 array for both
+    assert _compute._any_ewkb(pa.array([not_ewkb_item])) is False
+    assert _compute._any_ewkb(pa.array([ewkb_item])) is True
+
+    # Check size 2 array in both orders
+    assert _compute._any_ewkb(pa.array([ewkb_item, not_ewkb_item])) is True
+    assert _compute._any_ewkb(pa.array([not_ewkb_item, ewkb_item])) is True
+
+    # Undefined results for invalid WKB, but it shouldn't error
+    assert _compute._any_ewkb(pa.array([b""])) is True
+
+    # Check that as_wkb() can fix ewkb
+    wkb_array_with_ewkb = ga.array([ewkb_item, not_ewkb_item])
+    assert _compute.as_wkb(wkb_array_with_ewkb) is wkb_array_with_ewkb
+    fixed = _compute.as_wkb(wkb_array_with_ewkb, strict_iso_wkb=True)
+    assert fixed != wkb_array_with_ewkb
+
+
 def test_format_wkt():
     wkt_array = ga.array(["POINT (0 1)"])
     assert _compute.format_wkt(wkt_array, max_element_size_bytes=5) == pa.array(
