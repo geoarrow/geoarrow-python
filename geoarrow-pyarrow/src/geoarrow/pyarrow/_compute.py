@@ -321,7 +321,7 @@ def make_point(x, y, z=None, m=None, crs=None, crs_type=None):
     PointArray:PointType(geoarrow.point)[3]
     <POINT (1 4)>
     <POINT (2 5)>
-    <POINT (3 6)
+    <POINT (3 6)>
     """
     import pyarrow.compute as pc
 
