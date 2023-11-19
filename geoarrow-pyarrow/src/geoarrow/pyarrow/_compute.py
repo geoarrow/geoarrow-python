@@ -310,6 +310,19 @@ def format_wkt(obj, precision=None, max_element_size_bytes=None):
 
 
 def make_point(x, y, z=None, m=None, crs=None, crs_type=None):
+    """Create a geoarrow-encoded point array from two or more arrays
+    representing x, y, and/or z, and/or m values. In many cases, this
+    is a zero-copy operation if the input arrays are already in a
+    column-based format (e.g., numpy array, pandas series, or pyarrow
+    Array/ChunkedArray).
+
+    >>> import geoarrow.pyarrow as ga
+    >>> ga.make_point([1, 2, 3], [4, 5, 6])
+    PointArray:PointType(geoarrow.point)[3]
+    <POINT (1 4)>
+    <POINT (2 5)>
+    <POINT (3 6)
+    """
     import pyarrow.compute as pc
 
     if z is not None and m is not None:
