@@ -13,7 +13,8 @@ import pyarrow as _pa
 import pyarrow.parquet as _pq
 import pyarrow.types as _types
 import pyarrow_hotfix as _  # noqa: F401
-from geoarrow.pyarrow._compute import ensure_storage
+from geoarrow.pyarrow import _type
+from geoarrow.pyarrow import _compute
 
 
 def read_pyogrio_table(*args, **kwargs):
@@ -145,6 +146,7 @@ def write_geoparquet_table(
     write_bbox=False,
     write_geometry_types=None,
     check_wkb=True,
+    geometry_encoding="WKB",
     **kwargs,
 ):
     """Write GeoParquet using PyArrow
@@ -167,6 +169,7 @@ def write_geoparquet_table(
         primary_geometry_column=primary_geometry_column,
         geometry_columns=geometry_columns,
         add_geometry_types=write_geometry_types,
+        encoding=geometry_encoding,
     )
 
     # Note: this will also update geo_meta with geometry_types and bbox if requested
@@ -231,6 +234,11 @@ def _geoparquet_chunked_array_to_geoarrow(item, spec):
     encoding = spec["encoding"]
     if encoding in ("WKB", "WKT"):
         item = _ga.array(item)
+    elif encoding == "geoarrow":
+        type = _type.type_cls_from_name(
+            spec["geoarrow_type"]
+        ).__arrow_ext_deserialize__(item.type, b"")
+        item = type.wrap_array(item)
     else:
         raise ValueError(f"Invalid GeoParquet encoding value: '{encoding}'")
 
@@ -333,7 +341,11 @@ def _geoparquet_column_spec_from_type(type, add_geometry_types=None, encoding=No
 
 
 def _geoparquet_columns_from_schema(
-    schema, geometry_columns=None, primary_geometry_column=None, add_geometry_types=None
+    schema,
+    geometry_columns=None,
+    primary_geometry_column=None,
+    add_geometry_types=None,
+    encoding=None,
 ):
     schema_names = schema.names
     schema_types = schema.types
@@ -353,20 +365,27 @@ def _geoparquet_columns_from_schema(
     for name, type in zip(schema_names, schema_types):
         if name in geometry_columns:
             specs[name] = _geoparquet_column_spec_from_type(
-                type, add_geometry_types=add_geometry_types
+                type, add_geometry_types=add_geometry_types, encoding=encoding
             )
 
     return specs
 
 
 def _geoparquet_metadata_from_schema(
-    schema, geometry_columns=None, primary_geometry_column=None, add_geometry_types=None
+    schema,
+    geometry_columns=None,
+    primary_geometry_column=None,
+    add_geometry_types=None,
+    encoding=None,
 ):
     primary_geometry_column = _geoparquet_guess_primary_geometry_column(
         schema, primary_geometry_column
     )
     columns = _geoparquet_columns_from_schema(
-        schema, geometry_columns, add_geometry_types=add_geometry_types
+        schema,
+        geometry_columns,
+        add_geometry_types=add_geometry_types,
+        encoding=encoding,
     )
     return {
         "version": "1.0.0",
@@ -440,7 +459,7 @@ def _geoparquet_encode_chunked_array(
     if add_bbox:
         _geoparquet_update_spec_bbox(item_calc, spec)
 
-    return ensure_storage(item_out)
+    return _compute.ensure_storage(item_out)
 
 
 _GEOPARQUET_GEOMETRY_TYPE_LABELS = [

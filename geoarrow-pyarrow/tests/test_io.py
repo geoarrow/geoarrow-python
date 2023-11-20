@@ -1,6 +1,7 @@
 import pytest
 import tempfile
 import os
+import json
 
 import pyarrow as pa
 from pyarrow import parquet
@@ -34,23 +35,49 @@ def test_readpyogrio_table_gpkg():
         assert ga.format_wkt(table.column("geometry")).to_pylist() == ["POINT (0 1)"]
 
 
-def test_write_geoparquet_table():
+def test_write_geoparquet_table_default():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        temp_pq = os.path.join(tmpdir, "test.parquet")
+        tab = pa.table([ga.as_geoarrow(["POINT (0 1)"])], names=["geometry"])
+
+        # When geometry_encoding=None, geoarrow types stay geoarrow types
+        # (probably need to workshop this based on geoparquet_version or something)
+        io.write_geoparquet_table(tab, temp_pq, geometry_encoding=None)
+        tab2 = parquet.read_table(temp_pq)
+        assert b"geo" in tab2.schema.metadata
+        assert tab2.schema.types[0] == ga.point().storage_type
+
+
+def test_write_geoparquet_table_wkb():
     with tempfile.TemporaryDirectory() as tmpdir:
         temp_pq = os.path.join(tmpdir, "test.parquet")
         tab = pa.table([ga.array(["POINT (0 1)"])], names=["geometry"])
-        io.write_geoparquet_table(tab, temp_pq)
+        io.write_geoparquet_table(tab, temp_pq, geometry_encoding="WKB")
         tab2 = parquet.read_table(temp_pq)
         assert b"geo" in tab2.schema.metadata
         assert tab2.schema.types[0] == pa.binary()
 
 
-def test_read_geoparquet_table():
+def test_write_geoparquet_table_geoarrow():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        temp_pq = os.path.join(tmpdir, "test.parquet")
+        tab = pa.table([ga.array(["POINT (0 1)"])], names=["geometry"])
+        io.write_geoparquet_table(tab, temp_pq, geometry_encoding="geoarrow")
+        tab2 = parquet.read_table(temp_pq)
+        assert b"geo" in tab2.schema.metadata
+        meta = json.loads(tab2.schema.metadata[b"geo"])
+        assert meta["columns"]["geometry"]["encoding"] == "geoarrow"
+        assert meta["columns"]["geometry"]["geoarrow_type"] == "geoarrow.point"
+        assert tab2.schema.types[0] == ga.point().storage_type
+
+
+def test_read_geoparquet_table_wkb():
     with tempfile.TemporaryDirectory() as tmpdir:
         temp_pq = os.path.join(tmpdir, "test.parquet")
 
         # With "geo" metadata key
         tab = pa.table([ga.array(["POINT (0 1)"])], names=["geometry"])
-        io.write_geoparquet_table(tab, temp_pq)
+        io.write_geoparquet_table(tab, temp_pq, geometry_encoding="WKB")
         tab2 = io.read_geoparquet_table(temp_pq)
         assert isinstance(tab2["geometry"].type, ga.GeometryExtensionType)
         assert b"geo" not in tab2.schema.metadata
@@ -60,6 +87,16 @@ def test_read_geoparquet_table():
         parquet.write_table(tab, temp_pq)
         tab2 = io.read_geoparquet_table(temp_pq)
         assert isinstance(tab2["geometry"].type, ga.GeometryExtensionType)
+
+
+def test_read_geoparquet_table_geoarrow():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        temp_pq = os.path.join(tmpdir, "test.parquet")
+
+        tab = pa.table([ga.array(["POINT (0 1)"])], names=["geometry"])
+        io.write_geoparquet_table(tab, temp_pq, geometry_encoding="geoarrow")
+        tab2 = io.read_geoparquet_table(temp_pq)
+        tab2["geometry"].type == ga.point()
 
 
 def test_geoparquet_column_spec_from_type_geom_type():
