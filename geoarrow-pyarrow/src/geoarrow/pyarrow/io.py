@@ -9,6 +9,7 @@ testing and documenting the GeoArrow format and encodings.
 import json
 
 import geoarrow.pyarrow as _ga
+import pyarrow as _pa
 import pyarrow.parquet as _pq
 import pyarrow.types as _types
 import pyarrow_hotfix as _  # noqa: F401
@@ -288,12 +289,19 @@ def _geoparquet_guess_primary_geometry_column(schema, primary_geometry_column=No
     )
 
 
-def _geoparquet_column_spec_from_type(type, add_geometry_types=None):
-    # We always encode to WKB since it's the only supported value
-    spec = {"encoding": "WKB", "geometry_types": []}
+def _geoparquet_column_spec_from_type(type, add_geometry_types=None, encoding=None):
+    spec = {"encoding": encoding, "geometry_types": []}
 
     # Pass along extra information from GeoArrow extension type metadata
     if isinstance(type, _ga.GeometryExtensionType):
+        # If encoding is unspecified and data is already geoarrow, don't serialize to WKB
+        if encoding is None and type.coord_type != _ga.CoordType.UNKNOWN:
+            spec["encoding"] = "geoarrow"
+
+        # Add geoarrow_type if we know what it is
+        if encoding == "geoarrow" and type.coord_type != _ga.CoordType.UNKNOWN:
+            spec["geoarrow_type"] = type._extension_name
+
         if type.crs_type == _ga.CrsType.PROJJSON:
             spec["crs"] = json.loads(type.crs)
         elif type.crs_type == _ga.CrsType.NONE:
@@ -317,6 +325,9 @@ def _geoparquet_column_spec_from_type(type, add_geometry_types=None):
             geometry_type = _GEOPARQUET_GEOMETRY_TYPE_LABELS[maybe_known_geometry_type]
             dimensions = _GEOPARQUET_DIMENSION_LABELS[maybe_known_dimensions]
             spec["geometry_types"] = [f"{geometry_type}{dimensions}"]
+
+    if spec["encoding"] is None:
+        spec["encoding"] = "WKB"
 
     return spec
 
@@ -382,19 +393,42 @@ def _geoparquet_update_spec_bbox(item, spec):
 def _geoparquet_encode_chunked_array(
     item, spec, add_geometry_types=None, add_bbox=False, check_wkb=True
 ):
-    # ...because we're currently only ever encoding using WKB
     if spec["encoding"] == "WKB":
         item_out = _ga.as_wkb(item, strict_iso_wkb=check_wkb)
+
+        # If input was WKT, use the WKB-encoded value to perform calculations
+        if _pa.types.is_string(item.type) or isinstance(item.type, _ga.WktType):
+            item_calc = item_out
+        else:
+            item_calc = item
+
+    elif spec["encoding"] == "geoarrow":
+        item_out = _ga.as_geoarrow(item, coord_type=_ga.CoordType.SEPARATE)
+        # Use geoarrow-encoded value to perform calculations
+        item_calc = item_out
+
+        # Add GeoArrow type
+        spec["geoarrow_type"] = item_out.type.extension_name
+
+        # Make sure the GeoArrow type is valid (might be geoarrow.wkb if user attempted
+        # to write mixed values with geometry_encoding="geoarrow")
+        if spec["geoarrow_type"] not in (
+            "geoarrow.point",
+            "geoarrow.linestring",
+            "geoarrow.polygon",
+            "geoarrow.multipoint",
+            "geoarrow.multilinestring",
+            "geoarrow.multipolygon",
+        ):
+            raise ValueError(
+                "Can't write one or more columns using encoding='geoarrow'"
+            )
+
     else:
         encoding = spec["encoding"]
-        raise ValueError(f"Expected column encoding 'WKB' but got '{encoding}'")
-
-    # For everything except a well-known text-encoded column, we want to do
-    # calculations on the pre-WKB-encoded value.
-    if spec["encoding"] == "WKT":
-        item_calc = item_out
-    else:
-        item_calc = item
+        raise ValueError(
+            f"Expected column encoding 'WKB' or 'geoarrow' but got '{encoding}'"
+        )
 
     # geometry_types that are fixed at the data type level have already been
     # added to the spec in an earlier step. The unique_geometry_types()
