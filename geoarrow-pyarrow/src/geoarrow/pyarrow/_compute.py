@@ -309,6 +309,44 @@ def format_wkt(obj, precision=None, max_element_size_bytes=None):
     )
 
 
+def make_point(x, y, z=None, m=None, crs=None, crs_type=None):
+    """Create a geoarrow-encoded point array from two or more arrays
+    representing x, y, and/or z, and/or m values. In many cases, this
+    is a zero-copy operation if the input arrays are already in a
+    column-based format (e.g., numpy array, pandas series, or pyarrow
+    Array/ChunkedArray).
+
+    >>> import geoarrow.pyarrow as ga
+    >>> ga.make_point([1, 2, 3], [4, 5, 6])
+    PointArray:PointType(geoarrow.point)[3]
+    <POINT (1 4)>
+    <POINT (2 5)>
+    <POINT (3 6)>
+    """
+    import pyarrow.compute as pc
+
+    if z is not None and m is not None:
+        dimensions = Dimensions.XYZM
+        field_names = ["x", "y", "z", "m"]
+    elif m is not None:
+        dimensions = Dimensions.XYM
+        field_names = ["x", "y", "m"]
+    elif z is not None:
+        dimensions = Dimensions.XYZ
+        field_names = ["x", "y", "z"]
+    else:
+        dimensions = Dimensions.XY
+        field_names = ["x", "y"]
+
+    type = _type.extension_type(
+        GeometryType.POINT, dimensions, crs=crs, crs_type=crs_type
+    )
+    args = [x, y] + [el for el in [z, m] if el is not None]
+    args = [pa.array(el, pa.float64()) for el in args]
+    storage = pc.make_struct(*args, field_names=field_names)
+    return type.wrap_array(storage)
+
+
 def _box_point_struct(storage):
     arrays = storage.flatten()
     return pa.StructArray.from_arrays(

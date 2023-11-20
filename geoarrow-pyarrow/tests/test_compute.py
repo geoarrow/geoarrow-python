@@ -234,6 +234,48 @@ def test_as_geoarrow():
     assert array.type.geoarrow_id == ga.wkb().geoarrow_id
 
 
+def test_make_point():
+    xs = [1, 2, 3]
+    ys = [4, 5, 6]
+    zs = [7, 8, 9]
+    ms = [10, 11, 12]
+
+    xy = _compute.make_point(xs, ys)
+    assert xy.type.dimensions == ga.Dimensions.XY
+    assert _compute.format_wkt(xy).to_pylist() == [
+        "POINT (1 4)",
+        "POINT (2 5)",
+        "POINT (3 6)",
+    ]
+
+    xyz = _compute.make_point(xs, ys, zs)
+    assert xyz.type.dimensions == ga.Dimensions.XYZ
+    assert _compute.format_wkt(xyz).to_pylist() == [
+        "POINT Z (1 4 7)",
+        "POINT Z (2 5 8)",
+        "POINT Z (3 6 9)",
+    ]
+
+    xym = _compute.make_point(xs, ys, m=ms)
+    assert xym.type.dimensions == ga.Dimensions.XYM
+    assert _compute.format_wkt(xym).to_pylist() == [
+        "POINT M (1 4 10)",
+        "POINT M (2 5 11)",
+        "POINT M (3 6 12)",
+    ]
+
+    xyzm = _compute.make_point(xs, ys, zs, ms)
+    assert xyzm.type.dimensions == ga.Dimensions.XYZM
+    assert _compute.format_wkt(xyzm).to_pylist() == [
+        "POINT ZM (1 4 7 10)",
+        "POINT ZM (2 5 8 11)",
+        "POINT ZM (3 6 9 12)",
+    ]
+
+    xy_crs = _compute.make_point(xs, ys, crs="EPSG:1234")
+    assert xy_crs.type.crs == "EPSG:1234"
+
+
 def test_box():
     wkt_array = ga.array(["POINT (0 1)", "POINT (2 3)"])
     box = _compute.box(wkt_array)
