@@ -270,6 +270,11 @@ def test_encode_chunked_array():
             ga.array("POINT (0 1)"), {"encoding": "NotAnEncoding"}
         )
 
+    with pytest.raises(ValueError, match="Can't write one or more columns"):
+        io._geoparquet_encode_chunked_array(
+            ga.array(["POINT (0 1)", "LINESTRING (0 0, 1 1)"]), {"encoding": "geoarrow"}
+        )
+
     spec = {"encoding": "WKB"}
     encoded = io._geoparquet_encode_chunked_array(ga.as_wkb(["POINT (0 1)"]), spec)
     assert encoded.type == pa.binary()
