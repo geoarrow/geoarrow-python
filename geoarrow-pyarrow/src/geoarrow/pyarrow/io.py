@@ -416,7 +416,11 @@ def _geoparquet_encode_chunked_array(
         item_out = _ga.as_wkb(item, strict_iso_wkb=check_wkb)
 
         # If input was WKT, use the WKB-encoded value to perform calculations
-        if _pa.types.is_string(item.type) or isinstance(item.type, _ga.WktType):
+        if (
+            _pa.types.is_string(item.type)
+            or _pa.types.is_large_string(item.type)
+            or isinstance(item.type, _ga.WktType)
+        ):
             item_calc = item_out
         else:
             item_calc = item
