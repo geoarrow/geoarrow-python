@@ -431,9 +431,7 @@ def _geoparquet_encode_chunked_array(
                 "Can't encode column with incompatable geometry types as geoarrow"
             )
 
-        inferred_geoarrow_encoding = geoarrow_type._extension_name.removeprefix(
-            "geoarrow."
-        )
+        inferred_geoarrow_encoding = geoarrow_type._extension_name[len("geoarrow.") :]
 
     # If the encoding was the "give me any geoarrow" sentinel, we need to
     # update it to be an actual valid encoding value
