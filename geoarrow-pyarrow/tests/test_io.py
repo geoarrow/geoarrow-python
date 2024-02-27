@@ -279,6 +279,25 @@ def test_encode_chunked_array():
             {"encoding": io.geoparquet_encoding_geoarrow()},
         )
 
+    with pytest.raises(ValueError, match="Can't encode column with encoding"):
+        io._geoparquet_encode_chunked_array(
+            ga.as_geoarrow(["POINT (0 1)"]),
+            {"encoding": "linestring"},
+        )
+
+    # Check geoarrow encoding when nothing is to be done
+    already_point = ga.as_geoarrow(["POINT (0 1)"])
+    encoded = io._geoparquet_encode_chunked_array(
+        already_point, spec={"encoding": "point"}
+    )
+    assert encoded == already_point.storage
+
+    # Check geoarrow encoding when some inference and encoding has to happen
+    spec = {"encoding": io.geoparquet_encoding_geoarrow()}
+    encoded = io._geoparquet_encode_chunked_array(ga.as_wkb(["POINT (0 1)"]), spec=spec)
+    assert encoded == already_point.storage
+    assert spec["encoding"] == "point"
+
     spec = {"encoding": "WKB"}
     encoded = io._geoparquet_encode_chunked_array(ga.as_wkb(["POINT (0 1)"]), spec)
     assert encoded.type == pa.binary()
