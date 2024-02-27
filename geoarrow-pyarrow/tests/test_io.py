@@ -62,12 +62,13 @@ def test_write_geoparquet_table_geoarrow():
     with tempfile.TemporaryDirectory() as tmpdir:
         temp_pq = os.path.join(tmpdir, "test.parquet")
         tab = pa.table([ga.array(["POINT (0 1)"])], names=["geometry"])
-        io.write_geoparquet_table(tab, temp_pq, geometry_encoding="geoarrow")
+        io.write_geoparquet_table(
+            tab, temp_pq, geometry_encoding=io.geoparquet_encoding_geoarrow()
+        )
         tab2 = parquet.read_table(temp_pq)
         assert b"geo" in tab2.schema.metadata
         meta = json.loads(tab2.schema.metadata[b"geo"])
-        assert meta["columns"]["geometry"]["encoding"] == "geoarrow"
-        assert meta["columns"]["geometry"]["geoarrow_type"] == "geoarrow.point"
+        assert meta["columns"]["geometry"]["encoding"] == "point"
         assert tab2.schema.types[0] == ga.point().storage_type
 
 
@@ -94,7 +95,9 @@ def test_read_geoparquet_table_geoarrow():
         temp_pq = os.path.join(tmpdir, "test.parquet")
 
         tab = pa.table([ga.array(["POINT (0 1)"])], names=["geometry"])
-        io.write_geoparquet_table(tab, temp_pq, geometry_encoding="geoarrow")
+        io.write_geoparquet_table(
+            tab, temp_pq, geometry_encoding=io.geoparquet_encoding_geoarrow()
+        )
         tab2 = io.read_geoparquet_table(temp_pq)
         tab2["geometry"].type == ga.point()
 
@@ -265,14 +268,15 @@ def test_guess_geography_columns():
 
 
 def test_encode_chunked_array():
-    with pytest.raises(ValueError, match="Expected column encoding 'WKB'"):
+    with pytest.raises(ValueError, match="Expected column encoding to be one of"):
         io._geoparquet_encode_chunked_array(
-            ga.array("POINT (0 1)"), {"encoding": "NotAnEncoding"}
+            ga.array(["POINT (0 1)"]), {"encoding": "NotAnEncoding"}
         )
 
-    with pytest.raises(ValueError, match="Can't write one or more columns"):
+    with pytest.raises(ValueError, match="Can't encode column with"):
         io._geoparquet_encode_chunked_array(
-            ga.array(["POINT (0 1)", "LINESTRING (0 0, 1 1)"]), {"encoding": "geoarrow"}
+            ga.array(["POINT (0 1)", "LINESTRING (0 0, 1 1)"]),
+            {"encoding": io.geoparquet_encoding_geoarrow()},
         )
 
     spec = {"encoding": "WKB"}
