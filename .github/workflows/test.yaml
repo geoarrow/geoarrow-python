@@ -17,7 +17,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        python-version: ['3.8', '3.9', '3.10', '3.11']
+        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
 
     steps:
       - uses: actions/checkout@v3
@@ -47,13 +47,15 @@ jobs:
           pytest geoarrow-pandas/tests -v -s
 
       - name: Run doctests (geoarrow-pyarrow)
-        if: success() && matrix.python-version == '3.11'
+        if: success() && matrix.python-version == '3.12'
         run: |
+          cd geoarrow-pyarrow
           pytest --pyargs geoarrow.pyarrow --doctest-modules --import-mode=importlib
 
       - name: Run doctests (geoarrow-pandas)
-        if: success() && matrix.python-version == '3.11'
+        if: success() && matrix.python-version == '3.12'
         run: |
+          cd geoarrow-pandas
           pytest --pyargs geoarrow.pandas --doctest-modules --import-mode=importlib
 
   coverage:
@@ -67,7 +69,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
+          python-version: '3.12'
           cache: 'pip'
 
       - name: Install (geoarrow-pyarrow)

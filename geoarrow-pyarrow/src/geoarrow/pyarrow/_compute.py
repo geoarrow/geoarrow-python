@@ -124,7 +124,7 @@ def unique_geometry_types(obj):
     return pa.array(py_geometry_types, type=out_type)
 
 
-def infer_type_common(obj, coord_type=None, promote_multi=False):
+def infer_type_common(obj, coord_type=None, promote_multi=False, _geometry_types=None):
     """Infer a common :class:`geoarrow.pyarrow.GeometryExtensionType` for the
     geometries in ``obj``, preferring geoarrow-encoded types and falling back
     to well-known binary.
@@ -148,7 +148,11 @@ def infer_type_common(obj, coord_type=None, promote_multi=False):
     if coord_type is None:
         coord_type = CoordType.SEPARATE
 
-    types = unique_geometry_types(obj)
+    if _geometry_types is None:
+        types = unique_geometry_types(obj)
+    else:
+        types = _geometry_types
+
     if len(types) == 0:
         # Not ideal: we probably want a _type.empty() that keeps the CRS
         return pa.null()
