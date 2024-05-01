@@ -50,13 +50,13 @@ jobs:
         if: success() && matrix.python-version == '3.12'
         run: |
           cd geoarrow-pyarrow
-          pytest --doctest-modules
+          pytest --pyargs geoarrow.pyarrow --doctest-modules --import-mode=importlib
 
       - name: Run doctests (geoarrow-pandas)
         if: success() && matrix.python-version == '3.12'
         run: |
           cd geoarrow-pandas
-          pytest --doctest-modules
+          pytest --pyargs geoarrow.pandas --doctest-modules --import-mode=importlib
 
   coverage:
     needs: [test]
