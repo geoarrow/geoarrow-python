@@ -49,7 +49,7 @@ jobs:
       - name: Run doctests (geoarrow-pyarrow)
         if: success() && matrix.python-version == '3.12'
         run: |
-          pytest --pyargs geoarrow.pyarrow --doctest-modules --import-mode=importlib
+          pytest --pyargs geoarrow.pyarrow --doctest-modules
 
       - name: Run doctests (geoarrow-pandas)
         if: success() && matrix.python-version == '3.12'
