@@ -55,6 +55,8 @@ def test_write_geoparquet_table_wkb():
         io.write_geoparquet_table(tab, temp_pq, geometry_encoding="WKB")
         tab2 = parquet.read_table(temp_pq)
         assert b"geo" in tab2.schema.metadata
+        meta = json.loads(tab2.schema.metadata[b"geo"])
+        assert meta["version"] == "1.0.0"
         assert tab2.schema.types[0] == pa.binary()
 
 
@@ -68,6 +70,7 @@ def test_write_geoparquet_table_geoarrow():
         tab2 = parquet.read_table(temp_pq)
         assert b"geo" in tab2.schema.metadata
         meta = json.loads(tab2.schema.metadata[b"geo"])
+        assert meta["version"] == "1.1.0"
         assert meta["columns"]["geometry"]["encoding"] == "point"
         assert tab2.schema.types[0] == ga.point().storage_type
 

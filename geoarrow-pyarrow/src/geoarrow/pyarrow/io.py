@@ -384,11 +384,20 @@ def _geoparquet_metadata_from_schema(
         add_geometry_types=add_geometry_types,
         encoding=encoding,
     )
+
     return {
-        "version": "1.0.0",
+        "version": _geoparquet_get_version_from_columns(columns),
         "primary_column": primary_geometry_column,
         "columns": columns,
     }
+
+
+def _geoparquet_get_version_from_columns(columns):
+    for column in columns.values():
+        if column["encoding"] != "WKB":
+            return "1.1.0"
+
+    return "1.0.0"
 
 
 def _geoparquet_update_spec_geometry_types(item, spec, unique_geometry_types=None):
