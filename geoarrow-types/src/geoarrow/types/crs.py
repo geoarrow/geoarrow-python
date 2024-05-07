@@ -1,3 +1,4 @@
+from copy import deepcopy
 import json
 from typing import Union, Mapping
 
@@ -6,7 +7,9 @@ class Crs:
     """Abstract coordinate reference system definition
 
     Defines an abstract class with the methods required by GeoArrow types
-    to consume a coordinate reference system.
+    to consume a coordinate reference system. This is duck-typed on a
+    ``pyproj.CRS`` such that a pyproj CRS can be used to create GeoArrow
+    types.
     """
 
     @classmethod
@@ -47,8 +50,8 @@ class ProjJsonCrs(Crs):
     Examples
     --------
     >>> from geoarrow.types import crs
-    >>> crs.ProjJsonCrs({})
-    {}
+    >>> crs.ProjJsonCrs('{"key": "value"}')
+    ProjJsonCrs({"key": "value"})
     """
 
     @classmethod
@@ -87,7 +90,7 @@ class ProjJsonCrs(Crs):
         if self._obj is None:
             self._obj = json.loads(self._str)
 
-        return self._obj
+        return deepcopy(self._obj)
 
     def __repr__(self) -> str:
         try:
@@ -95,10 +98,12 @@ class ProjJsonCrs(Crs):
             if "id" in crs_dict:
                 crs_id = crs_dict["id"]
                 if "authority" in crs_id and "code" in crs_id:
-                    return f'{crs_id["authority"]}{crs_id["code"]}'
-            return repr(crs_dict)[:80]
+                    return f'ProjJsonCrs({crs_id["authority"]}:{crs_id["code"]})'
+
         except ValueError:
-            return repr(self.to_json())[:80]
+            pass
+
+        return f"ProjJsonCrs({self.to_json()[:80]})"
 
 
 _CRS_LONLAT_DICT = {
