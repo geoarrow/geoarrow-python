@@ -23,6 +23,7 @@ def test_projjson_crs_from_crs():
     crs_obj_from_crs = crs.ProjJsonCrs(crs_obj)
     assert crs_obj_from_crs.to_json() == crs_obj.to_json()
 
+
 def test_projjson_crs_repr():
     crs_valid_projjson = crs.OGC_CRS84
     assert repr(crs_valid_projjson) == "ProjJsonCrs(OGC:CRS84)"
@@ -32,4 +33,4 @@ def test_projjson_crs_repr():
 
     # repr() shouldn't error here
     crs_invalid_json = crs.ProjJsonCrs('{"this is not valid json')
-    assert repr(crs_invalid_json) =='ProjJsonCrs({"this is not valid json)'
+    assert repr(crs_invalid_json) == 'ProjJsonCrs({"this is not valid json)'

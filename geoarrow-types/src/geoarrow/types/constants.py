@@ -12,6 +12,8 @@ class Encoding(Enum):
     <Encoding.GEOARROW: 5>
     """
 
+    #: Unknown or uninitialized encoding
+    UNKNOWN = 0
     #: Well-known binary encoding with a maximum of 2GB of data per array chunk
     WKB = 1
     #: Well-known binary encoding
