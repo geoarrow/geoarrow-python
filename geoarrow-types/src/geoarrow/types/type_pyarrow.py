@@ -1,6 +1,6 @@
 from typing import Optional
 
-from geoarrow.types.type_base import GeoArrowType, SerializedType, NativeType
+from geoarrow.types.type_base import GeoArrowType
 from geoarrow.types.crs import Crs
 from geoarrow.types.constants import (
     Encoding,
@@ -14,12 +14,17 @@ import pyarrow as pa
 from pyarrow import types as pa_types
 
 
+def from_base_type(base_type):
+    cls = _EXTENSION_CLASSES[base_type.extension_name]
+    return cls(base_type)
+
+
 class GeometryExtensionType(pa.ExtensionType):
     """Extension type base class for vector geometry types."""
 
     _extension_name = None
 
-    def __init__(self, base_type: GeoArrowType, storage_type: pa.DataType):
+    def __init__(self, base_type: GeoArrowType):
         if not isinstance(base_type, GeoArrowType):
             raise TypeError(
                 "GeometryExtension Type must be created from a GeoArrowType"
@@ -31,13 +36,19 @@ class GeometryExtensionType(pa.ExtensionType):
                 f'Expected BaseType with extension name "{type(self)._extension_name}" but got "{self._type.extension_name}"'
             )
 
+        if base_type.encoding == Encoding.GEOARROW:
+            key = base_type.geometry_type, base_type.coord_type, base_type.dimensions
+            storage_type = _NATIVE_STORAGE_TYPES[key]
+        else:
+            storage_type = _SERIALIZED_STORAGE_TYPES[base_type.encoding]
+
         pa.ExtensionType.__init__(self, storage_type, self._type.extension_name)
 
     def __repr__(self):
         return f"{type(self).__name__}({repr(self._type)})"
 
     def __arrow_ext_serialize__(self):
-        return self._type.extension_metadata
+        return self._type.extension_metadata.encode()
 
     @classmethod
     def __arrow_ext_deserialize__(cls, storage_type, serialized):
@@ -125,7 +136,7 @@ class WkbType(GeometryExtensionType):
 
     @classmethod
     def __arrow_ext_deserialize__(cls, storage_type, serialized):
-        pass
+        raise NotImplementedError()
 
 
 class WktType(GeometryExtensionType):
@@ -137,7 +148,7 @@ class WktType(GeometryExtensionType):
 
     @classmethod
     def __arrow_ext_deserialize__(cls, storage_type, serialized):
-        pass
+        raise NotImplementedError()
 
 
 class PointType(GeometryExtensionType):
@@ -150,7 +161,7 @@ class PointType(GeometryExtensionType):
 
     @classmethod
     def __arrow_ext_deserialize__(cls, storage_type, serialized):
-        pass
+        raise NotImplementedError()
 
 
 class LinestringType(GeometryExtensionType):
@@ -162,7 +173,7 @@ class LinestringType(GeometryExtensionType):
 
     @classmethod
     def __arrow_ext_deserialize__(cls, storage_type, serialized):
-        pass
+        raise NotImplementedError()
 
 
 class PolygonType(GeometryExtensionType):
@@ -174,7 +185,7 @@ class PolygonType(GeometryExtensionType):
 
     @classmethod
     def __arrow_ext_deserialize__(cls, storage_type, serialized):
-        pass
+        raise NotImplementedError()
 
 
 class MultiPointType(GeometryExtensionType):
@@ -186,7 +197,7 @@ class MultiPointType(GeometryExtensionType):
 
     @classmethod
     def __arrow_ext_deserialize__(cls, storage_type, serialized):
-        pass
+        raise NotImplementedError()
 
 
 class MultiLinestringType(GeometryExtensionType):
@@ -196,10 +207,6 @@ class MultiLinestringType(GeometryExtensionType):
 
     _extension_name = "geoarrow.multilinestring"
 
-    @classmethod
-    def __arrow_ext_deserialize__(cls, storage_type, serialized):
-        pass
-
 
 class MultiPolygonType(GeometryExtensionType):
     """Extension type whose storage is an array of multilinestrings stored
@@ -207,39 +214,6 @@ class MultiPolygonType(GeometryExtensionType):
     """
 
     _extension_name = "geoarrow.multipolygon"
-
-    @classmethod
-    def __arrow_ext_deserialize__(cls, storage_type, serialized):
-        pass
-
-
-def type_cls_from_name(name):
-    if name not in _EXTENSION_CLASSES:
-        raise ValueError(f'Expected valid extension name but got "{name}"')
-
-    return _EXTENSION_CLASSES[name]
-
-
-def _base_type_to_extension_type(base_type):
-    cls = type_cls_from_name(base_type.extension_name)
-    if base_type.encoding == Encoding.GEOARROW:
-        key = base_type.geometry_type, base_type.coord_type, base_type.dimensions
-        storage = _NATIVE_STORAGE_TYPES[key]
-    else:
-        storage = _SERIALIZED_STORAGE_TYPES[base_type.encoding]
-
-    return cls(base_type, storage)
-
-
-def _storage_type_to_base_type(storage_type, extension_name):
-    fingerprint = _storage_type_fingerprint(storage_type)
-    key = extension_name, fingerprint
-    if key not in _STORAGE_TYPES_BY_FINGERPRINT:
-        raise ValueError(
-            f"{storage_type} is not a valid storage type for extension {extension_name}"
-        )
-
-
 
 
 def _struct_fields(dims):
@@ -281,11 +255,6 @@ def _append_fingerprint(obj, fingerprint):
     return fingerprint
 
 
-def _storage_type_fingerprint(type):
-    components = _append_fingerprint(type, [])
-    return ":".join(str(x) for x in components)
-
-
 def _generate_storage_types():
     coord_storage = {
         (CoordType.SEPARATE, Dimensions.XY): _struct_fields("xy"),
@@ -324,17 +293,6 @@ def _generate_storage_types():
     return all_storage_types
 
 
-def _generate_storage_type_fingerprints(*storage_types):
-    all_storage_types = {}
-
-    for type_dict in storage_types:
-        for type in type_dict.values():
-            fingerprint = _storage_type_fingerprint(type)
-            all_storage_types[fingerprint] = type
-
-    return all_storage_types
-
-
 _EXTENSION_CLASSES = {
     "geoarrow.wkb": WkbType,
     "geoarrow.wkt": WktType,
@@ -354,6 +312,3 @@ _SERIALIZED_STORAGE_TYPES = {
 }
 
 _NATIVE_STORAGE_TYPES = _generate_storage_types()
-_STORAGE_TYPES_BY_FINGERPRINT = _generate_storage_type_fingerprints(
-    _NATIVE_STORAGE_TYPES, _SERIALIZED_STORAGE_TYPES
-)
