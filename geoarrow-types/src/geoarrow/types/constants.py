@@ -94,7 +94,7 @@ class CoordType(Enum):
     UNKNOWN = 0
     #: Coordinate type composed of separate arrays for each dimension (i.e., a struct)
     SEPARATE = 1
-    #: Coordinate type compose of a single array containing all dimensions
+    #: Coordinate type composed of a single array containing all dimensions
     #:(i.e., a fixed-size list)
     INTERLEAVED = 2
 
