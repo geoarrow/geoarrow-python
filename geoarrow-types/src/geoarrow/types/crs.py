@@ -1,15 +1,15 @@
 from copy import deepcopy
 import json
-from typing import Union, Mapping
+from typing import Union, Mapping, Protocol
 
 
-class Crs:
-    """Abstract coordinate reference system definition
+class Crs(Protocol):
+    """Coordinate reference system protocol
 
-    Defines an abstract class with the methods required by GeoArrow types
-    to consume a coordinate reference system. This is duck-typed on a
-    ``pyproj.CRS`` such that a pyproj CRS can be used to create GeoArrow
-    types.
+    Defines an protocol with the methods required by GeoArrow types
+    to consume a coordinate reference system. This is a subset of the
+    methods available from a ``pyproj.CRS`` such that a pyproj CRS
+    can be used to create GeoArrow types.
     """
 
     @classmethod
@@ -180,3 +180,4 @@ _CRS_LONLAT_DICT = {
 
 #: Longitude/latitude CRS definition
 OGC_CRS84 = ProjJsonCrs.from_json_dict(_CRS_LONLAT_DICT)
+"""Longitude/latitude CRS definition"""
