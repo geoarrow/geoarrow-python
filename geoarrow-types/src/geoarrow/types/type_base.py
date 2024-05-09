@@ -11,8 +11,8 @@ from geoarrow.types.constants import (
 
 
 class GeoArrowType:
-    def __init__(self) -> None:
-        self._encoding = Encoding.UNKNOWN
+    def __init__(self, encoding: Encoding) -> None:
+        self._encoding = Encoding(encoding)
         self._geometry_type = GeometryType.GEOMETRY
         self._dimensions = Dimensions.UNKNOWN
         self._coord_type = CoordType.UNKNOWN
@@ -82,7 +82,7 @@ class SerializedType(GeoArrowType):
         edge_type: EdgeType = EdgeType.PLANAR,
         crs: Optional[Crs] = None,
     ) -> None:
-        super().__init__()
+        super().__init__(encoding)
 
         if encoding not in (
             Encoding.WKT,
@@ -94,7 +94,6 @@ class SerializedType(GeoArrowType):
                 "Serialized type encoding must be one of [LARGE_]WKT or [LARGE_]WKB"
             )
 
-        self._encoding = Encoding(encoding)
         self._edge_type = EdgeType(edge_type)
         self._crs = self._check_crs(crs)
 
@@ -121,9 +120,8 @@ class NativeType(GeoArrowType):
         edge_type: EdgeType = EdgeType.PLANAR,
         crs: Optional[Crs] = None,
     ) -> None:
-        super().__init__()
+        super().__init__(Encoding.GEOARROW)
 
-        self._encoding = Encoding.GEOARROW
         self._geometry_type = GeometryType(geometry_type)
         self._coord_type = CoordType(coord_type)
         self._dimensions = Dimensions(dimensions)

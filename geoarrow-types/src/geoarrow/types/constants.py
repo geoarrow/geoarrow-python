@@ -12,18 +12,20 @@ class Encoding(Enum):
     <Encoding.GEOARROW: 5>
     """
 
-    #: Unknown or uninitialized encoding
-    UNKNOWN = 0
-    #: Well-known binary encoding with a maximum of 2GB of data per array chunk
     WKB = 1
-    #: Well-known binary encoding
+    """Well-known binary encoding with a maximum of 2GB of data per array chunk"""
+
     LARGE_WKB = 2
-    #: Well-known text encoding with a maximum of 2GB of data per array chunk
+    """Well-known binary encoding"""
+
     WKT = 3
-    #: Well-known text encoding
+    """Well-known text encoding with a maximum of 2GB of data per array chunk"""
+
     LARGE_WKT = 4
-    #: GeoArrow native nested list encoding
+    """Well-known text encoding with 64-bit offsets"""
+
     GEOARROW = 5
+    """GeoArrow native nested list encoding"""
 
 
 class GeometryType(Enum):
@@ -38,22 +40,29 @@ class GeometryType(Enum):
     <GeometryType.MULTIPOINT: 4>
     """
 
-    #: Unknown or uninitialized geometry type
     GEOMETRY = 0
-    #: Point geometry type
+    """Unknown or uninitialized geometry type"""
+
     POINT = 1
-    #: Linestring geometry type
+    """Point geometry type"""
+
     LINESTRING = 2
-    #: Polygon geometry type
+    """Linestring geometry type"""
+
     POLYGON = 3
-    #: Multipoint geometry type
+    """Polygon geometry type"""
+
     MULTIPOINT = 4
-    #: Multilinestring geometry type
+    """Multipoint geometry type"""
+
     MULTILINESTRING = 5
-    #: Multipolygon geometry type
+    """Multilinestring geometry type"""
+
     MULTIPOLYGON = 6
-    #: Geometrycollection geometry type
+    """Multipolygon geometry type"""
+
     GEOMETRYCOLLECTION = 7
+    """Geometry collection geometry type"""
 
 
 class Dimensions(Enum):
@@ -67,16 +76,20 @@ class Dimensions(Enum):
     <Dimensions.XYZM: 4>
     """
 
-    #: Unknown or ininitialized dimensions
     UNKNOWN = 0
-    #: XY dimensions
+    """Unknown or uninitialized dimensions"""
+
     XY = 1
-    #: XYZ dimensions
+    """XY dimensions"""
+
     XYZ = 2
-    #: XYM dimensions
+    """XYZ dimensions"""
+
     XYM = 3
-    #: XYZM dimensions
+    """XYM dimensions"""
+
     XYZM = 4
+    """XYZM dimensions"""
 
 
 class CoordType(Enum):
@@ -90,13 +103,18 @@ class CoordType(Enum):
     <CoordType.INTERLEAVED: 2>
     """
 
-    #: Unknown or uninitialized coordinate type
     UNKNOWN = 0
-    #: Coordinate type composed of separate arrays for each dimension (i.e., a struct)
-    SEPARATE = 1
-    #: Coordinate type composed of a single array containing all dimensions
-    #:(i.e., a fixed-size list)
+    """"Unknown or uninitialized coordinate type"""
+
+    SEPARATED = 1
+    """Coordinate type composed of separate arrays for each dimension
+    (i.e., a struct)
+    """
+
     INTERLEAVED = 2
+    """Coordinate type composed of a single array containing all dimensions
+    (i.e., a fixed-size list)
+    """
 
 
 class EdgeType(Enum):
@@ -110,9 +128,8 @@ class EdgeType(Enum):
     <EdgeType.SPHERICAL: 2>
     """
 
-    #: Unknown or uninitialized edge type
-    UNKNOWN = 0
-    #: Edges form a Cartesian line on a plane
     PLANAR = 1
-    #: Edges are geodesic on a sphere
+    """Edges form a Cartesian line on a plane"""
+
     SPHERICAL = 2
+    """Edges are geodesic on a sphere"""

@@ -257,10 +257,10 @@ def _append_fingerprint(obj, fingerprint):
 
 def _generate_storage_types():
     coord_storage = {
-        (CoordType.SEPARATE, Dimensions.XY): _struct_fields("xy"),
-        (CoordType.SEPARATE, Dimensions.XYZ): _struct_fields("xyz"),
-        (CoordType.SEPARATE, Dimensions.XYM): _struct_fields("xym"),
-        (CoordType.SEPARATE, Dimensions.XYZM): _struct_fields("xyzm"),
+        (CoordType.SEPARATED, Dimensions.XY): _struct_fields("xy"),
+        (CoordType.SEPARATED, Dimensions.XYZ): _struct_fields("xyz"),
+        (CoordType.SEPARATED, Dimensions.XYM): _struct_fields("xym"),
+        (CoordType.SEPARATED, Dimensions.XYZM): _struct_fields("xyzm"),
         (CoordType.INTERLEAVED, Dimensions.XY): _interleaved_fields("xy"),
         (CoordType.INTERLEAVED, Dimensions.XYZ): _interleaved_fields("xyz"),
         (CoordType.INTERLEAVED, Dimensions.XYM): _interleaved_fields("xym"),
@@ -277,7 +277,7 @@ def _generate_storage_types():
     }
 
     all_geoemetry_types = list(field_names.keys())
-    all_coord_types = [CoordType.INTERLEAVED, CoordType.SEPARATE]
+    all_coord_types = [CoordType.INTERLEAVED, CoordType.SEPARATED]
     all_dimensions = [Dimensions.XY, Dimensions.XYZ, Dimensions.XYM, Dimensions.XYZM]
 
     all_storage_types = {}
