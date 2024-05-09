@@ -165,6 +165,21 @@ class NativeType(GeoArrowType):
         )
 
 
+def geoarrow_type(
+    encoding: Encoding,
+    geometry_type: GeometryType,
+    coord_type: CoordType,
+    dimensions: Dimensions = Dimensions.XY,
+    edge_type: EdgeType = EdgeType.PLANAR,
+    crs: Optional[Crs] = None,
+):
+    encoding = Encoding(encoding)
+    if encoding == Encoding.GEOARROW:
+        return NativeType(geometry_type, coord_type, dimensions, edge_type, crs)
+    else:
+        return SerializedType(encoding, edge_type, crs)
+
+
 _SERIALIZED_EXTENSION_NAMES = {
     Encoding.WKT: "geoarrow.wkt",
     Encoding.LARGE_WKT: "geoarrow.wkt",

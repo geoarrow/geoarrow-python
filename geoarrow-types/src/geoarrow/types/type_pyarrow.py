@@ -1,6 +1,6 @@
 from typing import Optional
 
-from geoarrow.types.type_base import GeoArrowType
+from geoarrow.types.type_base import GeoArrowType, geoarrow_type
 from geoarrow.types.crs import Crs
 from geoarrow.types.constants import (
     Encoding,
@@ -216,6 +216,40 @@ class MultiPolygonType(GeometryExtensionType):
     _extension_name = "geoarrow.multipolygon"
 
 
+def extension_type(
+    encoding: Encoding,
+    geometry_type: GeometryType,
+    coord_type: CoordType,
+    dimensions: Dimensions = Dimensions.XY,
+    edge_type: EdgeType = EdgeType.PLANAR,
+    crs: Optional[Crs] = None,
+):
+    base_type = geoarrow_type(
+        encoding, geometry_type, coord_type, dimensions, edge_type, crs
+    )
+    extension_cls = _EXTENSION_CLASSES[base_type.extension_name]
+    return extension_cls(base_type)
+
+
+def storage_type(
+    encoding: Encoding,
+    geometry_type: GeometryType,
+    coord_type: CoordType,
+    dimensions: Dimensions = Dimensions.XY,
+    edge_type: EdgeType = EdgeType.PLANAR,
+    crs: Optional[Crs] = None,
+):
+    base_type = geoarrow_type(
+        encoding, geometry_type, coord_type, dimensions, edge_type, crs
+    )
+
+    if base_type.encoding == Encoding.GEOARROW:
+        key = base_type.geometry_type, base_type.coord_type, base_type.dimensions
+        return _NATIVE_STORAGE_TYPES[key]
+    else:
+        return _SERIALIZED_STORAGE_TYPES[base_type.encoding]
+
+
 def _struct_fields(dims):
     return pa.struct([pa.field(c, pa.float64()) for c in dims])
 
@@ -286,7 +320,7 @@ def _generate_storage_types():
             for dimensions in all_dimensions:
                 names = field_names[geometry_type]
                 coord = coord_storage[(coord_type, dimensions)]
-                key = geometry_type, dimensions, coord_type
+                key = geometry_type, coord_type, dimensions
                 storage_type = _nested_type(coord, names)
                 all_storage_types[key] = storage_type
 
