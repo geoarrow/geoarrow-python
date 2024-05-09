@@ -16,7 +16,7 @@ class GeoArrowType:
         self._geometry_type = GeometryType.GEOMETRY
         self._dimensions = Dimensions.UNKNOWN
         self._coord_type = CoordType.UNKNOWN
-        self._edge_type = EdgeType.UNKNOWN
+        self._edge_type = EdgeType.PLANAR
         self._crs = None
 
     def _check_crs(self, crs):
@@ -167,8 +167,8 @@ class NativeType(GeoArrowType):
 
 def geoarrow_type(
     encoding: Encoding,
-    geometry_type: GeometryType,
-    coord_type: CoordType,
+    geometry_type: GeometryType = GeometryType.GEOMETRY,
+    coord_type: CoordType = CoordType.UNKNOWN,
     dimensions: Dimensions = Dimensions.XY,
     edge_type: EdgeType = EdgeType.PLANAR,
     crs: Optional[Crs] = None,

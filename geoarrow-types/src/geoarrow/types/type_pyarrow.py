@@ -218,8 +218,8 @@ class MultiPolygonType(GeometryExtensionType):
 
 def extension_type(
     encoding: Encoding,
-    geometry_type: GeometryType,
-    coord_type: CoordType,
+    geometry_type: GeometryType = GeometryType.GEOMETRY,
+    coord_type: CoordType = CoordType.UNKNOWN,
     dimensions: Dimensions = Dimensions.XY,
     edge_type: EdgeType = EdgeType.PLANAR,
     crs: Optional[Crs] = None,
@@ -233,8 +233,8 @@ def extension_type(
 
 def storage_type(
     encoding: Encoding,
-    geometry_type: GeometryType,
-    coord_type: CoordType,
+    geometry_type: GeometryType = GeometryType.GEOMETRY,
+    coord_type: CoordType = CoordType.UNKNOWN,
     dimensions: Dimensions = Dimensions.XY,
     edge_type: EdgeType = EdgeType.PLANAR,
     crs: Optional[Crs] = None,
