@@ -36,7 +36,7 @@ def read_pyogrio_table(*args, **kwargs):
     ...     ).to_file(temp_gpkg)
     ...     table = io.read_pyogrio_table(temp_gpkg)
     ...     table.column("geom").chunk(0)
-    GeometryExtensionArray:WkbType(geoarrow.wkb <{"$schema":"https://proj.org/schem...>)[1]
+    GeometryExtensionArray:WkbType(geoarrow.wkb <...>)[1]
     <POINT (0 1)>
     """
     import pyproj
