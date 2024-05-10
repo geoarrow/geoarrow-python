@@ -1111,7 +1111,7 @@ This does not parse the input, which OGR returns as
 <span class="gp">... </span>    <span class="p">)</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">temp_gpkg</span><span class="p">)</span>
 <span class="gp">... </span>    <span class="n">table</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">read_pyogrio_table</span><span class="p">(</span><span class="n">temp_gpkg</span><span class="p">)</span>
 <span class="gp">... </span>    <span class="n">table</span><span class="o">.</span><span class="n">column</span><span class="p">(</span><span class="s2">&quot;geom&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">chunk</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-<span class="go">GeometryExtensionArray:WkbType(geoarrow.wkb &lt;{&quot;$schema&quot;:&quot;https://proj.org/schem...&gt;)[1]</span>
+<span class="go">GeometryExtensionArray:WkbType(geoarrow.wkb &lt;...&gt;)[1]</span>
 <span class="go">&lt;POINT (0 1)&gt;</span>
 </pre></div>
 </div>
