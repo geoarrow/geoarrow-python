@@ -36,7 +36,7 @@ def read_pyogrio_table(*args, **kwargs):
     ...     ).to_file(temp_gpkg)
     ...     table = io.read_pyogrio_table(temp_gpkg)
     ...     table.column("geom").chunk(0)
-    GeometryExtensionArray:WkbType(geoarrow.wkb <{"$schema":"https://proj.org/schem...>)[1]
+    GeometryExtensionArray:WkbType(geoarrow.wkb <...>)[1]
     <POINT (0 1)>
     """
     import pyproj
@@ -46,40 +46,45 @@ def read_pyogrio_table(*args, **kwargs):
 
     # When meta["geometry_name"] is `""`, the geometry column name is wkb_geometry
     # in GDAL's Arrow output. This occurs for sources like shapefile whose geometry
-    # has no source-provided name. When GDAL >=3.8 is available, we should pass
-    # GEOMETRY_METADATA_ENCODING=GEOARROW, which will ensure that columns are already
-    # GeoArrow-encoded.
+    # has no source-provided name.
     geometry_name = meta["geometry_name"] if meta["geometry_name"] else "wkb_geometry"
     geometry_index = table.schema.get_field_index(geometry_name)
 
-    # Check that we actually have a geometry column
+    # Extract geometry information
     geometry_field = table.schema.field(geometry_index)
+    geometry = table.column(geometry_index)
+
+    # Always output the geometry column as "geometry"
+    if geometry_name == "wkb_geometry":
+        geometry_name_out = "geometry"
+    else:
+        geometry_name_out = geometry_name
+
+    # If extension types are registered and the version of pyogrio + GDAL is
+    # sufficient, the geometry field may already be a GeoArrow type. If that
+    # is the case, we are done.
+    if isinstance(geometry_field.type, _pa.ExtensionType):
+        return table.set_column(geometry_index, geometry_name_out, geometry)
+
     geometry_metadata = geometry_field.metadata
     field_is_geometry = (
         geometry_metadata
         and b"ARROW:extension:name" in geometry_metadata
         and geometry_metadata[b"ARROW:extension:name"] == b"ogc.wkb"
     )
+
     if not field_is_geometry:
         raise ValueError(
             f"Expected field {geometry_index} ({geometry_name})' to have extension "
             f"name 'ogc.wkb' but got {geometry_field}"
         )
 
-    # Rename wkb_geometry to geometry for consistency with GeoParquet and GeoPandas
-    if geometry_name == "wkb_geometry":
-        geometry_name_out = "geometry"
-    else:
-        geometry_name_out = geometry_name
-
-    # Get the JSON representation of the CRS
-    prj_as_json = pyproj.CRS(meta["crs"]).to_json()
-
     # Apply geoarrow type to geometry column. This doesn't scale to multiple geometry
-    # columns, but it's unclear if other columns would share the same CRS.
-    geometry = table.column(geometry_index)
+    # columns; however, this case is handled by newer GDAL and pyogrio.
+    prj_as_json = pyproj.CRS(meta["crs"]).to_json()
     geometry = _ga.wkb().wrap_array(geometry)
     geometry = _ga.with_crs(geometry, prj_as_json)
+
     return table.set_column(geometry_index, geometry_name_out, geometry)
 
 
