@@ -1,6 +1,6 @@
 from typing import Optional
 
-from geoarrow.types.type_base import GeoArrowType, geoarrow_type
+from geoarrow.types.type_base import GeoArrowType, create_geoarrow_type
 from geoarrow.types.crs import Crs
 from geoarrow.types.constants import (
     Encoding,
@@ -224,7 +224,7 @@ def extension_type(
     edge_type: EdgeType = EdgeType.PLANAR,
     crs: Optional[Crs] = None,
 ):
-    base_type = geoarrow_type(
+    base_type = create_geoarrow_type(
         encoding, geometry_type, coord_type, dimensions, edge_type, crs
     )
     extension_cls = _EXTENSION_CLASSES[base_type.extension_name]
@@ -239,7 +239,7 @@ def storage_type(
     edge_type: EdgeType = EdgeType.PLANAR,
     crs: Optional[Crs] = None,
 ):
-    base_type = geoarrow_type(
+    base_type = create_geoarrow_type(
         encoding, geometry_type, coord_type, dimensions, edge_type, crs
     )
 

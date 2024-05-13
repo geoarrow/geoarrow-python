@@ -133,3 +133,7 @@ class EdgeType(Enum):
 
     SPHERICAL = 2
     """Edges are geodesic on a sphere"""
+
+
+class Unspecified(Enum):
+    UNSPECIFIED = 0

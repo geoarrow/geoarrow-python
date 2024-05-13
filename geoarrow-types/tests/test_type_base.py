@@ -1,7 +1,7 @@
 import pytest
 
 from geoarrow.types import (
-    geoarrow_type,
+    create_geoarrow_type,
     Encoding,
     GeometryType,
     Dimensions,
@@ -13,8 +13,8 @@ from geoarrow.types import (
 from geoarrow.types.type_base import InvalidTypeError
 
 
-def test_construct_serialized_type_defaults():
-    dt = geoarrow_type(Encoding.WKB)
+def test_create_serialized_type_defaults():
+    dt = create_geoarrow_type(Encoding.WKB)
     assert dt.encoding == Encoding.WKB
     assert dt.geometry_type == GeometryType.GEOMETRY
     assert dt.dimensions == Dimensions.UNKNOWN
@@ -23,20 +23,22 @@ def test_construct_serialized_type_defaults():
     assert dt.crs is None
 
 
-def test_construct_serialized_type_edge_type():
-    dt = geoarrow_type(Encoding.WKB, edge_type=EdgeType.SPHERICAL)
+def test_create_serialized_type_edge_type():
+    dt = create_geoarrow_type(Encoding.WKB, edge_type=EdgeType.SPHERICAL)
     assert dt.encoding == Encoding.WKB
     assert dt.edge_type == EdgeType.SPHERICAL
 
 
-def test_construct_serialized_type_crs():
-    dt = geoarrow_type(Encoding.WKB, crs=OGC_CRS84)
+def test_create_serialized_type_crs():
+    dt = create_geoarrow_type(Encoding.WKB, crs=OGC_CRS84)
     assert dt.encoding == Encoding.WKB
     assert dt.crs is OGC_CRS84
 
 
-def test_construct_native_type_defaults():
-    dt = geoarrow_type(Encoding.GEOARROW, GeometryType.POINT, CoordType.INTERLEAVED)
+def test_create_native_type_defaults():
+    dt = create_geoarrow_type(
+        Encoding.GEOARROW, GeometryType.POINT, CoordType.INTERLEAVED
+    )
     assert dt.encoding == Encoding.GEOARROW
     assert dt.geometry_type == GeometryType.POINT
     assert dt.coord_type == CoordType.INTERLEAVED
@@ -45,8 +47,8 @@ def test_construct_native_type_defaults():
     assert dt.crs is None
 
 
-def test_construct_native_type_edge_type():
-    dt = geoarrow_type(
+def test_create_native_type_edge_type():
+    dt = create_geoarrow_type(
         Encoding.GEOARROW,
         GeometryType.POINT,
         CoordType.INTERLEAVED,
@@ -56,19 +58,19 @@ def test_construct_native_type_edge_type():
     assert dt.edge_type == EdgeType.SPHERICAL
 
 
-def test_construct_native_type_crs():
-    dt = geoarrow_type(
+def test_create_native_type_crs():
+    dt = create_geoarrow_type(
         Encoding.GEOARROW, GeometryType.POINT, CoordType.INTERLEAVED, crs=OGC_CRS84
     )
     assert dt.encoding == Encoding.GEOARROW
     assert dt.crs is OGC_CRS84
 
 
-def test_construct_native_type_errors():
+def test_create_native_type_errors():
     # If encoding is GEOARROW, geometry_type and coord_type must be specified
     with pytest.raises(InvalidTypeError):
-        geoarrow_type(Encoding.GEOARROW)
+        create_geoarrow_type(Encoding.GEOARROW)
     with pytest.raises(InvalidTypeError):
-        geoarrow_type(Encoding.GEOARROW, geometry_type=GeometryType.POINT)
+        create_geoarrow_type(Encoding.GEOARROW, geometry_type=GeometryType.POINT)
     with pytest.raises(InvalidTypeError):
-        geoarrow_type(Encoding.GEOARROW, coord_type=CoordType.INTERLEAVED)
+        create_geoarrow_type(Encoding.GEOARROW, coord_type=CoordType.INTERLEAVED)

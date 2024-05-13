@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Any, Union, Literal
 import json
 from geoarrow.types.crs import Crs
 from geoarrow.types.constants import (
@@ -7,6 +7,7 @@ from geoarrow.types.constants import (
     Dimensions,
     CoordType,
     EdgeType,
+    Unspecified,
 )
 
 
@@ -72,12 +73,6 @@ class GeoArrowType:
     def with_encoding(self, encoding: Encoding) -> "GeoArrowType":
         raise NotImplementedError()
 
-    def with_edge_type(self, edge_type: EdgeType) -> "GeoArrowType":
-        raise NotImplementedError()
-
-    def with_crs(self, crs: Crs) -> "GeoArrowType":
-        raise NotImplementedError()
-
 
 class SerializedType(GeoArrowType):
     def __init__(
@@ -105,14 +100,46 @@ class SerializedType(GeoArrowType):
     def extension_name(self) -> str:
         return _SERIALIZED_EXTENSION_NAMES[self.encoding]
 
+    def modify(
+        self,
+        *,
+        encoding: Optional[Encoding] = None,
+        geometry_type: Optional[GeometryType] = None,
+        coord_type: Optional[CoordType] = None,
+        dimensions: Optional[Dimensions] = None,
+        edge_type: EdgeType = EdgeType.PLANAR,
+        crs: Union[
+            Crs, None, Literal[Unspecified.UNSPECIFIED]
+        ] = Unspecified.UNSPECIFIED,
+    ) -> GeoArrowType:
+        if encoding is None or encoding in (
+            Encoding.WKT,
+            Encoding.WKB,
+            Encoding.LARGE_WKT,
+            Encoding.LARGE_WKB,
+        ):
+            return create_geoarrow_type(
+                self.encoding if encoding is None else encoding,
+                geometry_type=geometry_type,
+                coord_type=coord_type,
+                dimensions=dimensions,
+                edge_type=self.edge_type if edge_type is None else edge_type,
+                crs=self.crs if crs == Unspecified.UNSPECIFIED else crs,
+            )
+        else:
+            return create_geoarrow_type(
+                Encoding.GEOARROW,
+                geometry_type=self.geometry_type
+                if geometry_type is None
+                else geometry_type,
+                coord_type=self.coord_type if coord_type is None else coord_type,
+                dimensions=self.dimensions if dimensions is not None else dimensions,
+                edge_type=self.edge_type if edge_type is None else edge_type,
+                crs=self.crs if crs == Unspecified.UNSPECIFIED else crs,
+            )
+
     def with_encoding(self, encoding: Encoding) -> "SerializedType":
         return SerializedType(encoding, edge_type=self.edge_type, crs=self.crs)
-
-    def with_edge_type(self, edge_type: EdgeType) -> "SerializedType":
-        return SerializedType(self.encoding, edge_type, self.crs)
-
-    def with_crs(self, crs: Crs) -> "SerializedType":
-        return SerializedType(self.encoding, self.edge_type, crs)
 
 
 class NativeType(GeoArrowType):
@@ -145,47 +172,56 @@ class NativeType(GeoArrowType):
     def extension_name(self) -> str:
         return _NATIVE_EXTENSION_NAMES[self.geometry_type]
 
-    def with_encoding(self, encoding: Encoding) -> SerializedType:
-        return SerializedType(encoding, edge_type=self.edge_type, crs=self.crs)
-
-    def with_geometry_type(self, geometry_type: GeometryType):
-        return NativeType(
-            geometry_type, self.coord_type, self.dimensions, self.edge_type, self.crs
-        )
-
-    def with_coord_type(self, coord_type: CoordType):
-        return NativeType(
-            self.geometry_type,
-            coord_type,
-            self.dimensions,
-            self.edge_type,
-            self.crs,
-        )
-
-    def with_dimensions(self, dimensions: Dimensions) -> "NativeType":
-        return NativeType(
-            self.geometry_type, self.coord_type, dimensions, self.edge_type, self.crs
-        )
-
-    def with_edge_type(self, edge_type: EdgeType) -> "SerializedType":
-        return NativeType(
-            self.geometry_type, self.coord_type, self.dimensions, edge_type, self.crs
-        )
-
-    def with_crs(self, crs: Crs) -> "SerializedType":
-        return NativeType(
-            self.geometry_type, self.coord_type, self.dimensions, self.edge_type, crs
-        )
+    def modify(
+        self,
+        *,
+        encoding: Optional[Encoding] = None,
+        geometry_type: Optional[GeometryType] = None,
+        coord_type: Optional[CoordType] = None,
+        dimensions: Optional[Dimensions] = None,
+        edge_type: EdgeType = EdgeType.PLANAR,
+        crs: Union[
+            Crs, None, Literal[Unspecified.UNSPECIFIED]
+        ] = Unspecified.UNSPECIFIED,
+    ) -> GeoArrowType:
+        if encoding is None or encoding == Encoding.GEOARROW:
+            return create_geoarrow_type(
+                Encoding.GEOARROW,
+                geometry_type=self.geometry_type
+                if geometry_type is None
+                else geometry_type,
+                coord_type=self.coord_type if coord_type is None else coord_type,
+                dimensions=self.dimensions if dimensions is not None else dimensions,
+                edge_type=self.edge_type if edge_type is None else edge_type,
+                crs=self.crs if crs == Unspecified.UNSPECIFIED else crs,
+            )
+        else:
+            return create_geoarrow_type(
+                Encoding(encoding),
+                edge_type=self.edge_type if edge_type is None else edge_type,
+                crs=self.crs if crs == Unspecified.UNSPECIFIED else crs,
+            )
 
 
-def geoarrow_type(
+def geoarrow_type(obj: Any) -> GeoArrowType:
+    if isinstance(obj, GeoArrowType):
+        return obj
+
+    # Eventually we should find a minimal way to parse __arrow_c_schema__ here
+    # such that we can accept any type representation.
+    raise TypeError(
+        f"Can't create GeoArrowType from object of type {type(obj).__name__}"
+    )
+
+
+def create_geoarrow_type(
     encoding: Encoding,
     geometry_type: Optional[GeometryType] = None,
     coord_type: Optional[CoordType] = None,
     dimensions: Optional[Dimensions] = None,
     edge_type: EdgeType = EdgeType.PLANAR,
     crs: Optional[Crs] = None,
-):
+) -> GeoArrowType:
     encoding = Encoding(encoding)
 
     if encoding == Encoding.GEOARROW:
