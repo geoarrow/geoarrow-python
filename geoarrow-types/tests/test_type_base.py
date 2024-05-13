@@ -10,7 +10,15 @@ from geoarrow.types import (
     OGC_CRS84,
 )
 
-from geoarrow.types.type_base import InvalidTypeError
+from geoarrow.types.type_base import InvalidTypeError, SerializedType
+
+
+def test_construct_serialized_errors():
+    with pytest.raises(ValueError):
+        SerializedType(Encoding.GEOARROW)
+
+    with pytest.raises(TypeError):
+        SerializedType(Encoding.WKB, crs=[])
 
 
 def test_create_serialized_type_defaults():

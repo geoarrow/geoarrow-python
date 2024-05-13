@@ -70,7 +70,18 @@ class GeoArrowType:
     def extension_name(self) -> str:
         raise NotImplementedError()
 
-    def with_encoding(self, encoding: Encoding) -> "GeoArrowType":
+    def modify(
+        self,
+        *,
+        encoding: Optional[Encoding] = None,
+        geometry_type: Optional[GeometryType] = None,
+        coord_type: Optional[CoordType] = None,
+        dimensions: Optional[Dimensions] = None,
+        edge_type: EdgeType = EdgeType.PLANAR,
+        crs: Union[
+            Crs, None, Literal[Unspecified.UNSPECIFIED]
+        ] = Unspecified.UNSPECIFIED,
+    ) -> "GeoArrowType":
         raise NotImplementedError()
 
 
@@ -137,9 +148,6 @@ class SerializedType(GeoArrowType):
                 edge_type=self.edge_type if edge_type is None else edge_type,
                 crs=self.crs if crs == Unspecified.UNSPECIFIED else crs,
             )
-
-    def with_encoding(self, encoding: Encoding) -> "SerializedType":
-        return SerializedType(encoding, edge_type=self.edge_type, crs=self.crs)
 
 
 class NativeType(GeoArrowType):
