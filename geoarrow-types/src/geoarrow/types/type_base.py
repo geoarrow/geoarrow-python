@@ -10,6 +10,10 @@ from geoarrow.types.constants import (
 )
 
 
+class InvalidTypeError(RuntimeError):
+    pass
+
+
 class GeoArrowType:
     def __init__(self, encoding: Encoding) -> None:
         self._encoding = Encoding(encoding)
@@ -65,7 +69,7 @@ class GeoArrowType:
     def extension_name(self) -> str:
         raise NotImplementedError()
 
-    def with_encoding(self, encoding: Encoding) -> "SerializedType":
+    def with_encoding(self, encoding: Encoding) -> "GeoArrowType":
         raise NotImplementedError()
 
     def with_edge_type(self, edge_type: EdgeType) -> "GeoArrowType":
@@ -128,6 +132,15 @@ class NativeType(GeoArrowType):
         self._edge_type = EdgeType(edge_type)
         self._crs = self._check_crs(crs)
 
+        if self._geometry_type in (
+            GeometryType.GEOMETRY,
+            GeometryType.GEOMETRYCOLLECTION,
+        ):
+            raise InvalidTypeError(
+                "Encoding GEOARROW not implemented for geometry type "
+                f"{self._geometry_type}"
+            )
+
     @property
     def extension_name(self) -> str:
         return _NATIVE_EXTENSION_NAMES[self.geometry_type]
@@ -167,16 +180,38 @@ class NativeType(GeoArrowType):
 
 def geoarrow_type(
     encoding: Encoding,
-    geometry_type: GeometryType = GeometryType.GEOMETRY,
-    coord_type: CoordType = CoordType.UNKNOWN,
-    dimensions: Dimensions = Dimensions.XY,
+    geometry_type: Optional[GeometryType] = None,
+    coord_type: Optional[CoordType] = None,
+    dimensions: Optional[Dimensions] = None,
     edge_type: EdgeType = EdgeType.PLANAR,
     crs: Optional[Crs] = None,
 ):
     encoding = Encoding(encoding)
+
     if encoding == Encoding.GEOARROW:
+        # Error if required parameters were unspecified
+        if geometry_type is None or coord_type is None:
+            raise InvalidTypeError(
+                "geometry_type and coord_type must be supplied when "
+                "constructing a GEOARROW encoding"
+            )
+
+        if dimensions is None:
+            dimensions = Dimensions.XY
+
         return NativeType(geometry_type, coord_type, dimensions, edge_type, crs)
     else:
+        # Error if native-specific parameters were specified
+        if (
+            geometry_type is not None
+            or coord_type is not None
+            or dimensions is not None
+        ):
+            raise InvalidTypeError(
+                "geometry_type, coord_type, and dimensions must be unspecified "
+                "when constructing a serialized encoding"
+            )
+
         return SerializedType(encoding, edge_type, crs)
 
 
