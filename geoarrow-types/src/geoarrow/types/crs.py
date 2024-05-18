@@ -36,6 +36,13 @@ class Crs(Protocol):
         raise NotImplementedError()
 
 
+class UnspecifiedCrs(Crs):
+    pass
+
+
+UNSPECIFIED = UnspecifiedCrs()
+
+
 class ProjJsonCrs(Crs):
     """Concrete Crs implementation wrapping a previously-generated
     PROJJSON string or dictionary.

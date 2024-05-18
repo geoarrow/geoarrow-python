@@ -12,6 +12,9 @@ class Encoding(Enum):
     <Encoding.GEOARROW: 5>
     """
 
+    UNKNOWN = 0
+    """Unknown or uninitialized encoding"""
+
     WKB = 1
     """Well-known binary encoding with a maximum of 2GB of data per array chunk"""
 
@@ -128,12 +131,11 @@ class EdgeType(Enum):
     <EdgeType.SPHERICAL: 2>
     """
 
+    UNKNOWN = 0
+    """Unknown or ininitialized edge type"""
+
     PLANAR = 1
     """Edges form a Cartesian line on a plane"""
 
     SPHERICAL = 2
     """Edges are geodesic on a sphere"""
-
-
-class Unspecified(Enum):
-    UNSPECIFIED = 0
