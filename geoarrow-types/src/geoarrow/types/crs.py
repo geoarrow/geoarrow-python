@@ -1,4 +1,5 @@
 from copy import deepcopy
+from functools import reduce
 import json
 from typing import Union, Mapping, Protocol
 
@@ -183,13 +184,51 @@ OGC_CRS84 = ProjJsonCrs.from_json_dict(_CRS_LONLAT_DICT)
 
 
 class UnspecifiedCrs(Crs):
-    pass
+    def __eq__(self, value):
+        return value is UNSPECIFIED
 
 
-CRS_UNSPECIFIED = UnspecifiedCrs()
+UNSPECIFIED = UnspecifiedCrs()
 """Unspecified CRS sentinel
 
 A :class:`Crs` singleton indicating that a CRS has not been specified.
 This is necessary because ``None`` is a valid CRS specification denoting
 an explicitly unset CRS.
 """
+
+
+def default(value, default):
+    if value is UNSPECIFIED:
+        return default
+    else:
+        return value
+
+
+def specified(*args):
+    return reduce(_specified2, args, UNSPECIFIED)
+
+
+def common(*args):
+    return reduce(_specified2, args, UNSPECIFIED)
+
+
+def _specified2(lhs, rhs):
+    if _crs_equal(lhs, rhs):
+        return lhs
+    elif lhs == UNSPECIFIED:
+        return rhs
+    elif rhs == UNSPECIFIED:
+        return lhs
+    else:
+        raise ValueError(f"Crs {lhs} and {rhs} are both specified")
+
+
+def _crs_equal(lhs, rhs):
+    if lhs is UNSPECIFIED or rhs is UNSPECIFIED:
+        return lhs == rhs
+    elif lhs == rhs:
+        return True
+    elif hasattr(lhs, "to_json_dict") and hasattr(rhs, "to_json_dict"):
+        return lhs.to_json_dict() == rhs.to_json_dict()
+    else:
+        return False
