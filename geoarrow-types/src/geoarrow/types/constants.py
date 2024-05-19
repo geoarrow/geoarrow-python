@@ -12,7 +12,7 @@ class Encoding(Enum):
     <Encoding.GEOARROW: 5>
     """
 
-    UNKNOWN = 0
+    UNSPECIFIED = 0
     """Unknown or uninitialized encoding"""
 
     WKB = 1
@@ -79,7 +79,7 @@ class Dimensions(Enum):
     <Dimensions.XYZM: 4>
     """
 
-    UNKNOWN = 0
+    UNSPECIFIED = 0
     """Unknown or uninitialized dimensions"""
 
     XY = 1
@@ -106,7 +106,7 @@ class CoordType(Enum):
     <CoordType.INTERLEAVED: 2>
     """
 
-    UNKNOWN = 0
+    UNSPECIFIED = 0
     """"Unknown or uninitialized coordinate type"""
 
     SEPARATED = 1
@@ -131,7 +131,7 @@ class EdgeType(Enum):
     <EdgeType.SPHERICAL: 2>
     """
 
-    UNKNOWN = 0
+    UNSPECIFIED = 0
     """Unknown or ininitialized edge type"""
 
     PLANAR = 1

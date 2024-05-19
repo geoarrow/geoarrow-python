@@ -1,4 +1,4 @@
-from typing import NamedTuple
+from typing import NamedTuple, Optional
 
 
 from geoarrow.types.constants import (
@@ -8,16 +8,16 @@ from geoarrow.types.constants import (
     EdgeType,
     CoordType,
 )
-from geoarrow.types.crs import Crs, UNSPECIFIED
+from geoarrow.types.crs import Crs, CRS_UNSPECIFIED
 
 
 class LayoutSpec(NamedTuple):
-    encoding: Encoding = Encoding.UNKNOWN
+    encoding: Encoding = Encoding.UNSPECIFIED
     geometry_type: GeometryType = GeometryType.GEOMETRY
-    dimensions: Dimensions = Dimensions.UNKNOWN
-    coord_type: CoordType = CoordType.UNKNOWN
+    dimensions: Dimensions = Dimensions.UNSPECIFIED
+    coord_type: CoordType = CoordType.UNSPECIFIED
 
 
 class TypeSpec(LayoutSpec):
-    edge_type: EdgeType = EdgeType.UNKNOWN
-    crs: Crs = UNSPECIFIED
+    edge_type: EdgeType = EdgeType.UNSPECIFIED
+    crs: Optional[Crs] = CRS_UNSPECIFIED

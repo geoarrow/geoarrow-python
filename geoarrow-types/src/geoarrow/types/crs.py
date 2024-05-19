@@ -36,13 +36,6 @@ class Crs(Protocol):
         raise NotImplementedError()
 
 
-class UnspecifiedCrs(Crs):
-    pass
-
-
-UNSPECIFIED = UnspecifiedCrs()
-
-
 class ProjJsonCrs(Crs):
     """Concrete Crs implementation wrapping a previously-generated
     PROJJSON string or dictionary.
@@ -185,6 +178,18 @@ _CRS_LONLAT_DICT = {
     "id": {"authority": "OGC", "code": "CRS84"},
 }
 
-#: Longitude/latitude CRS definition
 OGC_CRS84 = ProjJsonCrs.from_json_dict(_CRS_LONLAT_DICT)
 """Longitude/latitude CRS definition"""
+
+
+class UnspecifiedCrs(Crs):
+    pass
+
+
+CRS_UNSPECIFIED = UnspecifiedCrs()
+"""Unspecified CRS sentinel
+
+A :class:`Crs` singleton indicating that a CRS has not been specified.
+This is necessary because ``None`` is a valid CRS specification denoting
+an explicitly unset CRS.
+"""
