@@ -17,5 +17,4 @@ __all__ = [
     "EdgeType",
     "Crs",
     "OGC_CRS84",
-    "create_geoarrow_type",
 ]
