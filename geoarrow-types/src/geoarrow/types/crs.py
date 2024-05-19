@@ -197,6 +197,15 @@ an explicitly unset CRS.
 """
 
 
+def create(obj) -> Crs:
+    if obj is None:
+        return None
+    elif hasattr(obj, "to_json_dict"):
+        return obj
+    else:
+        return ProjJsonCrs(obj)
+
+
 def default(value, default):
     if value is UNSPECIFIED:
         return default
