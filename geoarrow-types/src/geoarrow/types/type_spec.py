@@ -20,12 +20,26 @@ class TypeSpec(NamedTuple):
     edge_type: EdgeType = EdgeType.UNSPECIFIED
     crs: Optional[Crs] = crs.UNSPECIFIED
 
-    def any_unspecified(self) -> bool:
-        for cls, arg in zip(_SPEC_TYPES):
-            if arg == cls.UNSPECIFIED:
-                return True
+    def is_partial(self) -> bool:
+        if not self.encoding.is_specified():
+            return True
 
-        return False
+        elif not self.encoding.is_serialized():
+            return (
+                not self.geometry_type.is_specified()
+                or not self.dimensions.is_specified()
+                or not self.coord_type.is_specified()
+            )
+
+        return not self.edge_type.is_specified() or self.crs is crs.UNSPECIFIED
+
+    def __repr__(self) -> str:
+        specified_fields = []
+        for cls, item in zip(_SPEC_TYPES, self):
+            if item is not cls.UNSPECIFIED:
+                specified_fields.append(str(item))
+        specified_fields_str = ", ".join(specified_fields)
+        return f"TypeSpec({specified_fields_str})"
 
 
 def type_spec(
@@ -42,4 +56,4 @@ def type_spec(
     return TypeSpec(*sanitized_args)
 
 
-_SPEC_TYPES = [Encoding, GeometryType, Dimensions, CoordType, EdgeType, crs]
+_SPEC_TYPES = (Encoding, GeometryType, Dimensions, CoordType, EdgeType, crs)

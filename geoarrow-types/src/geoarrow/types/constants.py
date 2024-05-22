@@ -3,6 +3,9 @@ from functools import reduce
 
 
 class TypeSpecEnum(Enum):
+    def is_specified(self):
+        return self is self.UNSPECIFIED
+
     @classmethod
     def create(cls, obj):
         if isinstance(obj, cls):
@@ -90,6 +93,14 @@ class Encoding(TypeSpecEnum):
 
     GEOARROW = 5
     """GeoArrow native nested list encoding"""
+
+    def is_serialized(self):
+        return self in (
+            Encoding.WKB,
+            Encoding.LARGE_WKB,
+            Encoding.WKT,
+            Encoding.LARGE_WKT,
+        )
 
 
 class GeometryType(TypeSpecEnum):

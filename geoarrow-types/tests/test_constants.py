@@ -50,6 +50,11 @@ def test_enum_common():
     assert EdgeType.common(EdgeType.SPHERICAL, EdgeType.PLANAR) is None
 
 
+def test_encoding_serialized():
+    assert Encoding.WKB.is_serialized() is True
+    assert Encoding.GEOARROW.is_serialized() is False
+
+
 def test_geometry_type_common():
     # Case handled by base enum
     assert (
