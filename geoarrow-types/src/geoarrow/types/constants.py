@@ -20,26 +20,26 @@ class TypeSpecEnum(Enum):
             )
 
     @classmethod
-    def default(cls, *args):
-        return reduce(cls._defaults2, args, cls.UNSPECIFIED)
+    def coalesce(cls, *args):
+        return reduce(cls._coalesce2, args, cls.UNSPECIFIED)
 
     @classmethod
-    def specified(cls, *args):
-        return reduce(cls._specified2, args, cls.UNSPECIFIED)
+    def coalesce_unspecified(cls, *args):
+        return reduce(cls._coalesce_unspecified2, args, cls.UNSPECIFIED)
 
     @classmethod
     def common(cls, *args):
         return reduce(cls._common2, args, cls.UNSPECIFIED)
 
     @classmethod
-    def _defaults2(cls, value, default):
+    def _coalesce2(cls, value, default):
         if value == cls.UNSPECIFIED:
             return default
         else:
             return value
 
     @classmethod
-    def _specified2(cls, lhs, rhs):
+    def _coalesce_unspecified2(cls, lhs, rhs):
         if lhs == rhs:
             return lhs
         elif lhs == cls.UNSPECIFIED:

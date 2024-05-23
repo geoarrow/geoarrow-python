@@ -20,18 +20,24 @@ def test_enum_create_from_input():
 
 
 def test_enum_default():
-    assert Encoding.default(Encoding.WKB, Encoding.UNSPECIFIED) is Encoding.WKB
-    assert Encoding.default(Encoding.UNSPECIFIED, Encoding.WKB) is Encoding.WKB
-    assert Encoding.default(Encoding.WKB, Encoding.WKT) is Encoding.WKB
+    assert Encoding.coalesce(Encoding.WKB, Encoding.UNSPECIFIED) is Encoding.WKB
+    assert Encoding.coalesce(Encoding.UNSPECIFIED, Encoding.WKB) is Encoding.WKB
+    assert Encoding.coalesce(Encoding.WKB, Encoding.WKT) is Encoding.WKB
 
 
 def test_enum_specified():
-    assert Encoding.specified(Encoding.WKB, Encoding.WKB) is Encoding.WKB
-    assert Encoding.specified(Encoding.WKB, Encoding.UNSPECIFIED) is Encoding.WKB
-    assert Encoding.specified(Encoding.UNSPECIFIED, Encoding.WKB) is Encoding.WKB
+    assert Encoding.coalesce_unspecified(Encoding.WKB, Encoding.WKB) is Encoding.WKB
+    assert (
+        Encoding.coalesce_unspecified(Encoding.WKB, Encoding.UNSPECIFIED)
+        is Encoding.WKB
+    )
+    assert (
+        Encoding.coalesce_unspecified(Encoding.UNSPECIFIED, Encoding.WKB)
+        is Encoding.WKB
+    )
 
     with pytest.raises(ValueError):
-        Encoding.specified(Encoding.WKB, Encoding.WKT)
+        Encoding.coalesce_unspecified(Encoding.WKB, Encoding.WKT)
 
 
 def test_enum_common():
