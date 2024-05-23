@@ -20,40 +20,40 @@ def test_enum_create_from_input():
 
 
 def test_enum_default():
-    assert Encoding.coalesce(Encoding.WKB, Encoding.UNSPECIFIED) is Encoding.WKB
-    assert Encoding.coalesce(Encoding.UNSPECIFIED, Encoding.WKB) is Encoding.WKB
-    assert Encoding.coalesce(Encoding.WKB, Encoding.WKT) is Encoding.WKB
+    assert Encoding._coalesce2(Encoding.WKB, Encoding.UNSPECIFIED) is Encoding.WKB
+    assert Encoding._coalesce2(Encoding.UNSPECIFIED, Encoding.WKB) is Encoding.WKB
+    assert Encoding._coalesce2(Encoding.WKB, Encoding.WKT) is Encoding.WKB
 
 
 def test_enum_specified():
-    assert Encoding.coalesce_unspecified(Encoding.WKB, Encoding.WKB) is Encoding.WKB
+    assert Encoding._coalesce_unspecified2(Encoding.WKB, Encoding.WKB) is Encoding.WKB
     assert (
-        Encoding.coalesce_unspecified(Encoding.WKB, Encoding.UNSPECIFIED)
+        Encoding._coalesce_unspecified2(Encoding.WKB, Encoding.UNSPECIFIED)
         is Encoding.WKB
     )
     assert (
-        Encoding.coalesce_unspecified(Encoding.UNSPECIFIED, Encoding.WKB)
+        Encoding._coalesce_unspecified2(Encoding.UNSPECIFIED, Encoding.WKB)
         is Encoding.WKB
     )
 
     with pytest.raises(ValueError):
-        Encoding.coalesce_unspecified(Encoding.WKB, Encoding.WKT)
+        Encoding._coalesce_unspecified2(Encoding.WKB, Encoding.WKT)
 
 
-def test_enum_common():
+def test_enum__common2():
     # Values equal
-    assert Encoding.common(Encoding.WKB, Encoding.WKB) is Encoding.WKB
+    assert Encoding._common2(Encoding.WKB, Encoding.WKB) is Encoding.WKB
 
     # One value unspecified
-    assert Encoding.common(Encoding.WKB, Encoding.UNSPECIFIED) is Encoding.WKB
-    assert Encoding.common(Encoding.UNSPECIFIED, Encoding.WKB) is Encoding.WKB
+    assert Encoding._common2(Encoding.WKB, Encoding.UNSPECIFIED) is Encoding.WKB
+    assert Encoding._common2(Encoding.UNSPECIFIED, Encoding.WKB) is Encoding.WKB
 
     # Values (or reversed values) in lookup table
-    assert Encoding.common(Encoding.WKB, Encoding.LARGE_WKB) is Encoding.LARGE_WKB
-    assert Encoding.common(Encoding.LARGE_WKB, Encoding.WKB) is Encoding.LARGE_WKB
+    assert Encoding._common2(Encoding.WKB, Encoding.LARGE_WKB) is Encoding.LARGE_WKB
+    assert Encoding._common2(Encoding.LARGE_WKB, Encoding.WKB) is Encoding.LARGE_WKB
 
-    # No common value
-    assert EdgeType.common(EdgeType.SPHERICAL, EdgeType.PLANAR) is None
+    # No _common2 value
+    assert EdgeType._common2(EdgeType.SPHERICAL, EdgeType.PLANAR) is None
 
 
 def test_encoding_serialized():
@@ -61,15 +61,15 @@ def test_encoding_serialized():
     assert Encoding.GEOARROW.is_serialized() is False
 
 
-def test_geometry_type_common():
+def test_geometry_type__common2():
     # Case handled by base enum
     assert (
-        GeometryType.common(GeometryType.POINT, GeometryType.POINT)
+        GeometryType._common2(GeometryType.POINT, GeometryType.POINT)
         is GeometryType.POINT
     )
 
     # Always fall back to geometry
     assert (
-        GeometryType.common(GeometryType.POINT, GeometryType.LINESTRING)
+        GeometryType._common2(GeometryType.POINT, GeometryType.LINESTRING)
         is GeometryType.GEOMETRY
     )
