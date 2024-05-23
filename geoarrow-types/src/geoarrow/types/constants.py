@@ -47,7 +47,7 @@ class TypeSpecEnum(Enum):
         elif rhs == cls.UNSPECIFIED:
             return lhs
         else:
-            raise ValueError(f"{cls.__name__} {lhs} and {rhs} are both specified")
+            raise ValueError(f"{cls.__name__} is overspecified ({lhs} and {rhs})")
 
     @classmethod
     def _common2(cls, lhs, rhs):

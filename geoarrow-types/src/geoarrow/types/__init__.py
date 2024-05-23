@@ -8,6 +8,8 @@ from geoarrow.types.constants import (
 
 from geoarrow.types.crs import Crs, OGC_CRS84
 
+from geoarrow.types.type_spec import TypeSpec, type_spec
+
 
 __all__ = [
     "Encoding",
@@ -17,4 +19,6 @@ __all__ = [
     "EdgeType",
     "Crs",
     "OGC_CRS84",
+    "TypeSpec",
+    "type_spec",
 ]
