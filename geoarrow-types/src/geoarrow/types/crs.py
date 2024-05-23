@@ -1,5 +1,4 @@
 from copy import deepcopy
-from functools import reduce
 import json
 from typing import Union, Mapping, Protocol
 
@@ -206,22 +205,14 @@ def create(obj) -> Crs:
         return ProjJsonCrs(obj)
 
 
-def default(value, default):
+def _coalesce2(value, default):
     if value is UNSPECIFIED:
         return default
     else:
         return value
 
 
-def specified(*args):
-    return reduce(_specified2, args, UNSPECIFIED)
-
-
-def common(*args):
-    return reduce(_specified2, args, UNSPECIFIED)
-
-
-def _specified2(lhs, rhs):
+def _coalesce_unspecified2(lhs, rhs):
     if _crs_equal(lhs, rhs):
         return lhs
     elif lhs == UNSPECIFIED:
@@ -230,6 +221,10 @@ def _specified2(lhs, rhs):
         return lhs
     else:
         raise ValueError(f"Crs {lhs} and {rhs} are both specified")
+
+
+def _common2(lhs, rhs):
+    return _coalesce_unspecified2(lhs, rhs)
 
 
 def _crs_equal(lhs, rhs):

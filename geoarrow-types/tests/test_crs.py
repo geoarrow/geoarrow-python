@@ -38,28 +38,28 @@ def test_projjson_crs_repr():
     assert repr(crs_invalid_json) == 'ProjJsonCrs({"this is not valid json)'
 
 
-def test_crs_default():
-    assert crs.default(crs.UNSPECIFIED, crs.OGC_CRS84) is crs.OGC_CRS84
-    assert crs.default(None, crs.OGC_CRS84) is None
+def test_crs_coalesce():
+    assert crs._coalesce2(crs.UNSPECIFIED, crs.OGC_CRS84) is crs.OGC_CRS84
+    assert crs._coalesce2(None, crs.OGC_CRS84) is None
 
 
-def test_crs_specified():
-    assert crs.specified(crs.UNSPECIFIED, crs.OGC_CRS84) is crs.OGC_CRS84
-    assert crs.specified(crs.OGC_CRS84, crs.UNSPECIFIED) is crs.OGC_CRS84
-    assert crs.specified(crs.OGC_CRS84, crs.OGC_CRS84) is crs.OGC_CRS84
+def test_crs_coalesce_unspecified():
+    assert crs._coalesce_unspecified2(crs.UNSPECIFIED, crs.OGC_CRS84) is crs.OGC_CRS84
+    assert crs._coalesce_unspecified2(crs.OGC_CRS84, crs.UNSPECIFIED) is crs.OGC_CRS84
+    assert crs._coalesce_unspecified2(crs.OGC_CRS84, crs.OGC_CRS84) is crs.OGC_CRS84
 
     ogc_crs84_clone = crs.ProjJsonCrs(crs.OGC_CRS84.to_json())
-    assert crs.specified(ogc_crs84_clone, crs.OGC_CRS84) is ogc_crs84_clone
-    assert crs.specified(crs.OGC_CRS84, ogc_crs84_clone) is crs.OGC_CRS84
+    assert crs._coalesce_unspecified2(ogc_crs84_clone, crs.OGC_CRS84) is ogc_crs84_clone
+    assert crs._coalesce_unspecified2(crs.OGC_CRS84, ogc_crs84_clone) is crs.OGC_CRS84
 
     with pytest.raises(ValueError):
-        crs.specified(None, crs.OGC_CRS84)
+        crs._coalesce_unspecified2(None, crs.OGC_CRS84)
 
 
 def test_crs_common():
-    assert crs.common(crs.UNSPECIFIED, crs.OGC_CRS84) is crs.OGC_CRS84
-    assert crs.common(crs.OGC_CRS84, crs.UNSPECIFIED) is crs.OGC_CRS84
-    assert crs.common(crs.OGC_CRS84, crs.OGC_CRS84) is crs.OGC_CRS84
+    assert crs._common2(crs.UNSPECIFIED, crs.OGC_CRS84) is crs.OGC_CRS84
+    assert crs._common2(crs.OGC_CRS84, crs.UNSPECIFIED) is crs.OGC_CRS84
+    assert crs._common2(crs.OGC_CRS84, crs.OGC_CRS84) is crs.OGC_CRS84
 
     with pytest.raises(ValueError):
-        crs.common(None, crs.OGC_CRS84)
+        crs._common2(None, crs.OGC_CRS84)

@@ -41,9 +41,51 @@ class TypeSpec(NamedTuple):
         specified_fields_str = ", ".join(specified_fields)
         return f"TypeSpec({specified_fields_str})"
 
+    @classmethod
+    def create(cls, obj):
+        if isinstance(obj, TypeSpec):
+            return obj
+
+        for name, field_cls in zip(cls._fields, _SPEC_TYPES[:-1]):
+            if isinstance(obj, field_cls):
+                return TypeSpec(**{name: obj})
+
+        if hasattr(obj, "to_json_dict"):
+            return TypeSpec(crs=obj)
+
+        raise TypeError(
+            f"Can't create TypeSpec from object of type {type(obj).__name__}"
+        )
+
+    @classmethod
+    def coalesce(cls, *args):
+        return cls._reduce_common("_coalesce2", args)
+
+    @classmethod
+    def coalesce_unspecified(cls, *args):
+        return cls._reduce_common("_coalesce_unspecified2", args)
+
+    @classmethod
+    def common(cls, *args):
+        return cls._reduce_common("_common2", args)
+
+    @classmethod
+    def _reduce_common(cls, reducer2_name, args):
+        reducers = [getattr(cls, reducer2_name) for cls in _SPEC_TYPES]
+
+        args = iter(args)
+        out = cls.create(next(args, TypeSpec()))
+        for item in args:
+            item = cls.create(item)
+            out = TypeSpec(
+                *(reducer(a, b) for reducer, a, b in zip(reducers, out, item))
+            )
+
+        return out
+
 
 def type_spec(
-    *,
+    *args,
     encoding=None,
     geometry_type=None,
     dimensions=None,
@@ -51,9 +93,11 @@ def type_spec(
     edge_type=None,
     crs=crs.UNSPECIFIED,
 ):
-    args = (encoding, geometry_type, dimensions, coord_type, edge_type, crs)
-    sanitized_args = (cls.create(arg) for cls, arg in zip(_SPEC_TYPES, args))
-    return TypeSpec(*sanitized_args)
+    out_args = TypeSpec.coalesce_unspecified(*args)
+
+    kwargs = (encoding, geometry_type, dimensions, coord_type, edge_type, crs)
+    sanitized_kwargs = (cls.create(arg) for cls, arg in zip(_SPEC_TYPES, kwargs))
+    return TypeSpec.coalesce_unspecified(out_args, TypeSpec(*sanitized_kwargs))
 
 
 _SPEC_TYPES = (Encoding, GeometryType, Dimensions, CoordType, EdgeType, crs)
