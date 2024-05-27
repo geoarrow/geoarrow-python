@@ -217,7 +217,7 @@ def create(obj) -> Optional[Crs]:
     >>> from geoarrow.types import crs
     >>> crs.create(None)
     >>> crs.create(crs.OGC_CRS84)
-    foo
+    ProjJsonCrs(OGC:CRS84)
     """
     if obj is None:
         return None
