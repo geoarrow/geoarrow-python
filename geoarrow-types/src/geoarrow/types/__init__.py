@@ -8,7 +8,20 @@ from geoarrow.types.constants import (
 
 from geoarrow.types.crs import Crs, OGC_CRS84
 
-from geoarrow.types.type_spec import TypeSpec, type_spec
+from geoarrow.types.type_spec import (
+    TypeSpec,
+    type_spec,
+    wkb,
+    large_wkb,
+    wkt,
+    large_wkt,
+    point,
+    linestring,
+    polygon,
+    multipoint,
+    multilinestring,
+    multipolygon,
+)
 
 
 __all__ = [
@@ -21,4 +34,14 @@ __all__ = [
     "OGC_CRS84",
     "TypeSpec",
     "type_spec",
+    "wkb",
+    "large_wkb",
+    "wkt",
+    "large_wkt",
+    "point",
+    "linestring",
+    "polygon",
+    "multipoint",
+    "multilinestring",
+    "multipolygon",
 ]

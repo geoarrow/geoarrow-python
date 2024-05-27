@@ -224,6 +224,204 @@ class TypeSpec(NamedTuple):
         return out
 
 
+def wkb(*, edge_type=None, crs=crs.UNSPECIFIED) -> TypeSpec:
+    """Well-known binary encoding
+
+    Create a :class:`TypeSpec` denoting a well-known binary type.
+    See :func:`type_spec` for parameter definitions.
+    """
+    return type_spec(encoding=Encoding.WKB, edge_type=edge_type, crs=crs)
+
+
+def large_wkb(*, edge_type=None, crs=crs.UNSPECIFIED) -> TypeSpec:
+    """Large well-known binary encoding
+
+    Create a :class:`TypeSpec` denoting a well-known binary type  with
+    64-bit data offsets. See :func:`type_spec` for parameter definitions.
+    """
+    return type_spec(encoding=Encoding.LARGE_WKB, edge_type=edge_type, crs=crs)
+
+
+def wkt(*, edge_type=None, crs=crs.UNSPECIFIED) -> TypeSpec:
+    """Well-known text encoding
+
+    Create a :class:`TypeSpec` denoting a well-known text type.
+    See :func:`type_spec` for parameter definitions.
+    """
+    return type_spec(encoding=Encoding.WKT, edge_type=edge_type, crs=crs)
+
+
+def large_wkt(*, edge_type=None, crs=crs.UNSPECIFIED) -> TypeSpec:
+    """Large well-known text encoding
+
+    Create a :class:`TypeSpec` denoting a well-known text type with
+    64-bit data offsets. See :func:`type_spec` for parameter definitions.
+    """
+    return type_spec(encoding=Encoding.LARGE_WKT, edge_type=edge_type, crs=crs)
+
+
+def geoarrow(
+    *,
+    geometry_type=None,
+    dimensions=None,
+    coord_type=None,
+    edge_type=None,
+    crs=crs.UNSPECIFIED,
+) -> TypeSpec:
+    """GeoArrow native encoding
+
+    Create a :class:`TypeSpec` denoting a preference for GeoArrow encoding
+    without a request for a particular geometry type (e.g. one that might be
+    inferred from the data). See :func:`type_spec` for parameter definitions.
+    """
+    return type_spec(
+        encoding=Encoding.GEOARROW,
+        geometry_type=geometry_type,
+        dimensions=dimensions,
+        coord_type=coord_type,
+        edge_type=edge_type,
+        crs=crs,
+    )
+
+
+def point(
+    *,
+    dimensions=None,
+    coord_type=None,
+    edge_type=None,
+    crs=crs.UNSPECIFIED,
+) -> TypeSpec:
+    """GeoArrow native point encoding
+
+    Create a :class:`TypeSpec` denoting a preference for GeoArrow point
+    type without an explicit request for dimensions or coordinate type.
+    See :func:`type_spec` for parameter definitions.
+    """
+    return type_spec(
+        encoding=Encoding.GEOARROW,
+        geometry_type=GeometryType.POINT,
+        dimensions=dimensions,
+        coord_type=coord_type,
+        edge_type=edge_type,
+        crs=crs,
+    )
+
+
+def linestring(
+    *,
+    dimensions=None,
+    coord_type=None,
+    edge_type=None,
+    crs=crs.UNSPECIFIED,
+) -> TypeSpec:
+    """GeoArrow native linestring encoding
+
+    Create a :class:`TypeSpec` denoting a preference for GeoArrow linestring
+    type without an explicit request for dimensions or coordinate type.
+    See :func:`type_spec` for parameter definitions.
+    """
+    return type_spec(
+        encoding=Encoding.GEOARROW,
+        geometry_type=GeometryType.LINESTRING,
+        dimensions=dimensions,
+        coord_type=coord_type,
+        edge_type=edge_type,
+        crs=crs,
+    )
+
+
+def polygon(
+    *,
+    dimensions=None,
+    coord_type=None,
+    edge_type=None,
+    crs=crs.UNSPECIFIED,
+) -> TypeSpec:
+    """GeoArrow native polygon encoding
+
+    Create a :class:`TypeSpec` denoting a preference for GeoArrow polygon
+    type without an explicit request for dimensions or coordinate type.
+    See :func:`type_spec` for parameter definitions.
+    """
+    return type_spec(
+        encoding=Encoding.GEOARROW,
+        geometry_type=GeometryType.POLYGON,
+        dimensions=dimensions,
+        coord_type=coord_type,
+        edge_type=edge_type,
+        crs=crs,
+    )
+
+
+def multipoint(
+    *,
+    dimensions=None,
+    coord_type=None,
+    edge_type=None,
+    crs=crs.UNSPECIFIED,
+) -> TypeSpec:
+    """GeoArrow native multipoint encoding
+
+    Create a :class:`TypeSpec` denoting a preference for GeoArrow multipoint
+    type without an explicit request for dimensions or coordinate type.
+    See :func:`type_spec` for parameter definitions.
+    """
+    return type_spec(
+        encoding=Encoding.GEOARROW,
+        geometry_type=GeometryType.MULTIPOINT,
+        dimensions=dimensions,
+        coord_type=coord_type,
+        edge_type=edge_type,
+        crs=crs,
+    )
+
+
+def multilinestring(
+    *,
+    dimensions=None,
+    coord_type=None,
+    edge_type=None,
+    crs=crs.UNSPECIFIED,
+) -> TypeSpec:
+    """GeoArrow native multilinestring encoding
+
+    Create a :class:`TypeSpec` denoting a preference for GeoArrow multilinestring
+    type without an explicit request for dimensions or coordinate type.
+    See :func:`type_spec` for parameter definitions.
+    """
+    return type_spec(
+        encoding=Encoding.GEOARROW,
+        geometry_type=GeometryType.MULTILINESTRING,
+        dimensions=dimensions,
+        coord_type=coord_type,
+        edge_type=edge_type,
+        crs=crs,
+    )
+
+
+def multipolygon(
+    *,
+    dimensions=None,
+    coord_type=None,
+    edge_type=None,
+    crs=crs.UNSPECIFIED,
+) -> TypeSpec:
+    """GeoArrow native multipolygon encoding
+
+    Create a :class:`TypeSpec` denoting a preference for GeoArrow multipolygon
+    type without an explicit request for dimensions or coordinate type.
+    See :func:`type_spec` for parameter definitions.
+    """
+    return type_spec(
+        encoding=Encoding.GEOARROW,
+        geometry_type=GeometryType.MULTIPOLYGON,
+        dimensions=dimensions,
+        coord_type=coord_type,
+        edge_type=edge_type,
+        crs=crs,
+    )
+
+
 def type_spec(
     *args,
     encoding=None,
@@ -232,7 +430,7 @@ def type_spec(
     coord_type=None,
     edge_type=None,
     crs=crs.UNSPECIFIED,
-):
+) -> TypeSpec:
     """Create a type specification
 
     This helper creates a GeoArrow :class:`TypeSpec`, applying creation
