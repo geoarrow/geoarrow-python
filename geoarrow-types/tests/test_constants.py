@@ -40,7 +40,7 @@ def test_enum_specified():
         Encoding._coalesce_unspecified2(Encoding.WKB, Encoding.WKT)
 
 
-def test_enum__common2():
+def test_enum_common2():
     # Values equal
     assert Encoding._common2(Encoding.WKB, Encoding.WKB) is Encoding.WKB
 
@@ -61,7 +61,7 @@ def test_encoding_serialized():
     assert Encoding.GEOARROW.is_serialized() is False
 
 
-def test_geometry_type__common2():
+def test_geometry_type_common2():
     # Case handled by base enum
     assert (
         GeometryType._common2(GeometryType.POINT, GeometryType.POINT)
