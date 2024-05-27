@@ -21,6 +21,7 @@ from geoarrow.types.type_spec import (
     multipoint,
     multilinestring,
     multipolygon,
+    geoarrow,
 )
 
 
@@ -38,6 +39,7 @@ __all__ = [
     "large_wkb",
     "wkt",
     "large_wkt",
+    "geoarrow",
     "point",
     "linestring",
     "polygon",

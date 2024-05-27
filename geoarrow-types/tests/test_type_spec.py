@@ -1,5 +1,6 @@
 import pytest
 
+import geoarrow.types as gt
 from geoarrow.types.constants import (
     Encoding,
     GeometryType,
@@ -171,4 +172,57 @@ def test_type_spec_override():
 
     assert fully_specified.override(crs=UNSPECIFIED_CRS) == TypeSpec(
         *fully_specified[:5], UNSPECIFIED_CRS
+    )
+
+
+def test_type_spec_helper():
+    # Check positional arguments inferred
+    assert gt.type_spec(Encoding.WKB) == TypeSpec(encoding=Encoding.WKB)
+    assert gt.type_spec(GeometryType.POINT) == TypeSpec(
+        geometry_type=GeometryType.POINT
+    )
+    assert gt.type_spec(Dimensions.XY) == TypeSpec(dimensions=Dimensions.XY)
+    assert gt.type_spec(CoordType.INTERLEAVED) == TypeSpec(
+        coord_type=CoordType.INTERLEAVED
+    )
+    assert gt.type_spec(EdgeType.PLANAR) == TypeSpec(edge_type=EdgeType.PLANAR)
+    assert gt.type_spec(gt.OGC_CRS84) == TypeSpec(crs=gt.OGC_CRS84)
+
+    # Check sanitized arguments by name
+    assert gt.type_spec(encoding="wkb") == TypeSpec(encoding=Encoding.WKB)
+    assert gt.type_spec(geometry_type="point") == TypeSpec(
+        geometry_type=GeometryType.POINT
+    )
+    assert gt.type_spec(dimensions="xy") == TypeSpec(dimensions=Dimensions.XY)
+    assert gt.type_spec(coord_type="interleaved") == TypeSpec(
+        coord_type=CoordType.INTERLEAVED
+    )
+    assert gt.type_spec(edge_type="planar") == TypeSpec(edge_type=EdgeType.PLANAR)
+    assert gt.type_spec(crs=gt.OGC_CRS84) == TypeSpec(crs=gt.OGC_CRS84)
+
+
+def test_type_spec_shortcuts():
+    assert gt.wkb() == TypeSpec(encoding=Encoding.WKB)
+    assert gt.large_wkb() == TypeSpec(encoding=Encoding.LARGE_WKB)
+    assert gt.wkt() == TypeSpec(encoding=Encoding.WKT)
+    assert gt.large_wkt() == TypeSpec(encoding=Encoding.LARGE_WKT)
+
+    assert gt.geoarrow() == TypeSpec(encoding=Encoding.GEOARROW)
+    assert gt.point() == TypeSpec(
+        encoding=Encoding.GEOARROW, geometry_type=GeometryType.POINT
+    )
+    assert gt.linestring() == TypeSpec(
+        encoding=Encoding.GEOARROW, geometry_type=GeometryType.LINESTRING
+    )
+    assert gt.polygon() == TypeSpec(
+        encoding=Encoding.GEOARROW, geometry_type=GeometryType.POLYGON
+    )
+    assert gt.multipoint() == TypeSpec(
+        encoding=Encoding.GEOARROW, geometry_type=GeometryType.MULTIPOINT
+    )
+    assert gt.multilinestring() == TypeSpec(
+        encoding=Encoding.GEOARROW, geometry_type=GeometryType.MULTILINESTRING
+    )
+    assert gt.multipolygon() == TypeSpec(
+        encoding=Encoding.GEOARROW, geometry_type=GeometryType.MULTIPOLYGON
     )
