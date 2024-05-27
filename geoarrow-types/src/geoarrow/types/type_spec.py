@@ -33,6 +33,12 @@ class TypeSpec(NamedTuple):
 
         return not self.edge_type.is_specified() or self.crs is crs.UNSPECIFIED
 
+    def with_defaults_from(self, defaults):
+        return TypeSpec.coalesce(self, defaults)
+
+    def override_with(self, new_values):
+        return TypeSpec.coalesce(new_values, self)
+
     def __repr__(self) -> str:
         specified_fields = []
         for cls, item in zip(_SPEC_TYPES, self):

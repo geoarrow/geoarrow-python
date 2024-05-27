@@ -77,6 +77,11 @@ def test_type_spec_coalesce():
     assert TypeSpec.coalesce(fully_specified, fully_specified2) == fully_specified
     assert TypeSpec.coalesce(fully_specified2, fully_specified) == fully_specified2
 
+    # Ensure that with_default()/override() are mapped properly
+    assert TypeSpec().with_defaults_from(fully_specified) == fully_specified
+    assert fully_specified.with_defaults_from(fully_specified2) == fully_specified
+    assert fully_specified.override_with(fully_specified2) == fully_specified2
+
 
 def test_type_spec_coalesce_unspecified():
     fully_specified = TypeSpec(
