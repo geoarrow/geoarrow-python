@@ -1,6 +1,6 @@
 from copy import deepcopy
 import json
-from typing import Union, Mapping, Protocol
+from typing import Union, Mapping, Protocol, Optional
 
 
 class Crs(Protocol):
@@ -196,7 +196,29 @@ an explicitly unset CRS.
 """
 
 
-def create(obj) -> Crs:
+def create(obj) -> Optional[Crs]:
+    """Create a Crs from an arbitrary Python object
+
+    Applies some heuristics to sanitize an object as a CRS that can be
+    exported to PROJJSON for use with a GeoArrow type.
+
+    Parameters
+    ----------
+    obj : None, crs-like, string, bytes, or dict
+        Can be any of:
+        - ``None``, in which case ``None`` will be returned. This is the
+          sentinel used to indcate an explicitly unset CRS.
+        - A crs-like object (i.e., an object with a ``to_json_dict()`` method)
+        - A string, bytes, or dictionary representation of a PROJJSON crs
+          (passed to :class:`ProjJsonCrs`).
+
+    Examples
+    --------
+    >>> from geoarrow.types import crs
+    >>> crs.create(None)
+    >>> crs.create(crs.OGC_CRS84)
+    foo
+    """
     if obj is None:
         return None
     elif hasattr(obj, "to_json_dict"):
@@ -233,6 +255,8 @@ def _crs_equal(lhs, rhs):
     elif lhs == rhs:
         return True
     elif hasattr(lhs, "to_json_dict") and hasattr(rhs, "to_json_dict"):
+        # This could be more sophisticated; however, CRS equality is
+        # hard and is currently outside the scope of this module
         return lhs.to_json_dict() == rhs.to_json_dict()
     else:
         return False

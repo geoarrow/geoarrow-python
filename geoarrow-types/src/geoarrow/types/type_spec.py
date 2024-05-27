@@ -11,8 +11,29 @@ from geoarrow.types.constants import (
 from geoarrow.types.crs import Crs
 from geoarrow.types import crs
 
+_UNSPECIFIED_CRS_ARG = crs.UnspecifiedCrs()
+
 
 class TypeSpec(NamedTuple):
+    """GeoArrow Type Specification
+
+    This class is a parameterization of all available types in the
+    GeoArrow specification, including both serialized and native encodings
+    with supported metadata. A ``TypeSpec`` instance can leave some
+    components unspecified such that multiple instances can be merged
+    to accomodate various type constraints.
+
+    Parameters
+    ----------
+    encoding : Encoding, optional
+    geometry_type
+    dimensions
+    coord_type
+    edge_type
+    crs
+
+    """
+
     encoding: Encoding = Encoding.UNSPECIFIED
     geometry_type: GeometryType = GeometryType.UNSPECIFIED
     dimensions: Dimensions = Dimensions.UNSPECIFIED
@@ -33,11 +54,38 @@ class TypeSpec(NamedTuple):
 
         return not self.edge_type.is_specified() or self.crs is crs.UNSPECIFIED
 
-    def with_defaults_from(self, defaults):
+    def with_defaults(self, defaults):
         return TypeSpec.coalesce(self, defaults)
 
-    def override_with(self, new_values):
-        return TypeSpec.coalesce(new_values, self)
+    def override(
+        self,
+        *,
+        encoding=None,
+        geometry_type=None,
+        dimensions=None,
+        coord_type=None,
+        edge_type=None,
+        crs=_UNSPECIFIED_CRS_ARG,
+    ):
+        clean = type_spec(
+            encoding=encoding,
+            geometry_type=geometry_type,
+            dimensions=dimensions,
+            coord_type=coord_type,
+            edge_type=edge_type,
+            crs=crs,
+        )
+
+        encoding = self.encoding if encoding is None else clean.encoding
+        geometry_type = (
+            self.geometry_type if geometry_type is None else clean.geometry_type
+        )
+        dimensions = self.dimensions if dimensions is None else clean.dimensions
+        coord_type = self.coord_type if coord_type is None else clean.coord_type
+        edge_type = self.edge_type if edge_type is None else clean.edge_type
+        crs = self.crs if crs is _UNSPECIFIED_CRS_ARG else clean.crs
+
+        return TypeSpec(encoding, geometry_type, dimensions, coord_type, edge_type, crs)
 
     def __repr__(self) -> str:
         specified_fields = []

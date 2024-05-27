@@ -8,7 +8,7 @@ from geoarrow.types.constants import (
     CoordType,
 )
 from geoarrow.types.type_spec import TypeSpec
-from geoarrow.types.crs import OGC_CRS84
+from geoarrow.types.crs import OGC_CRS84, UNSPECIFIED as UNSPECIFIED_CRS
 
 
 def test_type_spec_repr():
@@ -78,9 +78,8 @@ def test_type_spec_coalesce():
     assert TypeSpec.coalesce(fully_specified2, fully_specified) == fully_specified2
 
     # Ensure that with_default()/override() are mapped properly
-    assert TypeSpec().with_defaults_from(fully_specified) == fully_specified
-    assert fully_specified.with_defaults_from(fully_specified2) == fully_specified
-    assert fully_specified.override_with(fully_specified2) == fully_specified2
+    assert TypeSpec().with_defaults(fully_specified) == fully_specified
+    assert fully_specified.with_defaults(fully_specified2) == fully_specified
 
 
 def test_type_spec_coalesce_unspecified():
@@ -137,4 +136,39 @@ def test_type_spec_common():
     assert (
         TypeSpec.common(fully_specified, TypeSpec(dimensions=Dimensions.XYZ))
         == fully_specified_z
+    )
+
+
+def test_type_spec_override():
+    fully_specified = TypeSpec(
+        Encoding.GEOARROW,
+        GeometryType.POINT,
+        Dimensions.XY,
+        CoordType.SEPARATED,
+        EdgeType.PLANAR,
+        None,
+    )
+
+    assert fully_specified.override(encoding="unspecified") == TypeSpec(
+        Encoding.UNSPECIFIED, *fully_specified[1:]
+    )
+
+    assert fully_specified.override(geometry_type="unspecified") == TypeSpec(
+        *fully_specified[:1], GeometryType.UNSPECIFIED, *fully_specified[2:]
+    )
+
+    assert fully_specified.override(dimensions="unspecified") == TypeSpec(
+        *fully_specified[:2], Dimensions.UNSPECIFIED, *fully_specified[3:]
+    )
+
+    assert fully_specified.override(coord_type="unspecified") == TypeSpec(
+        *fully_specified[:3], CoordType.UNSPECIFIED, *fully_specified[4:]
+    )
+
+    assert fully_specified.override(edge_type="unspecified") == TypeSpec(
+        *fully_specified[:4], EdgeType.UNSPECIFIED, *fully_specified[5:]
+    )
+
+    assert fully_specified.override(crs=UNSPECIFIED_CRS) == TypeSpec(
+        *fully_specified[:5], UNSPECIFIED_CRS
     )
