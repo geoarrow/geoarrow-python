@@ -203,6 +203,19 @@ def storage_type(spec: TypeSpec) -> pa.DataType:
         return _SERIALIZED_STORAGE_TYPES[spec.encoding]
 
 
+def _field_nesting(type_):
+    if isinstance(type_, pa.ListType):
+        f = type_.field(0)
+        return [f.name] + _field_nesting(f.type)
+    elif isinstance(type_, pa.StructType):
+        return tuple(type_.field(i).name for i in range(type_.num_fields))
+    elif isinstance(type_, pa.FixedSizeListType):
+        f = type_.field(0)
+        return (f.name,)
+    else:
+        raise ValueError(f"Type {type_} is not a valid GeoArrow type component")
+
+
 def _struct_fields(dims):
     return pa.struct([pa.field(c, pa.float64(), nullable=False) for c in dims])
 
