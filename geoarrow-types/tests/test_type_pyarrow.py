@@ -139,3 +139,27 @@ def test_separated_dimensions():
         for i in range(point_xyzm.storage_type.num_fields)
     ]
     assert storage_names == ["x", "y", "z", "m"]
+
+
+@pytest.mark.parametrize(
+    "spec",
+    [
+        gt.wkt(),
+        gt.large_wkt(),
+        gt.wkb(),
+        gt.large_wkb(),
+        gt.point(),
+        gt.linestring(),
+        gt.polygon(),
+        gt.multipoint(),
+        gt.multilinestring(),
+        gt.multipolygon(),
+    ],
+)
+def test_roundtrip_extension_type_through_storage(spec):
+    extension_type = type_pyarrow.extension_type(spec)
+    serialized = extension_type.__arrow_ext_serialize__()
+    extension_type2 = type_pyarrow._deserialize_storage(
+        extension_type.storage_type, extension_type._extension_name, serialized
+    )
+    assert extension_type2 == extension_type

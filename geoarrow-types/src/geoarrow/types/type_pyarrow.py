@@ -239,14 +239,14 @@ def _parse_storage(storage_type):
         n_fields = storage_type.num_fields
         names = tuple(storage_type.field(i).name for i in range(n_fields))
         parsed_children = tuple(
-            _parse_storage(storage_type.field(i).type) for i in range(n_fields)
+            _parse_storage(storage_type.field(i).type)[0] for i in range(n_fields)
         )
         return [("struct", (names, parsed_children))]
     elif isinstance(storage_type, pa.FixedSizeListType):
         f = storage_type.field(0)
         return [
             "fixed_size_list",
-            (f.name, storage_type.list_size, (_parse_storage(f.type),)),
+            (f.name, storage_type.list_size, (_parse_storage(f.type)[0],)),
         ]
     else:
         raise ValueError(f"Type {storage_type} is not a valid GeoArrow type component")
@@ -264,7 +264,7 @@ def _deserialize_storage(storage_type, extension_name=None, extension_metadata=N
         raise ValueError(f"Can't guess encoding from type nesting {parsed_type_names}")
 
     spec = _SPEC_FROM_TYPE_NESTING[parsed_type_names]
-    spec = TypeSpec.from_extension_metadata(extension_metadata).defaults(spec)
+    spec = TypeSpec.from_extension_metadata(extension_metadata).with_defaults(spec)
 
     # If this is a serialized type, we don't need to infer any more information
     # from the storage type.
@@ -274,7 +274,12 @@ def _deserialize_storage(storage_type, extension_name=None, extension_metadata=N
 
         return extension_type(spec, storage_type, validate_storage_type=False)
 
-    type_name, params = parsed_type_names[-1]
+    # Infer geometry type
+    if extension_name is not None:
+        spec = TypeSpec.from_extension_name(extension_name).with_defaults(spec)
+
+    # Infer dimensions and verify coordinate types
+    type_name, params = parsed[-1]
     if type_name == "struct":
         names, parsed_children = params
         n_dims = len(names)
@@ -296,7 +301,7 @@ def _deserialize_storage(storage_type, extension_name=None, extension_metadata=N
                 f"Expected coordinate double coordinate values but got {parsed_child[0]}"
             )
 
-    spec = spec.defaults(dims)
+    spec = spec.with_defaults(dims)
 
     if extension_name is not None and spec.extension_name() != extension_name:
         raise ValueError(f"Can't interpret {storage_type} as {extension_name}")
