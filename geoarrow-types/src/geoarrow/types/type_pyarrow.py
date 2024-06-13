@@ -245,8 +245,10 @@ def _parse_storage(storage_type):
     elif isinstance(storage_type, pa.FixedSizeListType):
         f = storage_type.field(0)
         return [
-            "fixed_size_list",
-            (f.name, storage_type.list_size, (_parse_storage(f.type)[0],)),
+            (
+                "fixed_size_list",
+                (f.name, storage_type.list_size, (_parse_storage(f.type)[0],)),
+            ),
         ]
     else:
         raise ValueError(f"Type {storage_type} is not a valid GeoArrow type component")

@@ -144,19 +144,31 @@ def test_separated_dimensions():
 @pytest.mark.parametrize(
     "spec",
     [
+        # Serialized types
         gt.wkt(),
         gt.large_wkt(),
         gt.wkb(),
         gt.large_wkb(),
+        # Geometry types
         gt.point(),
         gt.linestring(),
         gt.polygon(),
         gt.multipoint(),
         gt.multilinestring(),
         gt.multipolygon(),
+        # All dimensions, separated coords
+        gt.point(dimensions="xy", coord_type="separated"),
+        gt.point(dimensions="xyz", coord_type="separated"),
+        gt.point(dimensions="xym", coord_type="separated"),
+        gt.point(dimensions="xyzm", coord_type="separated"),
+        # All dimensions, interleaved coords
+        gt.point(dimensions="xy", coord_type="interleaved"),
+        gt.point(dimensions="xyz", coord_type="interleaved"),
+        gt.point(dimensions="xym", coord_type="interleaved"),
+        gt.point(dimensions="xyzm", coord_type="interleaved"),
     ],
 )
-def test_roundtrip_extension_type_through_storage(spec):
+def test_roundtrip_extension_type(spec):
     extension_type = type_pyarrow.extension_type(spec)
     serialized = extension_type.__arrow_ext_serialize__()
     extension_type2 = type_pyarrow._deserialize_storage(
