@@ -11,6 +11,7 @@ from geoarrow.types.constants import (
 )
 
 import pyarrow as pa
+from pyarrow import types as pa_types
 
 
 class GeometryExtensionType(pa.ExtensionType):
@@ -18,9 +19,12 @@ class GeometryExtensionType(pa.ExtensionType):
 
     _extension_name = None
 
-    def __init__(self, spec: TypeSpec):
+    def __init__(
+        self, spec: TypeSpec, *, storage_type=None, validate_storage_type=True
+    ):
         if not isinstance(spec, TypeSpec):
             raise TypeError("GeometryExtensionType must be created from a TypeSpec")
+
         self._spec = spec.canonicalize()
 
         if self._spec.extension_name() != type(self)._extension_name:
@@ -29,11 +33,14 @@ class GeometryExtensionType(pa.ExtensionType):
                 f'"{type(self)._extension_name}" but got "{self._spec.extension_name()}"'
             )
 
-        if spec.encoding == Encoding.GEOARROW:
-            key = spec.geometry_type, spec.coord_type, spec.dimensions
-            storage_type = _NATIVE_STORAGE_TYPES[key]
-        else:
-            storage_type = _SERIALIZED_STORAGE_TYPES[spec.encoding]
+        if storage_type is None:
+            if spec.encoding == Encoding.GEOARROW:
+                key = spec.geometry_type, spec.coord_type, spec.dimensions
+                storage_type = _NATIVE_STORAGE_TYPES[key]
+            else:
+                storage_type = _SERIALIZED_STORAGE_TYPES[spec.encoding]
+        elif validate_storage_type:
+            _validate_storage_type(storage_type, spec)
 
         pa.ExtensionType.__init__(self, storage_type, self._spec.extension_name())
 
@@ -45,7 +52,9 @@ class GeometryExtensionType(pa.ExtensionType):
 
     @classmethod
     def __arrow_ext_deserialize__(cls, storage_type, serialized):
-        raise NotImplementedError()
+        return _deserialize_storage(
+            storage_type, cls._extension_name, serialized.decode()
+        )
 
     def to_pandas_dtype(self):
         from pandas import ArrowDtype
@@ -187,10 +196,14 @@ class MultiPolygonType(GeometryExtensionType):
     _extension_name = "geoarrow.multipolygon"
 
 
-def extension_type(spec: TypeSpec) -> GeometryExtensionType:
+def extension_type(
+    spec: TypeSpec, storage_type=None, validate_storage_type=True
+) -> GeometryExtensionType:
     spec = spec.with_defaults()
     extension_cls = _EXTENSION_CLASSES[spec.extension_name()]
-    return extension_cls(spec)
+    return extension_cls(
+        spec, storage_type=storage_type, validate_storage_type=validate_storage_type
+    )
 
 
 def storage_type(spec: TypeSpec) -> pa.DataType:
@@ -203,17 +216,92 @@ def storage_type(spec: TypeSpec) -> pa.DataType:
         return _SERIALIZED_STORAGE_TYPES[spec.encoding]
 
 
-def _field_nesting(type_):
-    if isinstance(type_, pa.ListType):
-        f = type_.field(0)
-        return [f.name] + _field_nesting(f.type)
-    elif isinstance(type_, pa.StructType):
-        return tuple(type_.field(i).name for i in range(type_.num_fields))
-    elif isinstance(type_, pa.FixedSizeListType):
-        f = type_.field(0)
-        return (f.name,)
+def _parse_storage(storage_type):
+    """Distill a pyarrow type into the components we need to validate it.
+    This will return a list where each element is a node. All elements
+    will represent a list node except for the last node (which may be
+    coordinates for native types or data for serialized types).
+    """
+    if pa_types.is_binary(storage_type):
+        return [("binary", ())]
+    elif pa_types.is_large_binary(storage_type):
+        return [("large_binary", ())]
+    elif pa_types.is_string(storage_type):
+        return [("string", ())]
+    elif pa_types.is_large_string(storage_type):
+        return [("large_string", ())]
+    elif pa_types.is_float64(storage_type):
+        return [("double", ())]
+    elif isinstance(storage_type, pa.ListType):
+        f = storage_type.field(0)
+        return [("list", (f.name,))] + _parse_storage(f.type)
+    elif isinstance(storage_type, pa.StructType):
+        n_fields = storage_type.num_fields
+        names = tuple(storage_type.field(i).name for i in range(n_fields))
+        parsed_children = tuple(
+            _parse_storage(storage_type.field(i).type) for i in range(n_fields)
+        )
+        return [("struct", (names, parsed_children))]
+    elif isinstance(storage_type, pa.FixedSizeListType):
+        f = storage_type.field(0)
+        return [
+            "fixed_size_list",
+            (f.name, storage_type.list_size, (_parse_storage(f.type),)),
+        ]
     else:
-        raise ValueError(f"Type {type_} is not a valid GeoArrow type component")
+        raise ValueError(f"Type {storage_type} is not a valid GeoArrow type component")
+
+
+def _validate_storage_type(storage_type, spec):
+    raise NotImplementedError()
+
+
+def _deserialize_storage(storage_type, extension_name=None, extension_metadata=None):
+    parsed = _parse_storage(storage_type)
+    parsed_type_names = tuple(item[0] for item in parsed)
+
+    if parsed_type_names not in _SPEC_FROM_TYPE_NESTING:
+        raise ValueError(f"Can't guess encoding from type nesting {parsed_type_names}")
+
+    spec = _SPEC_FROM_TYPE_NESTING[parsed_type_names]
+    spec = TypeSpec.from_extension_metadata(extension_metadata).defaults(spec)
+
+    # If this is a serialized type, we don't need to infer any more information
+    # from the storage type.
+    if spec.encoding.is_serialized():
+        if extension_name is not None and spec.extension_name() != extension_name:
+            raise ValueError(f"Can't interpret {storage_type} as {extension_name}")
+
+        return extension_type(spec, storage_type, validate_storage_type=False)
+
+    type_name, params = parsed_type_names[-1]
+    if type_name == "struct":
+        names, parsed_children = params
+        n_dims = len(names)
+    else:
+        names, n_dims, parsed_children = params
+
+    if names in _DIMS_FROM_NAMES:
+        dims = _DIMS_FROM_NAMES[names]
+    elif n_dims == 2:
+        dims = Dimensions.XY
+    elif n_dims == 4:
+        dims = Dimensions.XYZM
+    else:
+        raise ValueError(f"Can't infer dimensions from coord field names {names}")
+
+    for parsed_child in parsed_children:
+        if parsed_child[0] != "double":
+            raise ValueError(
+                f"Expected coordinate double coordinate values but got {parsed_child[0]}"
+            )
+
+    spec = spec.defaults(dims)
+
+    if extension_name is not None and spec.extension_name() != extension_name:
+        raise ValueError(f"Can't interpret {storage_type} as {extension_name}")
+
+    return extension_type(spec, storage_type, validate_storage_type=False)
 
 
 def _struct_fields(dims):
@@ -296,3 +384,51 @@ _SERIALIZED_STORAGE_TYPES = {
 }
 
 _NATIVE_STORAGE_TYPES = _generate_storage_types()
+
+_SPEC_FROM_TYPE_NESTING = {
+    ("binary",): Encoding.WKB,
+    ("large_binary",): Encoding.LARGE_WKB,
+    ("string",): Encoding.WKT,
+    ("large_string",): Encoding.LARGE_WKT,
+    ("struct",): TypeSpec(
+        encoding=Encoding.GEOARROW,
+        geometry_type=GeometryType.POINT,
+        coord_type=CoordType.SEPARATED,
+    ),
+    ("list", "struct"): TypeSpec(
+        encoding=Encoding.GEOARROW, coord_type=CoordType.SEPARATED
+    ),
+    ("list", "list", "struct"): TypeSpec(
+        encoding=Encoding.GEOARROW, coord_type=CoordType.SEPARATED
+    ),
+    ("list", "list", "list", "struct"): TypeSpec(
+        encoding=Encoding.GEOARROW, coord_type=CoordType.SEPARATED
+    ),
+    ("fixed_size_list",): TypeSpec(
+        encoding=Encoding.GEOARROW,
+        geometry_type=GeometryType.POINT,
+        coord_type=CoordType.INTERLEAVED,
+    ),
+    ("list", "fixed_size_list"): TypeSpec(
+        encoding=Encoding.GEOARROW, coord_type=CoordType.INTERLEAVED
+    ),
+    ("list", "list", "fixed_size_list"): TypeSpec(
+        encoding=Encoding.GEOARROW, coord_type=CoordType.INTERLEAVED
+    ),
+    ("list", "list", "list", "fixed_size_list"): TypeSpec(
+        encoding=Encoding.GEOARROW,
+        coord_type=CoordType.INTERLEAVED,
+        geometry_type=GeometryType.MULTIPOLYGON,
+    ),
+}
+
+_DIMS_FROM_NAMES = {
+    "xy": Dimensions.XY,
+    "xyz": Dimensions.XYZ,
+    "xym": Dimensions.XYM,
+    "xyzm": Dimensions.XYZM,
+    ("x", "y"): Dimensions.XY,
+    ("x", "y", "z"): Dimensions.XYZ,
+    ("x", "y", "m"): Dimensions.XYM,
+    ("x", "y", "z", "m"): Dimensions.XYZM,
+}

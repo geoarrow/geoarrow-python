@@ -228,16 +228,6 @@ class TypeSpec(NamedTuple):
         )
 
     @staticmethod
-    def from_extension_name(extension_name: str):
-        if extension_name in _GEOMETRY_TYPE_FROM_EXT:
-            return TypeSpec(
-                encoding=Encoding.GEOARROW,
-                geometry_type=_GEOMETRY_TYPE_FROM_EXT[extension_name],
-            )
-        else:
-            return TypeSpec()
-
-    @staticmethod
     def from_extension_metadata(extension_metadata: str):
         if extension_metadata:
             metadata = json.loads(extension_metadata)
