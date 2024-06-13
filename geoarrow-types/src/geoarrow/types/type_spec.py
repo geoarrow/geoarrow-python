@@ -182,6 +182,34 @@ class TypeSpec(NamedTuple):
             f"Can't create TypeSpec from object of type {type(obj).__name__}"
         )
 
+    @staticmethod
+    def from_extension_name(extension_name: str):
+        if extension_name in _GEOMETRY_TYPE_FROM_EXT:
+            return TypeSpec(
+                encoding=Encoding.GEOARROW,
+                geometry_type=_GEOMETRY_TYPE_FROM_EXT[extension_name],
+            )
+        else:
+            return TypeSpec()
+
+    @staticmethod
+    def from_extension_metadata(extension_metadata: str):
+        if extension_metadata:
+            metadata = json.loads(extension_metadata)
+        else:
+            metadata = {}
+
+        out_edges = EdgeType.PLANAR
+        out_crs = None
+
+        if "edges" in metadata:
+            out_edges = EdgeType.create(metadata["edges"])
+
+        if "crs" in metadata and metadata["crs"] is not None:
+            out_crs = crs.ProjJsonCrs(metadata["crs"])
+
+        return TypeSpec(edge_type=out_edges, crs=out_crs)
+
     @classmethod
     def coalesce(cls, *args):
         """Coalesce specified values
@@ -512,3 +540,5 @@ _GEOARROW_EXT_NAMES = {
     GeometryType.MULTILINESTRING: "geoarrow.multilinestring",
     GeometryType.MULTIPOLYGON: "geoarrow.multipolygon",
 }
+
+_GEOMETRY_TYPE_FROM_EXT = {v: k for k, v in _GEOARROW_EXT_NAMES.items()}
