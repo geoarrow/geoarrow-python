@@ -85,16 +85,11 @@ class TypeSpec(NamedTuple):
 
         return json.dumps(metadata)
 
-    def geoparquet_column_metadata(self) -> str:
-        metadata = {}
-
-        if self.edge_type == EdgeType.SPHERICAL:
-            metadata["edges"] = "spherical"
-
-        if self.crs is not None and self.crs is not crs.UNSPECIFIED:
-            metadata["crs"] = self.crs.to_json_dict()
-
-        return json.dumps(metadata)
+    def __arrow_c_schema__(self):
+        # We could potentially use nanoarrow or arro3 here,
+        # but use pyarrow if the module is already loaded to
+        # avoid requiring those as a dependency.
+        return self.to_pyarrow().__arrow_c_schema__()
 
     def to_pyarrow(self):
         from geoarrow.types.type_pyarrow import extension_type

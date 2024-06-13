@@ -289,10 +289,6 @@ def _deserialize_storage(storage_type, extension_name=None, extension_metadata=N
 
         return extension_type(spec, storage_type, validate_storage_type=False)
 
-    # Infer geometry type from extension name
-    if extension_name is not None:
-        spec = TypeSpec.from_extension_name(extension_name).with_defaults(spec)
-
     # Infer dimensions and verify coordinate types
     type_name, params = parsed[-1]
     if type_name == "struct":
@@ -318,9 +314,13 @@ def _deserialize_storage(storage_type, extension_name=None, extension_metadata=N
 
     spec = spec.with_defaults(dims)
 
-    # Make sure we haven't generated a spec whose extension name doesn't match
-    if extension_name is not None and spec.extension_name() != extension_name:
-        raise ValueError(f"Can't interpret {storage_type} as {extension_name}")
+    # Infer geometry type from extension name
+    if extension_name is not None:
+        spec_from_name = TypeSpec.from_extension_name(extension_name)
+
+        # Ensure that if the spec from the name has a different geometry_type
+        # value that this errors.
+        spec = TypeSpec.coalesce_unspecified(spec, spec_from_name)
 
     # Construct the extension type
     return extension_type(spec, storage_type, validate_storage_type=False)
@@ -424,7 +424,9 @@ _SPEC_FROM_TYPE_NESTING = {
         encoding=Encoding.GEOARROW, coord_type=CoordType.SEPARATED
     ),
     ("list", "list", "list", "struct"): TypeSpec(
-        encoding=Encoding.GEOARROW, coord_type=CoordType.SEPARATED
+        encoding=Encoding.GEOARROW,
+        coord_type=CoordType.SEPARATED,
+        geometry_type=GeometryType.MULTIPOLYGON,
     ),
     ("fixed_size_list",): TypeSpec(
         encoding=Encoding.GEOARROW,

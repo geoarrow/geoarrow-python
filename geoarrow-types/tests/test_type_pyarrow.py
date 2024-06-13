@@ -141,6 +141,72 @@ def test_separated_dimensions():
     assert storage_names == ["x", "y", "z", "m"]
 
 
+def test_deserialize_infer_encoding():
+    extension_type = type_pyarrow._deserialize_storage(pa.utf8())
+    assert extension_type.encoding == gt.Encoding.WKT
+
+    extension_type = type_pyarrow._deserialize_storage(pa.large_utf8())
+    assert extension_type.encoding == gt.Encoding.LARGE_WKT
+
+    extension_type = type_pyarrow._deserialize_storage(pa.binary())
+    assert extension_type.encoding == gt.Encoding.WKB
+
+    extension_type = type_pyarrow._deserialize_storage(pa.large_binary())
+    assert extension_type.encoding == gt.Encoding.LARGE_WKB
+
+    # Should fail if given if given a non-sensical type
+    with pytest.raises(ValueError, match="Can't guess encoding from type nesting"):
+        type_pyarrow._deserialize_storage(pa.float64())
+
+    # ...and slightly differently if it uses a type that is never
+    # used in any geoarrow storage
+    with pytest.raises(
+        ValueError, match="Type int8 is not a valid GeoArrow type component"
+    ):
+        type_pyarrow._deserialize_storage(pa.int8())
+
+
+def test_deserialize_infer_geometry_type():
+    # We can infer the required information for points and multipolygons
+    # based purely on the level of nesting.
+    point = pa.struct({"x": pa.float64(), "y": pa.float64()})
+    multipolygon = pa.list_(pa.list_(pa.list_(point)))
+    interleaved_point = pa.list_(pa.float64(), list_size=2)
+    interleaved_multipolygon = pa.list_(pa.list_(pa.list_(interleaved_point)))
+
+    extension_type = type_pyarrow._deserialize_storage(point)
+    assert extension_type.encoding == gt.Encoding.GEOARROW
+    assert extension_type.geometry_type == gt.GeometryType.POINT
+    assert extension_type.dimensions == gt.Dimensions.XY
+    assert extension_type.coord_type == gt.CoordType.SEPARATED
+
+    extension_type = type_pyarrow._deserialize_storage(multipolygon)
+    assert extension_type.encoding == gt.Encoding.GEOARROW
+    assert extension_type.geometry_type == gt.GeometryType.MULTIPOLYGON
+    assert extension_type.dimensions == gt.Dimensions.XY
+    assert extension_type.coord_type == gt.CoordType.SEPARATED
+
+    extension_type = type_pyarrow._deserialize_storage(interleaved_point)
+    assert extension_type.encoding == gt.Encoding.GEOARROW
+    assert extension_type.geometry_type == gt.GeometryType.POINT
+    assert extension_type.dimensions == gt.Dimensions.XY
+    assert extension_type.coord_type == gt.CoordType.INTERLEAVED
+
+    extension_type = type_pyarrow._deserialize_storage(interleaved_multipolygon)
+    assert extension_type.encoding == gt.Encoding.GEOARROW
+    assert extension_type.geometry_type == gt.GeometryType.MULTIPOLYGON
+    assert extension_type.dimensions == gt.Dimensions.XY
+    assert extension_type.coord_type == gt.CoordType.INTERLEAVED
+
+    # extension name would be required for other levels of nesting
+    with pytest.raises(ValueError, match="Can't compute extension name"):
+        type_pyarrow._deserialize_storage(pa.list_(point))
+
+    # If we manually specify the wrong extension name, this should error
+    with pytest.raises(ValueError, match="GeometryType is overspecified"):
+        type_pyarrow._deserialize_storage(point, "geoarrow.linestring")
+
+
 @pytest.mark.parametrize(
     "spec",
     [
