@@ -224,6 +224,11 @@ class TypeSpec(NamedTuple):
 
     @staticmethod
     def from_extension_name(extension_name: str):
+        """Parse an extension name into a TypeSpec
+
+        Extracts the information from a GeoArrow extension name and places
+        it in a TypeSpec instance.
+        """
         if extension_name in _GEOMETRY_TYPE_FROM_EXT:
             return TypeSpec(
                 encoding=Encoding.GEOARROW,
@@ -234,6 +239,11 @@ class TypeSpec(NamedTuple):
 
     @staticmethod
     def from_extension_metadata(extension_metadata: str):
+        """Parse extension metadata into a TypeSpec
+
+        Extract the information from a serialized GeoArrow representation and
+        into a TypeSpec instance.
+        """
         if extension_metadata:
             metadata = json.loads(extension_metadata)
         else:
