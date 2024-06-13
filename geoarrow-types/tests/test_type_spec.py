@@ -37,6 +37,15 @@ def test_type_spec_extension_name():
         TypeSpec(encoding=Encoding.GEOARROW).extension_name()
 
 
+def test_type_spec_extension_metadata():
+    assert TypeSpec().extension_metadata() == "{}"
+    assert (
+        TypeSpec(edge_type=EdgeType.SPHERICAL).extension_metadata()
+        == '{"edges": "spherical"}'
+    )
+    assert TypeSpec(crs=gt.OGC_CRS84).extension_metadata().startswith('{"crs": {')
+
+
 def test_type_spec_create():
     # From TypeSpec
     spec = TypeSpec()
