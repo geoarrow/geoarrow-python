@@ -260,7 +260,7 @@ def _validate_storage_type(storage_type, spec):
     """Validate a storage type against a TypeSpec
 
     We don't currently call any constructor with validate_storage_type=True,
-    but if somebody does this it should error until is implemented.
+    but if somebody does this it should error until implemented.
     """
     raise NotImplementedError()
 
@@ -294,14 +294,23 @@ def _deserialize_storage(storage_type, extension_name=None, extension_metadata=N
     if type_name == "struct":
         names, parsed_children = params
         n_dims = len(names)
+        # We could use len(names) here, but we don't actually want to
+        # infer the dimensions if the struct field names are not valid
+        # (because it is typically very easy to set a struct's field names,
+        # as opposed to the fixed-size list where not all implementations
+        # expose that behaviour)
+        n_dims_infer = -1
     else:
         names, n_dims, parsed_children = params
+        n_dims_infer = n_dims
 
     if names in _DIMS_FROM_NAMES:
         dims = _DIMS_FROM_NAMES[names]
-    elif n_dims == 2:
+        if n_dims != dims.count():
+            raise ValueError(f"Expected {n_dims} dimensions but got Dimensions.{dims}")
+    elif n_dims_infer == 2:
         dims = Dimensions.XY
-    elif n_dims == 4:
+    elif n_dims_infer == 4:
         dims = Dimensions.XYZM
     else:
         raise ValueError(f"Can't infer dimensions from coord field names {names}")

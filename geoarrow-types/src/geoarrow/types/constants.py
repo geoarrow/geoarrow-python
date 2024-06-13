@@ -180,6 +180,12 @@ class Dimensions(TypeSpecEnum):
     XYZM = 4
     """XYZM dimensions"""
 
+    def count(self):
+        if self in (Dimensions.UNSPECIFIED, Dimensions.UNKNOWN):
+            return 0
+        else:
+            return len(self.name)
+
     @classmethod
     def _common2(cls, lhs, rhs):
         out = super()._common2(lhs, rhs)

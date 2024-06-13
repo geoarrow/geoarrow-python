@@ -177,25 +177,21 @@ def test_deserialize_infer_geometry_type():
     extension_type = type_pyarrow._deserialize_storage(point)
     assert extension_type.encoding == gt.Encoding.GEOARROW
     assert extension_type.geometry_type == gt.GeometryType.POINT
-    assert extension_type.dimensions == gt.Dimensions.XY
     assert extension_type.coord_type == gt.CoordType.SEPARATED
 
     extension_type = type_pyarrow._deserialize_storage(multipolygon)
     assert extension_type.encoding == gt.Encoding.GEOARROW
     assert extension_type.geometry_type == gt.GeometryType.MULTIPOLYGON
-    assert extension_type.dimensions == gt.Dimensions.XY
     assert extension_type.coord_type == gt.CoordType.SEPARATED
 
     extension_type = type_pyarrow._deserialize_storage(interleaved_point)
     assert extension_type.encoding == gt.Encoding.GEOARROW
     assert extension_type.geometry_type == gt.GeometryType.POINT
-    assert extension_type.dimensions == gt.Dimensions.XY
     assert extension_type.coord_type == gt.CoordType.INTERLEAVED
 
     extension_type = type_pyarrow._deserialize_storage(interleaved_multipolygon)
     assert extension_type.encoding == gt.Encoding.GEOARROW
     assert extension_type.geometry_type == gt.GeometryType.MULTIPOLYGON
-    assert extension_type.dimensions == gt.Dimensions.XY
     assert extension_type.coord_type == gt.CoordType.INTERLEAVED
 
     # extension name would be required for other levels of nesting
@@ -205,6 +201,71 @@ def test_deserialize_infer_geometry_type():
     # If we manually specify the wrong extension name, this should error
     with pytest.raises(ValueError, match="GeometryType is overspecified"):
         type_pyarrow._deserialize_storage(point, "geoarrow.linestring")
+
+
+def test_deserialize_infer_dimensions_separated():
+    extension_type = type_pyarrow._deserialize_storage(
+        pa.struct({d: pa.float64() for d in "xy"})
+    )
+    assert extension_type.dimensions == gt.Dimensions.XY
+
+    extension_type = type_pyarrow._deserialize_storage(
+        pa.struct({d: pa.float64() for d in "xyz"})
+    )
+    assert extension_type.dimensions == gt.Dimensions.XYZ
+
+    extension_type = type_pyarrow._deserialize_storage(
+        pa.struct({d: pa.float64() for d in "xym"})
+    )
+    assert extension_type.dimensions == gt.Dimensions.XYM
+
+    extension_type = type_pyarrow._deserialize_storage(
+        pa.struct({d: pa.float64() for d in "xyzm"})
+    )
+    assert extension_type.dimensions == gt.Dimensions.XYZM
+
+    # Struct coordinates should never have dimensions inferred from number of children
+    with pytest.raises(
+        ValueError, match="Can't infer dimensions from coord field names"
+    ):
+        type_pyarrow._deserialize_storage(pa.struct({d: pa.float64() for d in "ab"}))
+
+
+def test_deserialize_infer_dimensions_interleaved():
+    extension_type = type_pyarrow._deserialize_storage(
+        pa.list_(pa.float64(), list_size=2)
+    )
+    assert extension_type.dimensions == gt.Dimensions.XY
+
+    extension_type = type_pyarrow._deserialize_storage(
+        pa.list_(pa.float64(), list_size=4)
+    )
+    assert extension_type.dimensions == gt.Dimensions.XYZM
+
+    # Fixed-size list should never have dimensions inferred where this would be
+    # ambiguous.
+    with pytest.raises(
+        ValueError, match="Can't infer dimensions from coord field names"
+    ):
+        type_pyarrow._deserialize_storage(pa.list_(pa.float64(), list_size=3))
+
+    # ...but this should be able to be specified using the field name
+    extension_type = type_pyarrow._deserialize_storage(
+        pa.list_(pa.field("xyz", pa.float64()), list_size=3)
+    )
+    assert extension_type.dimensions == gt.Dimensions.XYZ
+
+    extension_type = type_pyarrow._deserialize_storage(
+        pa.list_(pa.field("xym", pa.float64()), list_size=3)
+    )
+    assert extension_type.dimensions == gt.Dimensions.XYM
+
+    # If the number of inferred dimensions does not match the number of actual dimensions,
+    # this should error
+    with pytest.raises(ValueError, match="Expected 4 dimensions but got"):
+        type_pyarrow._deserialize_storage(
+            pa.list_(pa.field("xyz", pa.float64()), list_size=4)
+        )
 
 
 @pytest.mark.parametrize(
