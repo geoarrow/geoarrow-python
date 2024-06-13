@@ -217,7 +217,9 @@ def storage_type(spec: TypeSpec) -> pa.DataType:
 
 
 def _parse_storage(storage_type):
-    """Distill a pyarrow type into the components we need to validate it.
+    """Simplified pyarrow type representation
+
+    Distill a pyarrow type into the components we need to validate it.
     This will return a list where each element is a node. All elements
     will represent a list node except for the last node (which may be
     coordinates for native types or data for serialized types).
@@ -255,11 +257,22 @@ def _parse_storage(storage_type):
 
 
 def _validate_storage_type(storage_type, spec):
+    """Validate a storage type against a TypeSpec
+
+    We don't currently call any constructor with validate_storage_type=True,
+    but if somebody does this it should error until is implemented.
+    """
     raise NotImplementedError()
 
 
 def _deserialize_storage(storage_type, extension_name=None, extension_metadata=None):
+    """Deserialize storage, extension name, and extension metadata
+
+    This is implemented in such a way that it could be reused for another backend
+    (i.e., only requires the "parsed" representation).
+    """
     parsed = _parse_storage(storage_type)
+
     parsed_type_names = tuple(item[0] for item in parsed)
 
     if parsed_type_names not in _SPEC_FROM_TYPE_NESTING:
@@ -276,7 +289,7 @@ def _deserialize_storage(storage_type, extension_name=None, extension_metadata=N
 
         return extension_type(spec, storage_type, validate_storage_type=False)
 
-    # Infer geometry type
+    # Infer geometry type from extension name
     if extension_name is not None:
         spec = TypeSpec.from_extension_name(extension_name).with_defaults(spec)
 
@@ -305,9 +318,11 @@ def _deserialize_storage(storage_type, extension_name=None, extension_metadata=N
 
     spec = spec.with_defaults(dims)
 
+    # Make sure we haven't generated a spec whose extension name doesn't match
     if extension_name is not None and spec.extension_name() != extension_name:
         raise ValueError(f"Can't interpret {storage_type} as {extension_name}")
 
+    # Construct the extension type
     return extension_type(spec, storage_type, validate_storage_type=False)
 
 
