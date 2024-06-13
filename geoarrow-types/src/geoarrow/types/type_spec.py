@@ -69,6 +69,11 @@ class TypeSpec(NamedTuple):
 
         return json.dumps(metadata)
 
+    def to_pyarrow(self):
+        from geoarrow.types.type_pyarrow import extension_type
+
+        return extension_type(self)
+
     def with_defaults(self, defaults=None):
         """Apply defaults to unspecified fields
 
