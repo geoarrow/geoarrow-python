@@ -33,6 +33,11 @@ jobs:
           pushd geoarrow-pyarrow
           pip install ".[test]"
 
+      - name: Install (geoarrow-types)
+        run: |
+          pushd geoarrow-types
+          pip install ".[test]"
+
       - name: Install (geoarrow-pandas)
         run: |
           pushd geoarrow-pandas
@@ -41,6 +46,10 @@ jobs:
       - name: Run tests (geoarrow-pyarrow)
         run: |
           pytest geoarrow-pyarrow/tests -v -s
+
+      - name: Run tests (geoarrow-types)
+        run: |
+          pytest geoarrow-types/tests -v -s
 
       - name: Run tests (geoarrow-pandas)
         run: |
@@ -51,6 +60,12 @@ jobs:
         run: |
           cd geoarrow-pyarrow
           pytest --pyargs geoarrow.pyarrow --doctest-modules --import-mode=importlib
+
+      - name: Run doctests (geoarrow-types)
+        if: success() && matrix.python-version == '3.12'
+        run: |
+          cd geoarrow-types
+          pytest --pyargs geoarrow.types --doctest-modules --import-mode=importlib
 
       - name: Run doctests (geoarrow-pandas)
         if: success() && matrix.python-version == '3.12'
@@ -77,6 +92,11 @@ jobs:
           pushd geoarrow-pyarrow
           pip install -e ".[test]"
 
+      - name: Install (geoarrow-types)
+        run: |
+          pushd geoarrow-types
+          pip install -e ".[test]"
+
       - name: Install (geoarrow-pandas)
         run: |
           pushd geoarrow-pandas
@@ -89,11 +109,17 @@ jobs:
       - name: Install editable
         run: |
           pip install -e geoarrow-pyarrow/
+          pip install -e geoarrow-types/
           pip install -e geoarrow-pandas/
 
       - name: Coverage
         run: |
           pushd geoarrow-pyarrow
+          python -m pytest --cov ./src/geoarrow ..
+          python -m coverage xml
+          popd
+
+          pushd geoarrow-types
           python -m pytest --cov ./src/geoarrow ..
           python -m coverage xml
           popd
@@ -106,4 +132,4 @@ jobs:
       - name: Upload coverage to codecov
         uses: codecov/codecov-action@v2
         with:
-          files: 'geoarrow-pyarrow/coverage.xml,geoarrow-pandas/coverage.xml'
+          files: 'geoarrow-pyarrow/coverage.xml,geoarrow-ptypes/coverage.xml,geoarrow-pandas/coverage.xml'
