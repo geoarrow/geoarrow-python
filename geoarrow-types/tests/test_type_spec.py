@@ -17,6 +17,26 @@ def test_type_spec_repr():
     assert repr(TypeSpec(encoding=Encoding.WKB)) == "TypeSpec(Encoding.WKB)"
 
 
+def test_type_spec_extension_name():
+    assert gt.wkb().extension_name() == "geoarrow.wkb"
+    assert gt.large_wkb().extension_name() == "geoarrow.wkb"
+    assert gt.wkt().extension_name() == "geoarrow.wkt"
+    assert gt.large_wkt().extension_name() == "geoarrow.wkt"
+
+    assert gt.point().extension_name() == "geoarrow.point"
+    assert gt.linestring().extension_name() == "geoarrow.linestring"
+    assert gt.polygon().extension_name() == "geoarrow.polygon"
+    assert gt.multipoint().extension_name() == "geoarrow.multipoint"
+    assert gt.multilinestring().extension_name() == "geoarrow.multilinestring"
+    assert gt.multipolygon().extension_name() == "geoarrow.multipolygon"
+
+    with pytest.raises(ValueError, match="Can't compute extension name for"):
+        TypeSpec().extension_name()
+
+    with pytest.raises(ValueError, match="Can't compute extension name for"):
+        TypeSpec(encoding=Encoding.GEOARROW).extension_name()
+
+
 def test_type_spec_create():
     # From TypeSpec
     spec = TypeSpec()

@@ -1,5 +1,5 @@
+import json
 from typing import NamedTuple, Optional
-
 
 from geoarrow.types.constants import (
     Encoding,
@@ -46,6 +46,28 @@ class TypeSpec(NamedTuple):
     coord_type: CoordType = CoordType.UNSPECIFIED
     edge_type: EdgeType = EdgeType.UNSPECIFIED
     crs: Optional[Crs] = crs.UNSPECIFIED
+
+    def extension_name(self) -> str:
+        if self.encoding in _SERIALIZED_EXT_NAMES:
+            return _SERIALIZED_EXT_NAMES[self.encoding]
+        elif (
+            self.encoding == Encoding.GEOARROW
+            and self.geometry_type in _GEOARROW_EXT_NAMES
+        ):
+            return _GEOARROW_EXT_NAMES[self.geometry_type]
+
+        raise ValueError(f"Can't compute extension name for {self}")
+
+    def extension_metadata(self) -> str:
+        metadata = {}
+
+        if self.edge_type == EdgeType.SPHERICAL:
+            metadata["edges"] = "spherical"
+
+        if self.crs is not None and self.crs is not crs.UNSPECIFIED:
+            metadata["crs"] = self.crs.to_json_dict()
+
+        return json.dumps(metadata)
 
     def with_defaults(self, defaults=None):
         """Apply defaults to unspecified fields
@@ -469,3 +491,19 @@ _SPEC_SPECIFIED_DEFAULTS = TypeSpec(
     edge_type=EdgeType.PLANAR,
     crs=None,
 )
+
+_SERIALIZED_EXT_NAMES = {
+    Encoding.WKB: "geoarrow.wkb",
+    Encoding.LARGE_WKB: "geoarrow.wkb",
+    Encoding.WKT: "geoarrow.wkt",
+    Encoding.LARGE_WKT: "geoarrow.wkt",
+}
+
+_GEOARROW_EXT_NAMES = {
+    GeometryType.POINT: "geoarrow.point",
+    GeometryType.LINESTRING: "geoarrow.linestring",
+    GeometryType.POLYGON: "geoarrow.polygon",
+    GeometryType.MULTIPOINT: "geoarrow.multipoint",
+    GeometryType.MULTILINESTRING: "geoarrow.multilinestring",
+    GeometryType.MULTIPOLYGON: "geoarrow.multipolygon",
+}
