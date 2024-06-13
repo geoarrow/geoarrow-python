@@ -38,12 +38,20 @@ def test_type_spec_extension_name():
 
 
 def test_type_spec_extension_metadata():
-    assert TypeSpec().extension_metadata() == "{}"
+    assert TypeSpec().with_defaults().extension_metadata() == "{}"
     assert (
-        TypeSpec(edge_type=EdgeType.SPHERICAL).extension_metadata()
+        TypeSpec(edge_type=EdgeType.SPHERICAL).with_defaults().extension_metadata()
         == '{"edges": "spherical"}'
     )
-    assert TypeSpec(crs=gt.OGC_CRS84).extension_metadata().startswith('{"crs": {')
+    assert (
+        TypeSpec(crs=gt.OGC_CRS84)
+        .with_defaults()
+        .extension_metadata()
+        .startswith('{"crs": {')
+    )
+
+    with pytest.raises(ValueError, match="Can't compute extension_metadata"):
+        TypeSpec().extension_metadata()
 
 
 def test_type_spec_create():

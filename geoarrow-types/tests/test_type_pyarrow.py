@@ -9,10 +9,16 @@ def test_classes_serialized():
     wkt = gt.wkt().to_pyarrow()
     assert isinstance(wkt, type_pyarrow.WktType)
     assert wkt.encoding == gt.Encoding.WKT
+    assert wkt.geometry_type == gt.GeometryType.GEOMETRY
+    assert wkt.dimensions == gt.Dimensions.UNKNOWN
+    assert wkt.coord_type == gt.CoordType.UNSPECIFIED
 
     wkb = gt.wkb().to_pyarrow()
     assert isinstance(wkb, type_pyarrow.WkbType)
     assert wkb.encoding == gt.Encoding.WKB
+    assert wkb.geometry_type == gt.GeometryType.GEOMETRY
+    assert wkb.dimensions == gt.Dimensions.UNKNOWN
+    assert wkb.coord_type == gt.CoordType.UNSPECIFIED
 
 
 def test_geometry_types():

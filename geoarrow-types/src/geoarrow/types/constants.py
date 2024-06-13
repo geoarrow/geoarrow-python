@@ -116,10 +116,10 @@ class GeometryType(TypeSpecEnum):
     """
 
     UNSPECIFIED = -1
-    """Unknown or unspecified geometry type"""
+    """Unspecified geometry type"""
 
     GEOMETRY = 0
-    """Mixed geometry type"""
+    """Unknown or mixed geometry type"""
 
     POINT = 1
     """Point geometry type"""
@@ -162,8 +162,11 @@ class Dimensions(TypeSpecEnum):
     <Dimensions.XYZM: 4>
     """
 
-    UNSPECIFIED = 0
-    """Unknown or uninitialized dimensions"""
+    UNSPECIFIED = -1
+    """Unspecified dimensions"""
+
+    UNKNOWN = 0
+    """Unknown or mixed dimensions"""
 
     XY = 1
     """XY dimensions"""
@@ -176,6 +179,14 @@ class Dimensions(TypeSpecEnum):
 
     XYZM = 4
     """XYZM dimensions"""
+
+    @classmethod
+    def _common2(cls, lhs, rhs):
+        out = super()._common2(lhs, rhs)
+        if out is not None:
+            return out
+        else:
+            return cls.UNKNOWN
 
 
 class CoordType(TypeSpecEnum):

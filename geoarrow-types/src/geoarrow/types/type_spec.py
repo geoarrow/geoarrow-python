@@ -48,6 +48,11 @@ class TypeSpec(NamedTuple):
     crs: Optional[Crs] = crs.UNSPECIFIED
 
     def extension_name(self) -> str:
+        """Compute the GeoArrow extension_name field
+
+        Compute the extension_name value to use in a GeoArrow extension
+        type implementation.
+        """
         if self.encoding in _SERIALIZED_EXT_NAMES:
             return _SERIALIZED_EXT_NAMES[self.encoding]
         elif (
@@ -59,6 +64,28 @@ class TypeSpec(NamedTuple):
         raise ValueError(f"Can't compute extension name for {self}")
 
     def extension_metadata(self) -> str:
+        """Compute the GeoArrow extension_metadata field
+
+        Compute the extension_metadata value to use in a GeoArrow extension
+        type implementation.
+        """
+        metadata = {}
+
+        if self.edge_type == EdgeType.UNSPECIFIED or self.crs == crs.UNSPECIFIED:
+            raise ValueError(
+                f"Can't compute extension_metadata for {self}: "
+                "edge_type or crs is unspecified"
+            )
+
+        if self.edge_type == EdgeType.SPHERICAL:
+            metadata["edges"] = "spherical"
+
+        if self.crs is not None:
+            metadata["crs"] = self.crs.to_json_dict()
+
+        return json.dumps(metadata)
+
+    def geoparquet_column_metadata(self) -> str:
         metadata = {}
 
         if self.edge_type == EdgeType.SPHERICAL:
@@ -92,6 +119,24 @@ class TypeSpec(NamedTuple):
             defaults = _SPEC_SPECIFIED_DEFAULTS
 
         return TypeSpec.coalesce(self, defaults)
+
+    def canonicalize(self):
+        """Canonicalize the representation of serialized types
+
+        If this type specification represents a serialized type, ensure
+        that the dimensions are UNKNOWN, the geometry type is GEOMETRY,
+        and the coord type is UNSPECIFIED. These ensure that when a type
+        implementation needs to construct a concrete type that its
+        components are represented consistently for serialized types.
+        """
+        if self.encoding.is_serialized():
+            return self.override(
+                geometry_type=GeometryType.GEOMETRY,
+                dimensions=Dimensions.UNKNOWN,
+                coord_type=CoordType.UNSPECIFIED,
+            )
+        else:
+            return self
 
     def override(
         self,

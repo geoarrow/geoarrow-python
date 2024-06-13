@@ -21,7 +21,7 @@ class GeometryExtensionType(pa.ExtensionType):
     def __init__(self, spec: TypeSpec):
         if not isinstance(spec, TypeSpec):
             raise TypeError("GeometryExtensionType must be created from a TypeSpec")
-        self._spec = spec
+        self._spec = spec.canonicalize()
 
         if self._spec.extension_name() != type(self)._extension_name:
             raise ValueError(
