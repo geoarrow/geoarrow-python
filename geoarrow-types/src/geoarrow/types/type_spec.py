@@ -1,5 +1,5 @@
+import json
 from typing import NamedTuple, Optional
-
 
 from geoarrow.types.constants import (
     Encoding,
@@ -47,6 +47,55 @@ class TypeSpec(NamedTuple):
     edge_type: EdgeType = EdgeType.UNSPECIFIED
     crs: Optional[Crs] = crs.UNSPECIFIED
 
+    def extension_name(self) -> str:
+        """Compute the GeoArrow extension_name field
+
+        Compute the extension_name value to use in a GeoArrow extension
+        type implementation.
+        """
+        if self.encoding in _SERIALIZED_EXT_NAMES:
+            return _SERIALIZED_EXT_NAMES[self.encoding]
+        elif (
+            self.encoding == Encoding.GEOARROW
+            and self.geometry_type in _GEOARROW_EXT_NAMES
+        ):
+            return _GEOARROW_EXT_NAMES[self.geometry_type]
+
+        raise ValueError(f"Can't compute extension name for {self}")
+
+    def extension_metadata(self) -> str:
+        """Compute the GeoArrow extension_metadata field
+
+        Compute the extension_metadata value to use in a GeoArrow extension
+        type implementation.
+        """
+        metadata = {}
+
+        if self.edge_type == EdgeType.UNSPECIFIED or self.crs == crs.UNSPECIFIED:
+            raise ValueError(
+                f"Can't compute extension_metadata for {self}: "
+                "edge_type or crs is unspecified"
+            )
+
+        if self.edge_type == EdgeType.SPHERICAL:
+            metadata["edges"] = "spherical"
+
+        if self.crs is not None:
+            metadata["crs"] = self.crs.to_json_dict()
+
+        return json.dumps(metadata)
+
+    def __arrow_c_schema__(self):
+        # We could potentially use nanoarrow or arro3 here,
+        # but use pyarrow if the module is already loaded to
+        # avoid requiring those as a dependency.
+        return self.to_pyarrow().__arrow_c_schema__()
+
+    def to_pyarrow(self):
+        from geoarrow.types.type_pyarrow import extension_type
+
+        return extension_type(self)
+
     def with_defaults(self, defaults=None):
         """Apply defaults to unspecified fields
 
@@ -65,6 +114,24 @@ class TypeSpec(NamedTuple):
             defaults = _SPEC_SPECIFIED_DEFAULTS
 
         return TypeSpec.coalesce(self, defaults)
+
+    def canonicalize(self):
+        """Canonicalize the representation of serialized types
+
+        If this type specification represents a serialized type, ensure
+        that the dimensions are UNKNOWN, the geometry type is GEOMETRY,
+        and the coord type is UNSPECIFIED. These ensure that when a type
+        implementation needs to construct a concrete type that its
+        components are represented consistently for serialized types.
+        """
+        if self.encoding.is_serialized():
+            return self.override(
+                geometry_type=GeometryType.GEOMETRY,
+                dimensions=Dimensions.UNKNOWN,
+                coord_type=CoordType.UNSPECIFIED,
+            )
+        else:
+            return self
 
     def override(
         self,
@@ -154,6 +221,44 @@ class TypeSpec(NamedTuple):
         raise TypeError(
             f"Can't create TypeSpec from object of type {type(obj).__name__}"
         )
+
+    @staticmethod
+    def from_extension_name(extension_name: str):
+        """Parse an extension name into a TypeSpec
+
+        Extracts the information from a GeoArrow extension name and places
+        it in a TypeSpec instance.
+        """
+        if extension_name in _GEOMETRY_TYPE_FROM_EXT:
+            return TypeSpec(
+                encoding=Encoding.GEOARROW,
+                geometry_type=_GEOMETRY_TYPE_FROM_EXT[extension_name],
+            )
+        else:
+            return TypeSpec()
+
+    @staticmethod
+    def from_extension_metadata(extension_metadata: str):
+        """Parse extension metadata into a TypeSpec
+
+        Extract the information from a serialized GeoArrow representation and
+        into a TypeSpec instance.
+        """
+        if extension_metadata:
+            metadata = json.loads(extension_metadata)
+        else:
+            metadata = {}
+
+        out_edges = EdgeType.PLANAR
+        out_crs = None
+
+        if "edges" in metadata:
+            out_edges = EdgeType.create(metadata["edges"])
+
+        if "crs" in metadata and metadata["crs"] is not None:
+            out_crs = crs.ProjJsonCrs(metadata["crs"])
+
+        return TypeSpec(edge_type=out_edges, crs=out_crs)
 
     @classmethod
     def coalesce(cls, *args):
@@ -469,3 +574,21 @@ _SPEC_SPECIFIED_DEFAULTS = TypeSpec(
     edge_type=EdgeType.PLANAR,
     crs=None,
 )
+
+_SERIALIZED_EXT_NAMES = {
+    Encoding.WKB: "geoarrow.wkb",
+    Encoding.LARGE_WKB: "geoarrow.wkb",
+    Encoding.WKT: "geoarrow.wkt",
+    Encoding.LARGE_WKT: "geoarrow.wkt",
+}
+
+_GEOARROW_EXT_NAMES = {
+    GeometryType.POINT: "geoarrow.point",
+    GeometryType.LINESTRING: "geoarrow.linestring",
+    GeometryType.POLYGON: "geoarrow.polygon",
+    GeometryType.MULTIPOINT: "geoarrow.multipoint",
+    GeometryType.MULTILINESTRING: "geoarrow.multilinestring",
+    GeometryType.MULTIPOLYGON: "geoarrow.multipolygon",
+}
+
+_GEOMETRY_TYPE_FROM_EXT = {v: k for k, v in _GEOARROW_EXT_NAMES.items()}
