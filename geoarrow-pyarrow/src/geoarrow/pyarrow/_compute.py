@@ -619,7 +619,7 @@ def to_geopandas(obj):
     >>> import geoarrow.pyarrow as ga
     >>> array = ga.as_geoarrow(["POINT (0 1)"])
     >>> ga.to_geopandas(array)
-    0    POINT (0.00000 1.00000)
+    0    POINT (0 1)
     dtype: geometry
     """
     import geopandas

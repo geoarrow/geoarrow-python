@@ -1,6 +1,7 @@
+from contextlib import contextmanager
 from typing import Optional
 
-from geoarrow.types.type_spec import TypeSpec
+from geoarrow.types.type_spec import TypeSpec, type_spec
 from geoarrow.types.crs import Crs
 from geoarrow.types.constants import (
     Encoding,
@@ -214,6 +215,126 @@ def storage_type(spec: TypeSpec) -> pa.DataType:
         return _NATIVE_STORAGE_TYPES[key]
     else:
         return _SERIALIZED_STORAGE_TYPES[spec.encoding]
+
+
+_extension_types_registered = False
+
+
+def extension_types_registered() -> bool:
+    """Check if PyArrow geometry types were registered
+
+    Returns ``True`` if the GeoArrow extension types were registered by
+    this module or ``False`` otherwise.
+    """
+    global _extension_types_registered
+
+    return _extension_types_registered
+
+
+@contextmanager
+def registered_extension_types():
+    """Context manager to perform some action with extension types registered"""
+    if extension_types_registered():
+        yield
+        return
+
+    register_extension_types()
+    try:
+        yield
+    finally:
+        unregister_extension_types()
+
+
+@contextmanager
+def unregistered_extension_types():
+    """Context manager to perform some action without extension types registered"""
+    if not extension_types_registered():
+        yield
+        return
+
+    unregister_extension_types()
+    try:
+        yield
+    finally:
+        register_extension_types()
+
+
+def register_extension_types(lazy: bool = True) -> None:
+    """Register PyArrow geometry extension types
+
+    Register the extension types in the geoarrow namespace with the pyarrow
+    registry. This enables geoarrow types to be read, written, imported, and
+    exported like any other Arrow type.
+
+    Parameters
+    ----------
+    lazy : bool
+        Skip the registration process if this function has already been called.
+    """
+    global _extension_types_registered
+
+    if lazy and _extension_types_registered is True:
+        return
+
+    _extension_types_registered = None
+
+    all_types = [
+        type_spec(Encoding.WKT).to_pyarrow(),
+        type_spec(Encoding.WKB).to_pyarrow(),
+        type_spec(Encoding.GEOARROW, GeometryType.POINT).to_pyarrow(),
+        type_spec(Encoding.GEOARROW, GeometryType.LINESTRING).to_pyarrow(),
+        type_spec(Encoding.GEOARROW, GeometryType.POLYGON).to_pyarrow(),
+        type_spec(Encoding.GEOARROW, GeometryType.MULTIPOINT).to_pyarrow(),
+        type_spec(Encoding.GEOARROW, GeometryType.MULTILINESTRING).to_pyarrow(),
+        type_spec(Encoding.GEOARROW, GeometryType.MULTIPOLYGON).to_pyarrow(),
+    ]
+
+    n_registered = 0
+    for t in all_types:
+        try:
+            pa.register_extension_type(t)
+            n_registered += 1
+        except pa.ArrowException:
+            pass
+
+    if n_registered != len(all_types):
+        raise RuntimeError("Failed to register one or more extension types")
+
+    _extension_types_registered = True
+
+
+def unregister_extension_types(lazy=True):
+    """Unregister extension types in the geoarrow namespace."""
+    global _extension_types_registered
+
+    if lazy and _extension_types_registered is False:
+        return
+
+    _extension_types_registered = None
+
+    all_type_names = [
+        "geoarrow.wkb",
+        "geoarrow.wkt",
+        "geoarrow.point",
+        "geoarrow.linestring",
+        "geoarrow.polygon",
+        "geoarrow.multipoint",
+        "geoarrow.multilinestring",
+        "geoarrow.multipolygon",
+    ]
+
+    n_unregistered = 0
+    for t_name in all_type_names:
+        try:
+            pa.unregister_extension_type(t_name)
+            n_unregistered += 1
+        except pa.ArrowException:
+            pass
+
+    if n_unregistered != len(all_type_names):
+        raise RuntimeError("Failed to unregister one or more extension types")
+
+    _extension_types_registered = False
 
 
 def _parse_storage(storage_type):

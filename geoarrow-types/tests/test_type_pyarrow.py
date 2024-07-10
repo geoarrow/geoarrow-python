@@ -302,3 +302,15 @@ def test_roundtrip_extension_type(spec):
         extension_type.storage_type, extension_type._extension_name, serialized
     )
     assert extension_type2 == extension_type
+
+
+def test_register_extension_type():
+    with type_pyarrow.registered_extension_types():
+        schema_capsule = gt.point().to_pyarrow().__arrow_c_schema__()
+        pa_type = pa.DataType._import_from_c_capsule(schema_capsule)
+        assert isinstance(pa_type, type_pyarrow.GeometryExtensionType)
+
+    with type_pyarrow.unregistered_extension_types():
+        schema_capsule = gt.point().to_pyarrow().__arrow_c_schema__()
+        pa_type = pa.DataType._import_from_c_capsule(schema_capsule)
+        assert not isinstance(pa_type, type_pyarrow.GeometryExtensionType)

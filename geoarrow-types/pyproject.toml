@@ -41,6 +41,7 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools_scm]
 root = ".."
+tag_regex = "geoarrow-types-([0-9.]+)"
 
 [tool.pytest.ini_options]
 consider_namespace_packages = true
