@@ -115,17 +115,17 @@ jobs:
       - name: Coverage
         run: |
           pushd geoarrow-pyarrow
-          python -m pytest --cov ./src/geoarrow ..
+          python -m pytest --cov ./src/geoarrow .. --import-mode=importlib
           python -m coverage xml
           popd
 
           pushd geoarrow-types
-          python -m pytest --cov ./src/geoarrow ..
+          python -m pytest --cov ./src/geoarrow .. --import-mode=importlib
           python -m coverage xml
           popd
 
           pushd geoarrow-pandas
-          python -m pytest --cov ./src/geoarrow ..
+          python -m pytest --cov ./src/geoarrow .. --import-mode=importlib
           python -m coverage xml
           popd
 
