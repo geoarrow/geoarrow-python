@@ -42,6 +42,7 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools_scm]
 root = ".."
 tag_regex = "geoarrow-types-([0-9.]+)"
+git_describe_command = "git describe --long --match='geoarrow-types-*'"
 
 [tool.pytest.ini_options]
 consider_namespace_packages = true
