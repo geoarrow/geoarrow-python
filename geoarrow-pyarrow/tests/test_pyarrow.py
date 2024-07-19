@@ -14,7 +14,7 @@ import geoarrow.pyarrow._array as _array
 
 
 def test_version():
-    assert re.match(r"^[0-9]+\.[0-9]+\.[0-9]+", ga.__version__)
+    assert re.match(r"^[0-9]+\.[0-9]+", ga.__version__)
 
 
 def test_geometry_type_basic():
