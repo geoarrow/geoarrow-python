@@ -1,3 +1,5 @@
+import re
+
 import pytest
 
 import pandas as pd
@@ -6,6 +8,10 @@ import geoarrow.pandas as gapd
 import geoarrow.pyarrow as ga
 from geoarrow.c import lib
 import numpy as np
+
+
+def test_version():
+    assert re.match(r"^[0-9]+\.[0-9]+", gapd.__version__)
 
 
 def test_dtype_constructor():

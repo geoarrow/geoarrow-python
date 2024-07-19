@@ -1,5 +1,6 @@
 import sys
 import json
+import re
 from math import inf
 
 import pyarrow as pa
@@ -10,6 +11,10 @@ import geoarrow.c.lib as lib
 import geoarrow.pyarrow as ga
 import geoarrow.pyarrow._type as _type
 import geoarrow.pyarrow._array as _array
+
+
+def test_version():
+    assert re.match(r"^[0-9]+\.[0-9]+", ga.__version__)
 
 
 def test_geometry_type_basic():

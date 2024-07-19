@@ -1,3 +1,5 @@
+from geoarrow.types._version import __version__, __version_tuple__  # NOQA: F401
+
 from geoarrow.types.constants import (
     Encoding,
     GeometryType,

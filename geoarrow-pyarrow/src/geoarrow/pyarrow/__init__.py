@@ -7,6 +7,8 @@ Examples
 >>> import geoarrow.pyarrow as ga
 """
 
+from geoarrow.types._version import __version__, __version_tuple__  # NOQA: F401
+
 from geoarrow.c.lib import GeometryType, Dimensions, CoordType, EdgeType, CrsType
 
 from geoarrow.pyarrow._type import (
