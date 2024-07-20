@@ -188,6 +188,14 @@ class PolygonType(GeometryExtensionType):
 
     _extension_name = "geoarrow.polygon"
 
+    def from_geobuffers(
+        self, validity, ring_offsets, coord_offsets, x, y=None, z_or_m=None, m=None
+    ):
+        storage = _from_buffers_polygon(
+            self.storage_type, validity, ring_offsets, coord_offsets, x, y, z_or_m, m
+        )
+        return self.wrap_array(storage)
+
 
 class MultiPointType(GeometryExtensionType):
     """Extension type whose storage is an array of polygons stored
@@ -195,6 +203,12 @@ class MultiPointType(GeometryExtensionType):
     """
 
     _extension_name = "geoarrow.multipoint"
+
+    def from_geobuffers(self, validity, coord_offsets, x, y=None, z_or_m=None, m=None):
+        storage = _from_buffers_linestring(
+            self.storage_type, validity, coord_offsets, x, y, z_or_m, m
+        )
+        return self.wrap_array(storage)
 
 
 class MultiLinestringType(GeometryExtensionType):
@@ -204,6 +218,28 @@ class MultiLinestringType(GeometryExtensionType):
 
     _extension_name = "geoarrow.multilinestring"
 
+    def from_geobuffers(
+        self,
+        validity,
+        linestring_offsets,
+        coord_offsets,
+        x,
+        y=None,
+        z_or_m=None,
+        m=None,
+    ):
+        storage = _from_buffers_polygon(
+            self.storage_type,
+            validity,
+            linestring_offsets,
+            coord_offsets,
+            x,
+            y,
+            z_or_m,
+            m,
+        )
+        return self.wrap_array(storage)
+
 
 class MultiPolygonType(GeometryExtensionType):
     """Extension type whose storage is an array of multilinestrings stored
@@ -211,6 +247,30 @@ class MultiPolygonType(GeometryExtensionType):
     """
 
     _extension_name = "geoarrow.multipolygon"
+
+    def from_geobuffers(
+        self,
+        validity,
+        polygon_offsets,
+        ring_offsets,
+        coord_offsets,
+        x,
+        y=None,
+        z_or_m=None,
+        m=None,
+    ):
+        storage = _from_buffers_multipolygon(
+            self.storage_type,
+            validity,
+            polygon_offsets,
+            ring_offsets,
+            coord_offsets,
+            x,
+            y,
+            z_or_m,
+            m,
+        )
+        return self.wrap_array(storage)
 
 
 def extension_type(
@@ -547,32 +607,20 @@ def _from_buffers_polygon(
     type_, validity, ring_offsets, coord_offsets, x, y=None, z_or_m=None, m=None
 ):
     validity = pa.py_buffer(validity) if validity is not None else None
-    pass
-
-
-def _from_buffers_multipoint(
-    self, validity, coord_offsets, x, y=None, z_or_m=None, m=None
-):
-    validity = pa.py_buffer(validity) if validity is not None else None
-    pass
-
-
-def _from_buffers_multilinestring(
-    self,
-    validity,
-    linestring_offsets,
-    coord_offsets,
-    x,
-    y=None,
-    z_or_m=None,
-    m=None,
-):
-    validity = pa.py_buffer(validity) if validity is not None else None
-    pass
+    rings = _from_buffers_linestring(
+        type_.field(0).type, None, coord_offsets, x, y, z_or_m, m
+    )
+    n_offsets, ring_offsets = _pybuffer_offset(ring_offsets)
+    return pa.Array.from_buffers(
+        type_,
+        n_offsets - 1,
+        buffers=[validity, pa.py_buffer(ring_offsets)],
+        children=[rings],
+    )
 
 
 def _from_buffers_multipolygon(
-    self,
+    type_,
     validity,
     polygon_offsets,
     ring_offsets,
@@ -583,7 +631,16 @@ def _from_buffers_multipolygon(
     m=None,
 ):
     validity = pa.py_buffer(validity) if validity is not None else None
-    pass
+    polygons = _from_buffers_polygon(
+        type_.field(0).type, None, ring_offsets, coord_offsets, x, y, z_or_m, m
+    )
+    n_offsets, polygon_offsets = _pybuffer_offset(polygon_offsets)
+    return pa.Array.from_buffers(
+        type_,
+        n_offsets - 1,
+        buffers=[validity, pa.py_buffer(ring_offsets)],
+        children=[polygons],
+    )
 
 
 def _generate_storage_types():
