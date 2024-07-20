@@ -297,6 +297,28 @@ def test_point_array_from_geobuffers():
     )
 
 
+def test_linestring_array_from_geobuffers():
+    pa_type = gt.linestring().to_pyarrow()
+    arr = pa_type.from_geobuffers(
+        b"\xff",
+        np.array([0, 4], np.int32),
+        np.array([0.0, 1.0, 0.0, 0.0]),
+        np.array([0.0, 0.0, 1.0, 0.0]),
+    )
+    assert len(arr) == 1
+    assert arr.storage == pa.array(
+        [
+            [
+                {"x": 0.0, "y": 0.0},
+                {"x": 1.0, "y": 0.0},
+                {"x": 0.0, "y": 1.0},
+                {"x": 0.0, "y": 0.0},
+            ]
+        ],
+        pa_type.storage_type,
+    )
+
+
 @pytest.mark.parametrize(
     "spec",
     [

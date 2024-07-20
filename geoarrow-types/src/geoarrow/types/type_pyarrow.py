@@ -174,6 +174,12 @@ class LinestringType(GeometryExtensionType):
 
     _extension_name = "geoarrow.linestring"
 
+    def from_geobuffers(self, validity, coord_offsets, x, y=None, z_or_m=None, m=None):
+        storage = _from_buffers_linestring(
+            self.storage_type, validity, coord_offsets, x, y, z_or_m, m
+        )
+        return self.wrap_array(storage)
+
 
 class PolygonType(GeometryExtensionType):
     """Extension type whose storage is an array of polygons stored
@@ -497,6 +503,14 @@ def _from_buffer_ordinate(x):
     return pa.array(mv, pa.float64())
 
 
+def _pybuffer_offset(x):
+    mv = memoryview(x)
+    if mv.format != "i":
+        mv = mv.cast("i")
+
+    return len(mv), pa.py_buffer(mv)
+
+
 def _from_buffers_point(type_, validity, x, y=None, z_or_m=None, m=None):
     validity = pa.py_buffer(validity) if validity is not None else None
     children = [_from_buffer_ordinate(x)]
@@ -518,18 +532,28 @@ def _from_buffers_point(type_, validity, x, y=None, z_or_m=None, m=None):
 def _from_buffers_linestring(
     type_, validity, coord_offsets, x, y=None, z_or_m=None, m=None
 ):
-    pass
+    validity = pa.py_buffer(validity) if validity is not None else None
+    n_offsets, coord_offsets = _pybuffer_offset(coord_offsets)
+    coords = _from_buffers_point(type_.field(0).type, None, x, y, z_or_m, m)
+    return pa.Array.from_buffers(
+        type_,
+        n_offsets - 1,
+        buffers=[validity, pa.py_buffer(coord_offsets)],
+        children=[coords],
+    )
 
 
 def _from_buffers_polygon(
-    self, validity, ring_offsets, coord_offsets, x, y=None, z_or_m=None, m=None
+    type_, validity, ring_offsets, coord_offsets, x, y=None, z_or_m=None, m=None
 ):
+    validity = pa.py_buffer(validity) if validity is not None else None
     pass
 
 
 def _from_buffers_multipoint(
     self, validity, coord_offsets, x, y=None, z_or_m=None, m=None
 ):
+    validity = pa.py_buffer(validity) if validity is not None else None
     pass
 
 
@@ -543,6 +567,7 @@ def _from_buffers_multilinestring(
     z_or_m=None,
     m=None,
 ):
+    validity = pa.py_buffer(validity) if validity is not None else None
     pass
 
 
@@ -557,6 +582,7 @@ def _from_buffers_multipolygon(
     z_or_m=None,
     m=None,
 ):
+    validity = pa.py_buffer(validity) if validity is not None else None
     pass
 
 
