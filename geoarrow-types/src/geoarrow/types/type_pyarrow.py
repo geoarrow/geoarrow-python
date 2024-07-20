@@ -62,6 +62,12 @@ class GeometryExtensionType(pa.ExtensionType):
 
         return ArrowDtype(self)
 
+    def from_geobuffers(self, *args, **kwargs):
+        """Create an array from the appropriate number of buffers
+        for this type.
+        """
+        raise NotImplementedError()
+
     @property
     def spec(self) -> TypeSpec:
         return self._spec
@@ -156,6 +162,10 @@ class PointType(GeometryExtensionType):
 
     _extension_name = "geoarrow.point"
 
+    def from_geobuffers(self, validity, x, y=None, z_or_m=None, m=None):
+        storage = _from_buffers_point(self.storage_type, validity, x, y, z_or_m, m)
+        return self.wrap_array(storage)
+
 
 class LinestringType(GeometryExtensionType):
     """Extension type whose storage is an array of linestrings stored
@@ -163,6 +173,12 @@ class LinestringType(GeometryExtensionType):
     """
 
     _extension_name = "geoarrow.linestring"
+
+    def from_geobuffers(self, validity, coord_offsets, x, y=None, z_or_m=None, m=None):
+        storage = _from_buffers_linestring(
+            self.storage_type, validity, coord_offsets, x, y, z_or_m, m
+        )
+        return self.wrap_array(storage)
 
 
 class PolygonType(GeometryExtensionType):
@@ -172,6 +188,14 @@ class PolygonType(GeometryExtensionType):
 
     _extension_name = "geoarrow.polygon"
 
+    def from_geobuffers(
+        self, validity, ring_offsets, coord_offsets, x, y=None, z_or_m=None, m=None
+    ):
+        storage = _from_buffers_polygon(
+            self.storage_type, validity, ring_offsets, coord_offsets, x, y, z_or_m, m
+        )
+        return self.wrap_array(storage)
+
 
 class MultiPointType(GeometryExtensionType):
     """Extension type whose storage is an array of polygons stored
@@ -179,6 +203,12 @@ class MultiPointType(GeometryExtensionType):
     """
 
     _extension_name = "geoarrow.multipoint"
+
+    def from_geobuffers(self, validity, coord_offsets, x, y=None, z_or_m=None, m=None):
+        storage = _from_buffers_linestring(
+            self.storage_type, validity, coord_offsets, x, y, z_or_m, m
+        )
+        return self.wrap_array(storage)
 
 
 class MultiLinestringType(GeometryExtensionType):
@@ -188,6 +218,28 @@ class MultiLinestringType(GeometryExtensionType):
 
     _extension_name = "geoarrow.multilinestring"
 
+    def from_geobuffers(
+        self,
+        validity,
+        linestring_offsets,
+        coord_offsets,
+        x,
+        y=None,
+        z_or_m=None,
+        m=None,
+    ):
+        storage = _from_buffers_polygon(
+            self.storage_type,
+            validity,
+            linestring_offsets,
+            coord_offsets,
+            x,
+            y,
+            z_or_m,
+            m,
+        )
+        return self.wrap_array(storage)
+
 
 class MultiPolygonType(GeometryExtensionType):
     """Extension type whose storage is an array of multilinestrings stored
@@ -195,6 +247,30 @@ class MultiPolygonType(GeometryExtensionType):
     """
 
     _extension_name = "geoarrow.multipolygon"
+
+    def from_geobuffers(
+        self,
+        validity,
+        polygon_offsets,
+        ring_offsets,
+        coord_offsets,
+        x,
+        y=None,
+        z_or_m=None,
+        m=None,
+    ):
+        storage = _from_buffers_multipolygon(
+            self.storage_type,
+            validity,
+            polygon_offsets,
+            ring_offsets,
+            coord_offsets,
+            x,
+            y,
+            z_or_m,
+            m,
+        )
+        return self.wrap_array(storage)
 
 
 def extension_type(
@@ -477,6 +553,94 @@ def _nested_type(coord, names):
         return pa.list_(_nested_field(coord, names))
     else:
         return coord
+
+
+def _from_buffer_ordinate(x):
+    mv = memoryview(x)
+    if mv.format != "d":
+        mv = mv.cast("d")
+
+    return pa.array(mv, pa.float64())
+
+
+def _pybuffer_offset(x):
+    mv = memoryview(x)
+    if mv.format != "i":
+        mv = mv.cast("i")
+
+    return len(mv), pa.py_buffer(mv)
+
+
+def _from_buffers_point(type_, validity, x, y=None, z_or_m=None, m=None):
+    validity = pa.py_buffer(validity) if validity is not None else None
+    children = [_from_buffer_ordinate(x)]
+    if y is not None:
+        children.append(_from_buffer_ordinate(y))
+    if z_or_m is not None:
+        children.append(_from_buffer_ordinate(z_or_m))
+    if m is not None:
+        children.append(_from_buffer_ordinate(m))
+
+    if pa_types.is_fixed_size_list(type_):
+        length = len(x) // type_.list_size
+    else:
+        length = len(x)
+
+    return pa.Array.from_buffers(type_, length, buffers=[validity], children=children)
+
+
+def _from_buffers_linestring(
+    type_, validity, coord_offsets, x, y=None, z_or_m=None, m=None
+):
+    validity = pa.py_buffer(validity) if validity is not None else None
+    n_offsets, coord_offsets = _pybuffer_offset(coord_offsets)
+    coords = _from_buffers_point(type_.field(0).type, None, x, y, z_or_m, m)
+    return pa.Array.from_buffers(
+        type_,
+        n_offsets - 1,
+        buffers=[validity, pa.py_buffer(coord_offsets)],
+        children=[coords],
+    )
+
+
+def _from_buffers_polygon(
+    type_, validity, ring_offsets, coord_offsets, x, y=None, z_or_m=None, m=None
+):
+    validity = pa.py_buffer(validity) if validity is not None else None
+    rings = _from_buffers_linestring(
+        type_.field(0).type, None, coord_offsets, x, y, z_or_m, m
+    )
+    n_offsets, ring_offsets = _pybuffer_offset(ring_offsets)
+    return pa.Array.from_buffers(
+        type_,
+        n_offsets - 1,
+        buffers=[validity, pa.py_buffer(ring_offsets)],
+        children=[rings],
+    )
+
+
+def _from_buffers_multipolygon(
+    type_,
+    validity,
+    polygon_offsets,
+    ring_offsets,
+    coord_offsets,
+    x,
+    y=None,
+    z_or_m=None,
+    m=None,
+):
+    validity = pa.py_buffer(validity) if validity is not None else None
+    polygons = _from_buffers_polygon(
+        type_.field(0).type, None, ring_offsets, coord_offsets, x, y, z_or_m, m
+    )
+    n_offsets, polygon_offsets = _pybuffer_offset(polygon_offsets)
+    return pa.Array.from_buffers(
+        type_,
+        n_offsets - 1,
+        buffers=[validity, pa.py_buffer(ring_offsets)],
+        children=[polygons],
+    )
 
 
 def _generate_storage_types():

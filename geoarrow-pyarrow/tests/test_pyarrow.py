@@ -29,7 +29,10 @@ def test_geometry_type_basic():
     assert pa_type.coord_type == ga.CoordType.SEPARATE
 
     expected_storage = pa.struct(
-        [pa.field("x", pa.float64()), pa.field("y", pa.float64())]
+        [
+            pa.field("x", pa.float64(), nullable=False),
+            pa.field("y", pa.float64(), nullable=False),
+        ]
     )
     assert pa_type.storage_type == expected_storage
 
