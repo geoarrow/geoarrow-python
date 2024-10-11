@@ -6,6 +6,22 @@ import geoarrow.types as gt
 from geoarrow.types import type_pyarrow
 
 
+def test_wrap_array_non_exact():
+    from pyarrow import compute as pc
+
+    storage = pc.make_struct(
+        pa.array([1.0, 2.0, 3.0]), pa.array([3.0, 4.0, 5.0]), field_names=["x", "y"]
+    )
+    point = gt.point().to_pyarrow()
+    point_ext = point.wrap_array(storage)
+    assert point_ext.type.storage_type.field(0).nullable is False
+
+    storage_chunked = pa.chunked_array([storage, storage])
+    point_chunked_ext = point.wrap_array(storage_chunked)
+    assert point_chunked_ext.type.storage_type.field(0).nullable is False
+    assert point_chunked_ext.num_chunks == 2
+
+
 def test_classes_serialized():
     wkt = gt.wkt().to_pyarrow()
     assert isinstance(wkt, type_pyarrow.WktType)

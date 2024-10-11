@@ -68,6 +68,29 @@ class GeometryExtensionType(pa.ExtensionType):
         """
         raise NotImplementedError()
 
+    def wrap_array(self, storage):
+        # Often this storage has the correct type except for nullable/
+        # non/nullable-ness of children. First check for the easy case
+        # (exactly correct storage type).
+        if storage.type == self.storage_type:
+            return super().wrap_array(storage)
+
+        # A cast won't work because pyarrow won't cast nullable to
+        # non-nullable; however, we can attempt to export to C and
+        # reimport against this after making sure that the storage parses
+        # to the appropriate geometry type.
+        _deserialize_storage(storage.type, self._extension_name)
+
+        # Handle ChunkedArray
+        if isinstance(storage, pa.ChunkedArray):
+            chunks = [self.wrap_array(chunk) for chunk in storage.chunks]
+            return pa.chunked_array(chunks, self)
+
+        _, c_array = storage.__arrow_c_array__()
+        c_schema = self.storage_type.__arrow_c_schema__()
+        storage = pa.Array._import_from_c_capsule(c_schema, c_array)
+        return super().wrap_array(storage)
+
     @property
     def spec(self) -> TypeSpec:
         return self._spec
