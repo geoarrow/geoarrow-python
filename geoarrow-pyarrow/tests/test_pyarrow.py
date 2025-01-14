@@ -18,15 +18,11 @@ def test_version():
 
 
 def test_geometry_type_basic():
-    ctype = lib.CVectorType.Make(
-        ga.GeometryType.POINT, ga.Dimensions.XY, ga.CoordType.SEPARATE
-    )
-
-    pa_type = _type.PointType(ctype)
+    pa_type = _type.point()
 
     assert pa_type.geometry_type == ga.GeometryType.POINT
     assert pa_type.dimensions == ga.Dimensions.XY
-    assert pa_type.coord_type == ga.CoordType.SEPARATE
+    assert pa_type.coord_type == ga.CoordType.SEPARATED
 
     expected_storage = pa.struct(
         [
@@ -36,16 +32,9 @@ def test_geometry_type_basic():
     )
     assert pa_type.storage_type == expected_storage
 
-    with pytest.raises(ValueError):
-        _type.LinestringType(ctype)
-
 
 def test_geometry_type_with():
-    ctype = lib.CVectorType.Make(
-        ga.GeometryType.POINT, ga.Dimensions.XY, ga.CoordType.SEPARATE
-    )
-
-    type_obj = _type.PointType(ctype)
+    type_obj = _type.point()
 
     type_linestring = type_obj.with_geometry_type(ga.GeometryType.LINESTRING)
     assert type_linestring.geometry_type == ga.GeometryType.LINESTRING

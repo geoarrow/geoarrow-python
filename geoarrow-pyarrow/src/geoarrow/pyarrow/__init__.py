@@ -9,7 +9,7 @@ Examples
 
 from geoarrow.types._version import __version__, __version_tuple__  # NOQA: F401
 
-from geoarrow.c.lib import GeometryType, Dimensions, CoordType, EdgeType, CrsType
+from geoarrow.types import GeometryType, Dimensions, CoordType, EdgeType
 
 from geoarrow.pyarrow._type import (
     GeometryExtensionType,

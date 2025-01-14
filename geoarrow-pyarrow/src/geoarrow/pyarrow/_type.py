@@ -1,10 +1,7 @@
-import json
-
 import pyarrow as pa
 import pyarrow_hotfix as _  # noqa: F401
-from geoarrow.c import lib
 
-from geoarrow.types import type_spec
+from geoarrow import types
 from geoarrow.types.type_pyarrow import (
     GeometryExtensionType,
     PointType,
@@ -15,33 +12,8 @@ from geoarrow.types.type_pyarrow import (
     MultiPolygonType,
     WkbType,
     WktType,
+    extension_type,
 )
-
-
-def type_cls_from_name(name):
-    if name == "geoarrow.wkb":
-        return WkbType
-    elif name == "geoarrow.wkt":
-        return WktType
-    elif name == "geoarrow.point":
-        return PointType
-    elif name == "geoarrow.linestring":
-        return LinestringType
-    elif name == "geoarrow.polygon":
-        return PolygonType
-    elif name == "geoarrow.multipoint":
-        return MultiPointType
-    elif name == "geoarrow.multilinestring":
-        return MultiLinestringType
-    elif name == "geoarrow.multipolygon":
-        return MultiPolygonType
-    else:
-        raise ValueError(f'Expected valid extension name but got "{name}"')
-
-
-def _make_default(geometry_type, cls):
-    spec = type_spec(geometry_type=geometry_type)
-    return cls(spec)
 
 
 def wkb() -> WkbType:
@@ -101,10 +73,10 @@ def point() -> PointType:
     >>> ga.point().storage_type
     StructType(struct<x: double, y: double>)
     """
-    return _make_default(lib.GeometryType.POINT, PointType)
+    return extension_type(types.point())
 
 
-def linestring() -> PointType:
+def linestring() -> LinestringType:
     """Geoarrow-encoded line features.
 
     >>> import geoarrow.pyarrow as ga
@@ -113,7 +85,7 @@ def linestring() -> PointType:
     >>> ga.linestring().storage_type
     ListType(list<vertices: struct<x: double, y: double>>)
     """
-    return _make_default(lib.GeometryType.LINESTRING, LinestringType)
+    return extension_type(types.linestring())
 
 
 def polygon() -> PolygonType:
@@ -125,7 +97,7 @@ def polygon() -> PolygonType:
     >>> ga.polygon().storage_type
     ListType(list<rings: list<vertices: struct<x: double, y: double>>>)
     """
-    return _make_default(lib.GeometryType.POLYGON, PolygonType)
+    return extension_type(types.polygon())
 
 
 def multipoint() -> MultiPointType:
@@ -137,7 +109,7 @@ def multipoint() -> MultiPointType:
     >>> ga.multipoint().storage_type
     ListType(list<points: struct<x: double, y: double>>)
     """
-    return _make_default(lib.GeometryType.MULTIPOINT, MultiPointType)
+    return extension_type(types.multipoint())
 
 
 def multilinestring() -> MultiLinestringType:
@@ -149,7 +121,7 @@ def multilinestring() -> MultiLinestringType:
     >>> ga.multilinestring().storage_type
     ListType(list<linestrings: list<vertices: struct<x: double, y: double>>>)
     """
-    return _make_default(lib.GeometryType.MULTILINESTRING, MultiLinestringType)
+    return extension_type(types.multilinestring())
 
 
 def multipolygon() -> MultiPolygonType:
@@ -161,26 +133,7 @@ def multipolygon() -> MultiPolygonType:
     >>> ga.multipolygon().storage_type
     ListType(list<polygons: list<rings: list<vertices: struct<x: double, y: double>>>>)
     """
-    return _make_default(lib.GeometryType.MULTIPOLYGON, MultiPolygonType)
-
-
-def extension_type(
-    geometry_type,
-    dimensions=lib.Dimensions.XY,
-    coord_type=lib.CoordType.SEPARATE,
-    edge_type=lib.EdgeType.PLANAR,
-    crs=None,
-    crs_type=None,
-) -> GeometryExtensionType:
-    """Generic vector geometry type constructor.
-
-    >>> import geoarrow.pyarrow as ga
-    >>> ga.extension_type(ga.GeometryType.POINT, crs="EPSG:1234")
-    PointType(geoarrow.point <EPSG:1234>)
-    """
-    ctype = lib.CVectorType.Make(geometry_type, dimensions, coord_type)
-    cls = type_cls_from_name(ctype.extension_name)
-    return cls(ctype).with_edge_type(edge_type).with_crs(crs, crs_type)
+    return extension_type(types.multipolygon())
 
 
 def _vector_type_common2(a, b):
