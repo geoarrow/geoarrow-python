@@ -64,6 +64,18 @@ class GeometryExtensionType(pa.ExtensionType):
 
         return ArrowDtype(self)
 
+    def __arrow_ext_class__(self):
+        if GeometryExtensionType._array_cls_from_name:
+            return GeometryExtensionType._array_cls_from_name(self.extension_name)
+        else:
+            return super().__arrow_ext_class__()
+
+    def __arrow_ext_scalar_class__(self):
+        if GeometryExtensionType._scalar_cls_from_name:
+            return GeometryExtensionType._scalar_cls_from_name(self.extension_name)
+        else:
+            return super().__arrow_ext_scalar_class__()
+
     def from_geobuffers(self, *args, **kwargs):
         """Create an array from the appropriate number of buffers
         for this type.

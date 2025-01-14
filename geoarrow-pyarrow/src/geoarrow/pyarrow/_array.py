@@ -55,10 +55,10 @@ class GeometryExtensionArray(pa.ExtensionArray):
         tail_str = [f"<{item.as_py()}>" for item in tail]
         for i in range(len(head)):
             if len(head_str[i]) > max_width:
-                head_str[i] = f"{head_str[i][:(max_width - 4)]}...>"
+                head_str[i] = f"{head_str[i][: (max_width - 4)]}...>"
         for i in range(len(tail)):
             if len(tail_str[i]) > max_width:
-                tail_str[i] = f"{tail_str[i][:(max_width - 4)]}...>"
+                tail_str[i] = f"{tail_str[i][: (max_width - 4)]}...>"
 
         type_name = type(self).__name__
         head_str = "\n".join(head_str)
