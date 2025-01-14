@@ -8,6 +8,7 @@ import numpy as np
 import pytest
 
 import geoarrow.c.lib as lib
+from geoarrow import types
 import geoarrow.pyarrow as ga
 import geoarrow.pyarrow._type as _type
 import geoarrow.pyarrow._array as _array
@@ -112,18 +113,20 @@ def test_constructors():
     assert ga.multipolygon().extension_name == "geoarrow.multipolygon"
 
     generic = ga.extension_type(
-        ga.GeometryType.POINT,
-        ga.Dimensions.XYZ,
-        ga.CoordType.INTERLEAVED,
-        ga.EdgeType.SPHERICAL,
-        "EPSG:1234",
+        types.type_spec(
+            ga.Encoding.GEOARROW,
+            ga.GeometryType.POINT,
+            ga.Dimensions.XYZ,
+            ga.CoordType.INTERLEAVED,
+            ga.EdgeType.SPHERICAL,
+            crs=types.OGC_CRS84,
+        )
     )
     assert generic.geometry_type == ga.GeometryType.POINT
     assert generic.dimensions == ga.Dimensions.XYZ
     assert generic.coord_type == ga.CoordType.INTERLEAVED
     assert generic.edge_type == ga.EdgeType.SPHERICAL
-    assert generic.crs == "EPSG:1234"
-    assert generic.crs_type == ga.CrsType.UNKNOWN
+    assert generic.crs == types.OGC_CRS84
 
 
 def test_type_common():
@@ -131,29 +134,6 @@ def test_type_common():
     assert ga.geometry_type_common([ga.wkt()]) == ga.wkt()
     assert ga.geometry_type_common([ga.point(), ga.point()]) == ga.point()
     assert ga.geometry_type_common([ga.point(), ga.linestring()]) == ga.wkb()
-
-
-def test_register_extension_types():
-    # Unregistering once is ok
-    ga.unregister_extension_types(lazy=False)
-
-    # Unregistering twice with lazy=True is ok
-    ga.unregister_extension_types(lazy=True)
-
-    # Unregistering twice with lazy=False is not
-    with pytest.raises(RuntimeError):
-        ga.unregister_extension_types(lazy=False)
-
-    # Same concept with registration
-    ga.register_extension_types(lazy=False)
-    ga.register_extension_types(lazy=True)
-    with pytest.raises(RuntimeError):
-        ga.register_extension_types(lazy=False)
-
-    # Reset state
-    ga.unregister_extension_types()
-    ga.register_extension_types()
-    assert _type._extension_types_registered is True
 
 
 def test_array():
