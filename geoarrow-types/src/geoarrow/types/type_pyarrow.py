@@ -19,6 +19,8 @@ class GeometryExtensionType(pa.ExtensionType):
     """Extension type base class for vector geometry types."""
 
     _extension_name = None
+    _array_cls_from_name = None
+    _scalar_cls_from_name = None
 
     def __init__(
         self, spec: TypeSpec, *, storage_type=None, validate_storage_type=True

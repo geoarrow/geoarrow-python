@@ -33,6 +33,9 @@ from geoarrow.pyarrow._type import (
     multipolygon,
     extension_type,
     geometry_type_common,
+)
+
+from geoarrow.types.type_pyarrow import (
     register_extension_types,
     unregister_extension_types,
 )
