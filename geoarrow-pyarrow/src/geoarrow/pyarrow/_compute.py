@@ -1,7 +1,16 @@
 import pyarrow as pa
 import pyarrow.compute as pc
 import pyarrow_hotfix as _  # noqa: F401
-from geoarrow.c.lib import CoordType, Dimensions, EdgeType, GeometryType
+
+from geoarrow.types import (
+    type_spec,
+    Encoding,
+    CoordType,
+    Dimensions,
+    EdgeType,
+    GeometryType,
+    TypeSpec,
+)
 from geoarrow.pyarrow import _type
 from geoarrow.pyarrow._array import array
 from geoarrow.pyarrow._kernel import Kernel
@@ -93,8 +102,8 @@ def unique_geometry_types(obj):
         return pa.array(
             [
                 {
-                    "geometry_type": obj.type.geometry_type,
-                    "dimensions": obj.type.dimensions,
+                    "geometry_type": int(obj.type.geometry_type),
+                    "dimensions": _DIMENSIONS_TO_ISO[obj.type.dimensions],
                 }
             ],
             type=out_type,
@@ -107,21 +116,30 @@ def unique_geometry_types(obj):
     py_geometry_types = []
     for item in result:
         item_int = item.as_py()
+
         if item_int >= 3000:
-            dimensions = Dimensions.XYZM
+            dimensions = Dimensions.XYZM.value
             item_int -= 3000
         elif item_int >= 2000:
-            dimensions = Dimensions.XYM
+            dimensions = Dimensions.XYM.value
             item_int -= 2000
         elif item_int >= 1000:
-            dimensions = Dimensions.XYZ
+            dimensions = Dimensions.XYZ.value
             item_int -= 1000
         else:
-            dimensions = Dimensions.XY
+            dimensions = Dimensions.XY.value
 
         py_geometry_types.append({"geometry_type": item_int, "dimensions": dimensions})
 
     return pa.array(py_geometry_types, type=out_type)
+
+
+_DIMENSIONS_TO_ISO = {
+    Dimensions.XY: 0,
+    Dimensions.XYZ: 1000,
+    Dimensions.XYM: 2000,
+    Dimensions.XYZM: 3000,
+}
 
 
 def infer_type_common(obj, coord_type=None, promote_multi=False, _geometry_types=None):
@@ -146,7 +164,7 @@ def infer_type_common(obj, coord_type=None, promote_multi=False, _geometry_types
             return obj.type.with_coord_type(coord_type)
 
     if coord_type is None:
-        coord_type = CoordType.SEPARATE
+        coord_type = CoordType.SEPARATED
 
     if _geometry_types is None:
         types = unique_geometry_types(obj)
@@ -159,53 +177,22 @@ def infer_type_common(obj, coord_type=None, promote_multi=False, _geometry_types
 
     types = types.flatten()
 
-    unique_dims = types[1].unique().to_pylist()
-    has_z = any(dim in (Dimensions.XYZ, Dimensions.XYZM) for dim in unique_dims)
-    has_m = any(dim in (Dimensions.XYM, Dimensions.XYZM) for dim in unique_dims)
-    if has_z and has_m:
-        dimensions = Dimensions.XYZM
-    elif has_z:
-        dimensions = Dimensions.XYZ
-    elif has_m:
-        dimensions = Dimensions.XYM
-    else:
-        dimensions = Dimensions.XY
+    dims = [Dimensions(dim) for dim in types[1].to_pylist()]
+    dims = Dimensions.common(*dims)
 
-    unique_geom_types = types[0].unique().to_pylist()
-    if len(unique_geom_types) == 1:
-        geometry_type = unique_geom_types[0]
-    elif all(
-        t in (GeometryType.POINT, GeometryType.MULTIPOINT) for t in unique_geom_types
-    ):
-        geometry_type = GeometryType.MULTIPOINT
-    elif all(
-        t in (GeometryType.LINESTRING, GeometryType.MULTILINESTRING)
-        for t in unique_geom_types
-    ):
-        geometry_type = GeometryType.MULTILINESTRING
-    elif all(
-        t in (GeometryType.POLYGON, GeometryType.MULTIPOLYGON)
-        for t in unique_geom_types
-    ):
-        geometry_type = GeometryType.MULTIPOLYGON
-    else:
-        return (
-            _type.wkb()
-            .with_edge_type(obj.type.edge_type)
-            .with_crs(obj.type.crs, obj.type.crs_type)
-        )
+    geometry_types = [
+        GeometryType(geometry_type) for geometry_type in types[0].to_pylist()
+    ]
+    geometry_type = GeometryType.coalesce(*geometry_types)
 
-    if promote_multi and geometry_type <= GeometryType.POLYGON:
-        geometry_type += 3
+    if promote_multi and geometry_type.value in (1, 2, 3):
+        geometry_type = GeometryType(geometry_type.value + 3)
 
-    return _type.extension_type(
-        geometry_type,
-        dimensions,
-        coord_type,
-        edge_type=obj.type.edge_type,
-        crs=obj.type.crs,
-        crs_type=obj.type.crs_type,
-    )
+    spec = TypeSpec.coalesce(
+        type_spec(Encoding.GEOARROW, dims, geometry_type), obj.type.spec
+    ).canonicalize()
+
+    return _type.extension_type(spec)
 
 
 def as_wkt(obj):
@@ -283,10 +270,16 @@ def as_geoarrow(obj, type=None, coord_type=None, promote_multi=False):
             obj, coord_type=coord_type, promote_multi=promote_multi
         )
 
-    if obj.type.geoarrow_id == type.geoarrow_id:
+    if obj.type.spec == type.spec:
         return obj
 
-    return push_all(Kernel.as_geoarrow, obj, args={"type_id": type.geoarrow_id})
+    from geoarrow.c import lib
+
+    cschema = lib.SchemaHolder()
+    type._export_to_c(cschema._addr())
+    ctype = lib.CVectorType.FromExtension(cschema)
+
+    return push_all(Kernel.as_geoarrow, obj, args={"type_id": ctype.id})
 
 
 def format_wkt(obj, precision=None, max_element_size_bytes=None):
@@ -313,7 +306,7 @@ def format_wkt(obj, precision=None, max_element_size_bytes=None):
     )
 
 
-def make_point(x, y, z=None, m=None, crs=None, crs_type=None):
+def make_point(x, y, z=None, m=None, crs=None):
     """Create a geoarrow-encoded point array from two or more arrays
     representing x, y, and/or z, and/or m values. In many cases, this
     is a zero-copy operation if the input arrays are already in a
@@ -342,9 +335,7 @@ def make_point(x, y, z=None, m=None, crs=None, crs_type=None):
         dimensions = Dimensions.XY
         field_names = ["x", "y"]
 
-    type = _type.extension_type(
-        GeometryType.POINT, dimensions, crs=crs, crs_type=crs_type
-    )
+    type = _type.extension_type(type_spec(GeometryType.POINT, dimensions, crs=crs))
     args = [x, y] + [el for el in [z, m] if el is not None]
     args = [pa.array(el, pa.float64()) for el in args]
     storage = pc.make_struct(*args, field_names=field_names)
@@ -394,7 +385,7 @@ def box(obj):
 
     # Optimization: a box of points is just x, x, y, y with zero-copy
     # if the coord type is struct
-    if obj.type.coord_type == CoordType.SEPARATE and len(obj) > 0:
+    if obj.type.coord_type == CoordType.SEPARATED and len(obj) > 0:
         if obj.type.geometry_type == GeometryType.POINT and isinstance(
             obj, pa.ChunkedArray
         ):
@@ -439,7 +430,7 @@ def box_agg(obj):
 
     # Optimization: pyarrow's minmax kernel is fast and we can use it if we have struct
     # coords. So far, only a measurable improvement for points.
-    if obj.type.coord_type == CoordType.SEPARATE and len(obj) > 0:
+    if obj.type.coord_type == CoordType.SEPARATED and len(obj) > 0:
         if obj.type.geometry_type == GeometryType.POINT and isinstance(
             obj, pa.ChunkedArray
         ):
@@ -525,7 +516,7 @@ def with_edge_type(obj, edge_type):
     return new_type.wrap_array(ensure_storage(obj))
 
 
-def with_crs(obj, crs, crs_type=None):
+def with_crs(obj, crs):
     """Force a :class:`geoarrow.CrsType`/crs value on an array.
 
     >>> import geoarrow.pyarrow as ga
@@ -534,7 +525,7 @@ def with_crs(obj, crs, crs_type=None):
     <POINT (0 1)>
     """
     obj = obj_as_array_or_chunked(obj)
-    new_type = obj.type.with_crs(crs, crs_type)
+    new_type = obj.type.with_crs(crs)
     return new_type.wrap_array(ensure_storage(obj))
 
 
