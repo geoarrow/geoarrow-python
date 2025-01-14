@@ -50,37 +50,8 @@ def test_geometry_type_with():
     assert type_spherical.edge_type == ga.EdgeType.SPHERICAL
 
     # Explicit type
-    type_crs = type_obj.with_crs("EPSG:1234", ga.CrsType.UNKNOWN)
-    assert type_crs.crs_type == ga.CrsType.UNKNOWN
-    assert type_crs.crs == "EPSG:1234"
-
-    type_crs = type_obj.with_crs(b"EPSG:1234", ga.CrsType.UNKNOWN)
-    assert type_crs.crs_type == ga.CrsType.UNKNOWN
-    assert type_crs.crs == "EPSG:1234"
-
-    type_crs = type_obj.with_crs({}, ga.CrsType.UNKNOWN)
-    assert type_crs.crs_type == ga.CrsType.UNKNOWN
-    assert type_crs.crs == "{}"
-
-    type_crs = type_obj.with_crs("{}", ga.CrsType.PROJJSON)
-    assert type_crs.crs_type == ga.CrsType.PROJJSON
-    assert type_crs.crs == "{}"
-
-    with pytest.raises(TypeError, match="Unknown type for crs object"):
-        type_obj.with_crs(pa.array([]), ga.CrsType.UNKNOWN)
-
-    # Implicit type
-    type_crs = type_obj.with_crs("EPSG:1234")
-    assert type_crs.crs_type == ga.CrsType.UNKNOWN
-    assert type_crs.crs == "EPSG:1234"
-
-    type_crs = type_obj.with_crs(b"EPSG:1234")
-    assert type_crs.crs_type == ga.CrsType.UNKNOWN
-    assert type_crs.crs == "EPSG:1234"
-
-    type_crs = type_obj.with_crs({})
-    assert type_crs.crs_type == ga.CrsType.PROJJSON
-    assert type_crs.crs == "{}"
+    type_crs = type_obj.with_crs(types.OGC_CRS84)
+    assert type_crs.crs == types.OGC_CRS84
 
 
 def test_type_with_crs_pyproj():
@@ -89,14 +60,7 @@ def test_type_with_crs_pyproj():
 
     # Implicit type
     type_crs = type_obj.with_crs(pyproj.CRS("EPSG:32620"))
-    assert type_crs.crs_type == ga.CrsType.PROJJSON
-    crs_dict = json.loads(type_crs.crs)
-    assert crs_dict["id"]["code"] == 32620
-
-    # Explicit type
-    type_crs = type_obj.with_crs(pyproj.CRS("EPSG:32620"), ga.CrsType.PROJJSON)
-    assert type_crs.crs_type == ga.CrsType.PROJJSON
-    crs_dict = json.loads(type_crs.crs)
+    crs_dict = type_crs.crs.to_json_dict()
     assert crs_dict["id"]["code"] == 32620
 
 

@@ -81,7 +81,6 @@ class GeometryExtensionType(pa.ExtensionType):
         # non-nullable; however, we can attempt to export to C and
         # reimport against this after making sure that the storage parses
         # to the appropriate geometry type.
-        _deserialize_storage(storage.type, self._extension_name)
 
         # Handle ChunkedArray
         if isinstance(storage, pa.ChunkedArray):
@@ -160,6 +159,67 @@ class GeometryExtensionType(pa.ExtensionType):
         'EPSG:1234'
         """
         return self._spec.crs
+
+    def with_metadata(self, metadata):
+        """This type with the extension metadata (e.g., copied from some other type)
+        >>> import geoarrow.pyarrow as ga
+        >>> ga.point().with_metadata('{"crs": "EPSG:1234"}').crs
+        'EPSG:1234'
+        """
+        if isinstance(metadata, str):
+            metadata = metadata.encode("UTF-8")
+        return type(self).__arrow_ext_deserialize__(self.storage_type, metadata)
+
+    def with_geometry_type(self, geometry_type):
+        """Returns a new type with the specified :class:`geoarrow.GeometryType`.
+        >>> import geoarrow.pyarrow as ga
+        >>> ga.point().with_geometry_type(ga.GeometryType.LINESTRING)
+        LinestringType(geoarrow.linestring)
+        """
+        spec = type_spec(Encoding.GEOARROW, geometry_type=geometry_type)
+        spec = TypeSpec.coalesce(spec, self.spec).canonicalize()
+        return extension_type(spec)
+
+    def with_dimensions(self, dimensions):
+        """Returns a new type with the specified :class:`geoarrow.Dimensions`.
+        >>> import geoarrow.pyarrow as ga
+        >>> ga.point().with_dimensions(ga.Dimensions.XYZ)
+        PointType(geoarrow.point_z)
+        """
+        spec = type_spec(dimensions=dimensions)
+        spec = TypeSpec.coalesce(spec, self.spec).canonicalize()
+        return extension_type(spec)
+
+    def with_coord_type(self, coord_type):
+        """Returns a new type with the specified :class:`geoarrow.CoordType`.
+        >>> import geoarrow.pyarrow as ga
+        >>> ga.point().with_coord_type(ga.CoordType.INTERLEAVED)
+        PointType(interleaved geoarrow.point)
+        """
+        spec = type_spec(coord_type=coord_type)
+        spec = TypeSpec.coalesce(spec, self.spec).canonicalize()
+        return extension_type(spec)
+
+    def with_edge_type(self, edge_type):
+        """Returns a new type with the specified :class:`geoarrow.EdgeType`.
+        >>> import geoarrow.pyarrow as ga
+        >>> ga.linestring().with_edge_type(ga.EdgeType.SPHERICAL)
+        LinestringType(spherical geoarrow.linestring)
+        """
+        spec = type_spec(edge_type=edge_type)
+        spec = TypeSpec.coalesce(spec, self.spec).canonicalize()
+        return extension_type(spec)
+
+    def with_crs(self, crs):
+        """Returns a new type with the specified coordinate reference system
+        :class:`geoarrow.CrsType` combination.
+        >>> import geoarrow.pyarrow as ga
+        >>> ga.linestring().with_crs("EPSG:1234")
+        LinestringType(geoarrow.linestring <EPSG:1234>)
+        """
+        spec = type_spec(crs=crs)
+        spec = TypeSpec.coalesce(spec, self.spec).canonicalize()
+        return extension_type(spec)
 
 
 class WkbType(GeometryExtensionType):
