@@ -1,3 +1,4 @@
+from typing import Iterable
 import pyarrow as pa
 import pyarrow_hotfix as _  # noqa: F401
 
@@ -136,31 +137,9 @@ def multipolygon() -> MultiPolygonType:
     return extension_type(types.multipolygon())
 
 
-def _vector_type_common2(a, b):
-    if not isinstance(a, GeometryExtensionType) or not isinstance(
-        b, GeometryExtensionType
-    ):
-        raise ValueError(
-            f"Can't compute common type between '{a}' and '{b}': non-geometry type"
-        )
-
-    if a == b:
-        return a
-
-    # This computation doesn't handle non-equal metadata (crs, edge type)
-    metadata_a = a._type.extension_metadata
-    metadata_b = b._type.extension_metadata
-    if metadata_a != metadata_b:
-        raise ValueError(
-            f"Can't compute common type between '{a}' and '{b}': metadata not equal"
-        )
-
-    # TODO: There are a number of other things we can try (e.g., promote multi)
-    # For now, just use wkb() if the types aren't exactly the same
-    return wkb().with_metadata(metadata_a)
-
-
-def geometry_type_common(types):
+def geometry_type_common(
+    type_objects: Iterable[GeometryExtensionType],
+) -> GeometryExtensionType:
     """Compute common type
 
     From a sequence of GeoArrow types, return a type to which all can be cast
@@ -172,15 +151,14 @@ def geometry_type_common(types):
     >>> ga.geometry_type_common([ga.point(), ga.point()])
     PointType(geoarrow.point)
     """
-    types = list(types)
+    type_objects = list(type_objects)
 
-    if len(types) == 0:
+    if len(type_objects) == 0:
         # Would be nice to have an empty type option here
         return wkb()
-    elif len(types) == 1:
-        return types[0]
+    elif len(type_objects) == 1:
+        return type_objects[0]
 
-    for i in reversed(range(len(types) - 1)):
-        types[i] = _vector_type_common2(types[i], types[i + 1])
-
-    return types[0]
+    specs = [t.spec for t in type_objects]
+    spec = types.TypeSpec.common(*specs).canonicalize()
+    return extension_type(spec)

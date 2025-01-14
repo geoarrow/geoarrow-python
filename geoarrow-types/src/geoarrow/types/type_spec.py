@@ -116,13 +116,17 @@ class TypeSpec(NamedTuple):
         return TypeSpec.coalesce(self, defaults)
 
     def canonicalize(self):
-        """Canonicalize the representation of serialized types
+        """Canonicalize the representation of a spec
 
         If this type specification represents a serialized type, ensure
         that the dimensions are UNKNOWN, the geometry type is GEOMETRY,
-        and the coord type is UNSPECIFIED. These ensure that when a type
+        and the coord type is UNSPECIFIED. Conversely, when geometry
+        type is UNKNOWN, the geometry type can't be guessed and we
+        need to set the encoding to a serialized type.
+
+        These ensure that when a type
         implementation needs to construct a concrete type that its
-        components are represented consistently for serialized types.
+        components are represented consistently.
         """
         if self.encoding.is_serialized():
             return self.override(
@@ -130,6 +134,8 @@ class TypeSpec(NamedTuple):
                 dimensions=Dimensions.UNKNOWN,
                 coord_type=CoordType.UNSPECIFIED,
             )
+        elif self.geometry_type == GeometryType.GEOMETRY:
+            return self.override(encoding=Encoding.WKB).canonicalize()
         else:
             return self
 
