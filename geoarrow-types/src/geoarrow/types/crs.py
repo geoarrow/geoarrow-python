@@ -80,6 +80,16 @@ class ProjJsonCrs(Crs):
                 "ProjJsonCrs can only be created from Crs, dict, str, or bytes"
             )
 
+    def __eq__(self, value):
+        # Some duplication with _crs_equal(), but using that here
+        # involves some recursion that's difficult to avoid
+        if isinstance(value, UnspecifiedCrs):
+            return False
+        elif hasattr(value, "to_json_dict"):
+            return self.to_json_dict() == value.to_json_dict()
+        else:
+            return False
+
     def to_json(self) -> str:
         if self._str is None:
             self._str = json.dumps(self._obj)
@@ -98,7 +108,7 @@ class ProjJsonCrs(Crs):
             if "id" in crs_dict:
                 crs_id = crs_dict["id"]
                 if "authority" in crs_id and "code" in crs_id:
-                    return f'ProjJsonCrs({crs_id["authority"]}:{crs_id["code"]})'
+                    return f"ProjJsonCrs({crs_id['authority']}:{crs_id['code']})"
 
         except ValueError:
             pass

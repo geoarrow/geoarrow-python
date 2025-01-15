@@ -4,6 +4,7 @@ import pyarrow as pa
 import numpy as np
 import pytest
 
+from geoarrow import types
 import geoarrow.pyarrow as ga
 import geoarrow.pyarrow._kernel as _kernel
 import geoarrow.pyarrow._compute as _compute
@@ -153,85 +154,73 @@ def test_infer_type_common():
 
     already_geoarrow = ga.as_geoarrow(["POINT (0 1)"])
     common = _compute.infer_type_common(already_geoarrow)
-    assert common.geoarrow_id == already_geoarrow.type.geoarrow_id
+    assert common.spec == already_geoarrow.type.spec
     common_interleaved = _compute.infer_type_common(
         already_geoarrow, coord_type=ga.CoordType.INTERLEAVED
     )
     assert (
-        common_interleaved.geoarrow_id
-        == already_geoarrow.type.with_coord_type(ga.CoordType.INTERLEAVED).geoarrow_id
+        common_interleaved.spec
+        == already_geoarrow.type.with_coord_type(ga.CoordType.INTERLEAVED).spec
     )
 
-    point = ga.wkt().with_crs("EPSG:1234").wrap_array(pa.array(["POINT (0 1)"]))
+    point = ga.wkt().with_crs(types.OGC_CRS84).wrap_array(pa.array(["POINT (0 1)"]))
     common = _compute.infer_type_common(point)
-    assert common.geoarrow_id == ga.point().geoarrow_id
-    assert common.crs == "EPSG:1234"
+    assert common.spec == ga.point().with_crs(types.OGC_CRS84).spec
 
     common_promote_multi = _compute.infer_type_common(point, promote_multi=True)
-    assert common_promote_multi.geoarrow_id == ga.multipoint().geoarrow_id
+    assert common_promote_multi.spec == ga.multipoint().with_crs(types.OGC_CRS84).spec
 
     point_z_and_zm = ga.array(["POINT (0 1)", "POINT ZM (0 1 2 3)"])
     common = _compute.infer_type_common(point_z_and_zm)
-    assert (
-        common.geoarrow_id == ga.point().with_dimensions(ga.Dimensions.XYZM).geoarrow_id
-    )
+    assert common.spec == ga.point().with_dimensions(ga.Dimensions.XYZM).spec
 
     point_m_and_z = ga.array(["POINT M (0 1 2)", "POINT Z (0 1 2)"])
     common = _compute.infer_type_common(point_m_and_z)
-    assert (
-        common.geoarrow_id == ga.point().with_dimensions(ga.Dimensions.XYZM).geoarrow_id
-    )
+    assert common.spec == ga.point().with_dimensions(ga.Dimensions.XYZM).spec
 
     mixed = (
         ga.wkt()
-        .with_crs("EPSG:1234")
+        .with_crs(types.OGC_CRS84)
         .wrap_array(pa.array(["POINT (0 1)", "LINESTRING (0 1, 2 3)"]))
     )
     common = _compute.infer_type_common(mixed)
-    assert common.geoarrow_id == ga.wkb().geoarrow_id
-    assert common.crs == "EPSG:1234"
+    assert common.spec == ga.wkb().with_crs(types.OGC_CRS84).spec
 
     point_and_multi = ga.array(["POINT (0 1)", "MULTIPOINT (2 3)"])
     common = _compute.infer_type_common(point_and_multi)
-    assert common.geoarrow_id == ga.multipoint().geoarrow_id
+    assert common.spec == ga.multipoint().spec
 
     linestring_and_multi = ga.array(
         ["LINESTRING (0 1, 2 3)", "MULTILINESTRING ((0 1, 2 3))"]
     )
     common = _compute.infer_type_common(linestring_and_multi)
-    assert common.geoarrow_id == ga.multilinestring().geoarrow_id
+    assert common.spec == ga.multilinestring().spec
 
     polygon_and_multi = ga.array(
         ["POLYGON ((0 0, 0 1, 1 0, 0 0))", "MULTIPOLYGON (((0 0, 0 1, 1 0, 0 0)))"]
     )
     common = _compute.infer_type_common(polygon_and_multi)
-    assert common.geoarrow_id == ga.multipolygon().geoarrow_id
+    assert common.spec == ga.multipolygon().spec
 
 
 def test_as_geoarrow():
     array = _compute.as_geoarrow(["POINT (0 1)"])
-    assert array.type.geoarrow_id == ga.point().geoarrow_id
+    assert array.type.spec == ga.point().spec
 
     array2 = _compute.as_geoarrow(array)
     assert array2 is array
 
     array2 = _compute.as_geoarrow(array, coord_type=ga.CoordType.INTERLEAVED)
-    assert (
-        array2.type.geoarrow_id
-        == ga.point().with_coord_type(ga.CoordType.INTERLEAVED).geoarrow_id
-    )
+    assert array2.type.spec == ga.point().with_coord_type(ga.CoordType.INTERLEAVED).spec
 
     array = _compute.as_geoarrow(["POINT (0 1)"], coord_type=ga.CoordType.INTERLEAVED)
-    assert (
-        array.type.geoarrow_id
-        == ga.point().with_coord_type(ga.CoordType.INTERLEAVED).geoarrow_id
-    )
+    assert array.type.spec == ga.point().with_coord_type(ga.CoordType.INTERLEAVED).spec
 
     array = _compute.as_geoarrow(["POINT (0 1)"], type=ga.multipoint())
-    assert array.type.geoarrow_id == ga.multipoint().geoarrow_id
+    assert array.type.spec == ga.multipoint().spec
 
     array = _compute.as_geoarrow(["POINT (0 1)", "LINESTRING (0 1, 2 3)"])
-    assert array.type.geoarrow_id == ga.wkb().geoarrow_id
+    assert array.type.spec == ga.wkb().spec
 
 
 def test_make_point():
@@ -272,8 +261,8 @@ def test_make_point():
         "POINT ZM (3 6 9 12)",
     ]
 
-    xy_crs = _compute.make_point(xs, ys, crs="EPSG:1234")
-    assert xy_crs.type.crs == "EPSG:1234"
+    xy_crs = _compute.make_point(xs, ys, crs=types.OGC_CRS84)
+    assert xy_crs.type.crs.to_json_dict() == types.OGC_CRS84.to_json_dict()
 
 
 def test_box():
@@ -357,17 +346,16 @@ def test_with_edge_type():
 
 def test_with_crs():
     storage_array = pa.array(["POINT (0 1)", "POINT (2 3)"])
-    crsified = _compute.with_crs(storage_array, "EPSG:1234")
+    crsified = _compute.with_crs(storage_array, types.OGC_CRS84)
     assert isinstance(crsified.type, ga.WktType)
-    assert crsified.type.crs == "EPSG:1234"
+    assert crsified.type.crs.to_json_dict() == types.OGC_CRS84.to_json_dict()
 
     crsnope = _compute.with_crs(crsified, None)
-    assert crsnope.type.crs == ""
-    assert crsnope.type.crs_type == ga.CrsType.NONE
+    assert crsnope.type.crs is None
 
     crsnope_chunked = pa.chunked_array([crsnope])
-    crsified_chunked = _compute.with_crs(crsnope_chunked, "EPSG:1234")
-    assert crsified_chunked.type.crs == "EPSG:1234"
+    crsified_chunked = _compute.with_crs(crsnope_chunked, types.OGC_CRS84)
+    assert crsified_chunked.type.crs.to_json_dict() == types.OGC_CRS84.to_json_dict()
 
 
 def test_with_coord_type():
@@ -375,8 +363,8 @@ def test_with_coord_type():
     with_interleaved = _compute.with_coord_type(wkt_array, ga.CoordType.INTERLEAVED)
     assert with_interleaved.type.coord_type == ga.CoordType.INTERLEAVED
 
-    with_struct = _compute.with_coord_type(with_interleaved, ga.CoordType.SEPARATE)
-    assert with_struct.type.coord_type == ga.CoordType.SEPARATE
+    with_struct = _compute.with_coord_type(with_interleaved, ga.CoordType.SEPARATED)
+    assert with_struct.type.coord_type == ga.CoordType.SEPARATED
 
 
 def test_with_dimensions():

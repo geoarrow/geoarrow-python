@@ -183,13 +183,14 @@ def infer_type_common(obj, coord_type=None, promote_multi=False, _geometry_types
     geometry_types = [
         GeometryType(geometry_type) for geometry_type in types[0].to_pylist()
     ]
-    geometry_type = GeometryType.coalesce(*geometry_types)
+    geometry_type = GeometryType.common(*geometry_types)
 
     if promote_multi and geometry_type.value in (1, 2, 3):
         geometry_type = GeometryType(geometry_type.value + 3)
 
     spec = TypeSpec.coalesce(
-        type_spec(Encoding.GEOARROW, dims, geometry_type), obj.type.spec
+        type_spec(Encoding.GEOARROW, dims, geometry_type, coord_type=coord_type),
+        obj.type.spec,
     ).canonicalize()
 
     return _type.extension_type(spec)
@@ -335,7 +336,9 @@ def make_point(x, y, z=None, m=None, crs=None):
         dimensions = Dimensions.XY
         field_names = ["x", "y"]
 
-    type = _type.extension_type(type_spec(GeometryType.POINT, dimensions, crs=crs))
+    type = _type.extension_type(
+        type_spec(Encoding.GEOARROW, GeometryType.POINT, dimensions, crs=crs)
+    )
     args = [x, y] + [el for el in [z, m] if el is not None]
     args = [pa.array(el, pa.float64()) for el in args]
     storage = pc.make_struct(*args, field_names=field_names)

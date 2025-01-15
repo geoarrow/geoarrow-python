@@ -202,29 +202,29 @@ def test_kernel_void():
 
 
 def test_kernel_as():
-    array = ga.array(["POINT (30 10)"], ga.wkt().with_crs("EPSG:1234"))
+    array = ga.array(["POINT (30 10)"], ga.wkt().with_crs(types.OGC_CRS84))
     kernel = ga.Kernel.as_wkt(array.type)
     out = kernel.push(array)
     assert out.type.extension_name == "geoarrow.wkt"
-    assert out.type.crs == "EPSG:1234"
+    assert out.type.crs.to_json_dict() == types.OGC_CRS84.to_json_dict()
     assert isinstance(out, _array.GeometryExtensionArray)
 
-    array = ga.array(["POINT (30 10)"], ga.wkt().with_crs("EPSG:1234"))
+    array = ga.array(["POINT (30 10)"], ga.wkt().with_crs(types.OGC_CRS84))
     kernel = ga.Kernel.as_wkb(array.type)
     out = kernel.push(array)
     assert out.type.extension_name == "geoarrow.wkb"
-    assert out.type.crs == "EPSG:1234"
+    assert out.type.crs.to_json_dict() == types.OGC_CRS84.to_json_dict()
     assert isinstance(out, _array.GeometryExtensionArray)
 
     if sys.byteorder == "little":
         wkb_item = b"\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x3e\x40\x00\x00\x00\x00\x00\x00\x24\x40"
         assert out[0].as_py() == wkb_item
 
-    array = ga.array(["POINT (30 10)"], ga.wkt().with_crs("EPSG:1234"))
-    kernel = ga.Kernel.as_geoarrow(array.type, ga.point().geoarrow_id)
+    array = ga.array(["POINT (30 10)"], ga.wkt().with_crs(types.OGC_CRS84))
+    kernel = ga.Kernel.as_geoarrow(array.type, 1)
     out = kernel.push(array)
     assert out.type.extension_name == "geoarrow.point"
-    assert out.type.crs == "EPSG:1234"
+    assert out.type.crs.to_json_dict() == types.OGC_CRS84.to_json_dict()
     assert isinstance(out, _array.PointArray)
 
 
