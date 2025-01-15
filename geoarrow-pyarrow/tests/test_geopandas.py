@@ -1,4 +1,5 @@
 import pytest
+from geoarrow import types
 import geoarrow.pyarrow as ga
 
 
@@ -9,8 +10,7 @@ def test_from_geopandas():
     geoseries = geopandas.GeoSeries.from_wkt(["POINT (30 10)"]).set_crs("OGC:CRS84")
     array = ga.array(geoseries)
     assert isinstance(array.type, ga.WkbType)
-    assert array.type.crs_type == ga.CrsType.PROJJSON
-    assert "CRS84" in array.type.crs
+    assert "CRS84" in repr(array.type.crs)
     assert ga.format_wkt(array)[0].as_py() == "POINT (30 10)"
 
 
@@ -32,7 +32,7 @@ def test_to_geopandas():
 
 
 def test_to_geopandas_with_crs():
-    array = ga.with_crs(ga.array(["POINT (30 10)"]), "OGC:CRS84")
+    array = ga.with_crs(ga.array(["POINT (30 10)"]), types.OGC_CRS84)
     geoseries = ga.to_geopandas(array)
     assert isinstance(geoseries, geopandas.GeoSeries)
     assert len(geoseries) == 1

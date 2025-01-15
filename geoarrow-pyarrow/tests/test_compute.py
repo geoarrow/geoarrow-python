@@ -113,8 +113,8 @@ def test_format_wkt():
 def test_unique_geometry_types():
     ga_array = ga.as_geoarrow(pa.array([], type=pa.utf8()), ga.point())
     out = _compute.unique_geometry_types(ga_array).flatten()
-    assert out[0] == pa.array([ga.GeometryType.POINT], type=pa.int32())
-    assert out[1] == pa.array([ga.Dimensions.XY], type=pa.int32())
+    assert out[0] == pa.array([ga.GeometryType.POINT.value], type=pa.int32())
+    assert out[1] == pa.array([0], type=pa.int32())
 
     wkt_array = ga.array(
         [
@@ -128,20 +128,20 @@ def test_unique_geometry_types():
     out = _compute.unique_geometry_types(wkt_array).flatten()
     assert out[0] == pa.array(
         [
-            ga.GeometryType.MULTIPOINT,
-            ga.GeometryType.POLYGON,
-            ga.GeometryType.LINESTRING,
-            ga.GeometryType.POINT,
+            ga.GeometryType.MULTIPOINT.value,
+            ga.GeometryType.POLYGON.value,
+            ga.GeometryType.LINESTRING.value,
+            ga.GeometryType.POINT.value,
         ],
         type=pa.int32(),
     )
 
     assert out[1] == pa.array(
         [
-            ga.Dimensions.XY,
-            ga.Dimensions.XYZ,
-            ga.Dimensions.XYM,
-            ga.Dimensions.XYZM,
+            ga.Dimensions.XY.value,
+            ga.Dimensions.XYZ.value,
+            ga.Dimensions.XYM.value,
+            ga.Dimensions.XYZM.value,
         ],
         type=pa.int32(),
     )

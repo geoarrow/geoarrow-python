@@ -102,7 +102,7 @@ def unique_geometry_types(obj):
         return pa.array(
             [
                 {
-                    "geometry_type": int(obj.type.geometry_type),
+                    "geometry_type": obj.type.geometry_type.value,
                     "dimensions": _DIMENSIONS_TO_ISO[obj.type.dimensions],
                 }
             ],
@@ -225,9 +225,7 @@ def as_wkb(obj, strict_iso_wkb=False):
     obj = as_geoarrow(obj, _type.wkb())
 
     if check_wkb and strict_iso_wkb and _any_ewkb(obj):
-        return push_all(
-            Kernel.as_geoarrow, obj, args={"type_id": _type.wkb().geoarrow_id}
-        )
+        return push_all(Kernel.as_geoarrow, obj, args={"type_id": 100001})
     else:
         return obj
 
@@ -619,7 +617,15 @@ def to_geopandas(obj):
     import geopandas
     import pandas as pd
 
-    # Ideally we will avoid serialization via geobuffers + from_ragged_array()
+    # Attempt GeoPandas from_arrow first
+    try:
+        return geopandas.GeoSeries.from_arrow(obj)
+    except ValueError:
+        pass
+    except AttributeError:
+        pass
+
+    # Fall back on wkb conversion
     wkb_array_or_chunked = as_wkb(obj)
 
     # Avoids copy on convert to pandas
@@ -628,4 +634,8 @@ def to_geopandas(obj):
         dtype=pd.ArrowDtype(wkb_array_or_chunked.type.storage_type),
     )
 
-    return geopandas.GeoSeries.from_wkb(wkb_pandas, crs=wkb_array_or_chunked.type.crs)
+    crs = wkb_array_or_chunked.type.crs
+    if crs is not None:
+        crs = crs.to_json()
+
+    return geopandas.GeoSeries.from_wkb(wkb_pandas, crs=crs)

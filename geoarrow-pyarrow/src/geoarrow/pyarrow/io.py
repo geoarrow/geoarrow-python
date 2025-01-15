@@ -436,11 +436,11 @@ def _geoparquet_encode_chunked_array(
         unique_geometry_types = _ga.unique_geometry_types(item)
         geoarrow_type = _ga.infer_type_common(
             item,
-            coord_type=_ga.CoordType.SEPARATE,
+            coord_type=_ga.CoordType.SEPARATED,
             _geometry_types=unique_geometry_types,
         )
 
-        if geoarrow_type.coord_type == _ga.CoordType.UNKNOWN:
+        if geoarrow_type.coord_type == _ga.CoordType.UNSPECIFIED:
             raise ValueError(
                 "Can't encode column with incompatable geometry types as geoarrow"
             )
