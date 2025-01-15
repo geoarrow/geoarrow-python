@@ -240,10 +240,7 @@ def _geoparquet_chunked_array_to_geoarrow(item, spec):
     if encoding in ("WKB", "WKT"):
         item = _ga.array(item)
     elif encoding in _GEOARROW_ENCODINGS:
-        extension_name = "geoarrow." + encoding
-        type = _type.type_cls_from_name(extension_name).__arrow_ext_deserialize__(
-            item.type, b""
-        )
+        type = _GEOARROW_ENCODINGS[encoding].__arrow_ext_deserialize__(item.type, b"")
         item = type.wrap_array(item)
     else:
         raise ValueError(f"Invalid GeoParquet encoding value: '{encoding}'")
@@ -309,20 +306,17 @@ def _geoparquet_column_spec_from_type(type, add_geometry_types=None, encoding=No
     # Pass along extra information from GeoArrow extension type metadata
     if isinstance(type, _ga.GeometryExtensionType):
         # If encoding is unspecified and data is already geoarrow, don't serialize to WKB
-        if encoding is None and type.coord_type != _ga.CoordType.UNKNOWN:
+        if encoding is None and type.coord_type != _ga.CoordType.UNSPECIFIED:
             spec["encoding"] = geoparquet_encoding_geoarrow()
 
-        if type.crs_type == _ga.CrsType.PROJJSON:
-            spec["crs"] = json.loads(type.crs)
-        elif type.crs_type == _ga.CrsType.NONE:
+        crs = type.crs
+        if crs is None:
             spec["crs"] = None
         else:
-            import pyproj
+            spec["crs"] = type.crs.to_json_dict()
 
-            spec["crs"] = pyproj.CRS(type.crs).to_json_dict()
-
-        if type.edge_type == _ga.EdgeType.SPHERICAL:
-            spec["edges"] = "spherical"
+        if type.edge_type != _ga.EdgeType.PLANAR:
+            spec["edges"] = type.edge_type.name.lower()
 
         # GeoArrow-encoded types can confidently declare a single geometry type
         maybe_known_geometry_type = type.geometry_type
@@ -332,8 +326,10 @@ def _geoparquet_column_spec_from_type(type, add_geometry_types=None, encoding=No
             and maybe_known_geometry_type != _ga.GeometryType.GEOMETRY
             and maybe_known_dimensions != _ga.Dimensions.UNKNOWN
         ):
-            geometry_type = _GEOPARQUET_GEOMETRY_TYPE_LABELS[maybe_known_geometry_type]
-            dimensions = _GEOPARQUET_DIMENSION_LABELS[maybe_known_dimensions]
+            geometry_type = _GEOPARQUET_GEOMETRY_TYPE_LABELS[
+                maybe_known_geometry_type.value
+            ]
+            dimensions = _GEOPARQUET_DIMENSION_LABELS[maybe_known_dimensions.value]
             spec["geometry_types"] = [f"{geometry_type}{dimensions}"]
 
     if spec["encoding"] is None:
@@ -432,7 +428,9 @@ def _geoparquet_encode_chunked_array(
     unique_geometry_types = None
     geoarrow_type = None
     inferred_geoarrow_encoding = None
-    if spec["encoding"] in (_GEOARROW_ENCODINGS + (geoparquet_encoding_geoarrow(),)):
+    if spec["encoding"] in (
+        tuple(_GEOARROW_ENCODINGS.keys()) + (geoparquet_encoding_geoarrow(),)
+    ):
         unique_geometry_types = _ga.unique_geometry_types(item)
         geoarrow_type = _ga.infer_type_common(
             item,
@@ -514,14 +512,14 @@ _GEOPARQUET_GEOMETRY_TYPE_LABELS = [
 
 _GEOPARQUET_DIMENSION_LABELS = [None, "", " Z", " M", " ZM"]
 
-_GEOARROW_ENCODINGS = (
-    "point",
-    "linestring",
-    "polygon",
-    "multipoint",
-    "multilinestring",
-    "multipolygon",
-)
+_GEOARROW_ENCODINGS = {
+    "point": _type.point(),
+    "linestring": _type.linestring(),
+    "polygon": _type.polygon(),
+    "multipoint": _type.multipoint(),
+    "multilinestring": _type.multilinestring(),
+    "multipolygon": _type.multipolygon(),
+}
 
 _CRS_LONLAT = {
     "$schema": "https://proj.org/schemas/v0.7/projjson.schema.json",
