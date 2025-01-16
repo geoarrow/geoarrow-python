@@ -34,7 +34,12 @@ def test_dtype_strings():
     assert dtype2 == dtype
 
     dtype = gapd.GeoArrowExtensionDtype(ga.point().with_crs(ga.OGC_CRS84))
-    assert str(dtype) == 'geoarrow.point{"crs": ' + ga.OGC_CRS84.to_json() + "}"
+    assert (
+        str(dtype)
+        == 'geoarrow.point{"crs": '
+        + ga.OGC_CRS84.to_json()
+        + ', "crs_type": "projjson"}'
+    )
     dtype2 = gapd.GeoArrowExtensionDtype.construct_from_string(str(dtype))
     assert dtype2 == dtype
 
