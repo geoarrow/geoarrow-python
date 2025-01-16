@@ -48,17 +48,19 @@ def test_geometry_type_with():
     type_spherical = type_obj.with_edge_type(ga.EdgeType.SPHERICAL)
     assert type_spherical.edge_type == ga.EdgeType.SPHERICAL
 
-    # Explicit type
     type_crs = type_obj.with_crs(types.OGC_CRS84)
     assert type_crs.crs == types.OGC_CRS84
+
+    type_crs = type_obj.with_crs("OGC:CRS84")
+    assert repr(type_crs.crs) == "StringCrs(OGC:CRS84)"
 
 
 def test_type_with_crs_pyproj():
     pyproj = pytest.importorskip("pyproj")
     type_obj = ga.wkb()
 
-    # Implicit type
     type_crs = type_obj.with_crs(pyproj.CRS("EPSG:32620"))
+    assert isinstance(type_crs.crs, pyproj.CRS)
     crs_dict = type_crs.crs.to_json_dict()
     assert crs_dict["id"]["code"] == 32620
 

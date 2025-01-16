@@ -80,8 +80,20 @@ class TypeSpec(NamedTuple):
         if self.edge_type == EdgeType.SPHERICAL:
             metadata["edges"] = "spherical"
 
-        if self.crs is not None:
+        if self.crs is None:
+            pass
+        elif hasattr(self.crs, "__geoarrow_crs_json_values__"):
+            metadata.update(self.crs.__geoarrow_crs_json_values__())
+        elif hasattr(self.crs, "to_json_dict"):
             metadata["crs"] = self.crs.to_json_dict()
+            metadata["crs_type"] = "projjson"
+        elif isinstance(self.crs, (str, bytes)):
+            string_crs = crs.StringCrs(self.crs)
+            metadata.update(string_crs.__geoarrow_crs_json_values__())
+        else:
+            raise ValueError(
+                f"Can't serialize crs object {self.crs} to extension metadata"
+            )
 
         return json.dumps(metadata)
 
@@ -262,7 +274,10 @@ class TypeSpec(NamedTuple):
             out_edges = EdgeType.create(metadata["edges"])
 
         if "crs" in metadata and metadata["crs"] is not None:
-            out_crs = crs.ProjJsonCrs(metadata["crs"])
+            if "crs_type" in metadata and metadata["crs_type"] == "projjson":
+                out_crs = crs.ProjJsonCrs(metadata["crs"])
+            else:
+                out_crs = crs.StringCrs(metadata["crs"])
 
         return TypeSpec(edge_type=out_edges, crs=out_crs)
 
