@@ -1,4 +1,5 @@
 import pytest
+import json
 
 import geoarrow.types as gt
 from geoarrow.types.constants import (
@@ -9,7 +10,12 @@ from geoarrow.types.constants import (
     CoordType,
 )
 from geoarrow.types.type_spec import TypeSpec
-from geoarrow.types.crs import OGC_CRS84, UNSPECIFIED as UNSPECIFIED_CRS
+from geoarrow.types.crs import (
+    OGC_CRS84,
+    UNSPECIFIED as UNSPECIFIED_CRS,
+    StringCrs,
+    ProjJsonCrs,
+)
 
 
 def test_type_spec_repr():
@@ -52,6 +58,72 @@ def test_type_spec_extension_metadata():
 
     with pytest.raises(ValueError, match="Can't compute extension_metadata"):
         TypeSpec().extension_metadata()
+
+
+def test_type_spec_metadata_crs():
+    # StringCrs
+    spec = TypeSpec(edge_type=EdgeType.PLANAR, crs=StringCrs("EPSG:32620"))
+    assert spec.extension_metadata() == '{"crs": "EPSG:32620"}'
+
+    # ProjJsonCrs
+    spec = spec.override(crs=OGC_CRS84)
+    assert json.loads(spec.extension_metadata())["crs"] == OGC_CRS84.to_json_dict()
+    assert json.loads(spec.extension_metadata())["crs_type"] == "projjson"
+
+    # Raw string
+    spec = TypeSpec(edge_type=EdgeType.PLANAR, crs="EPSG:32620")
+    assert spec.extension_metadata() == '{"crs": "EPSG:32620"}'
+
+    # Raw bytes
+    spec = TypeSpec(edge_type=EdgeType.PLANAR, crs="EPSG:32620".encode())
+    assert spec.extension_metadata() == '{"crs": "EPSG:32620"}'
+
+    # Accidentally JSON-encoded string
+    spec = TypeSpec(edge_type=EdgeType.PLANAR, crs='"EPSG:32620"')
+    assert spec.extension_metadata() == '{"crs": "EPSG:32620"}'
+
+    # UnspecifiedCrs
+    with pytest.raises(ValueError, match="edge_type or crs is unspecified"):
+        TypeSpec(crs=UNSPECIFIED_CRS).extension_metadata()
+
+
+def test_type_spec_metadata_crs_load():
+    spec = TypeSpec.from_extension_metadata('{"crs": "EPSG:32620"}')
+    assert isinstance(spec.crs, StringCrs)
+
+    spec = TypeSpec.from_extension_metadata('{"crs": {}, "crs_type": "projjson"}')
+    assert isinstance(spec.crs, ProjJsonCrs)
+    assert spec.crs.to_json_dict() == {}
+
+
+def test_type_spec_metadata_crs_sanitize():
+    crs_obj = TypeSpec().override(crs="EPSG:32620").crs
+    assert isinstance(crs_obj, StringCrs)
+    assert crs_obj._crs == "EPSG:32620"
+    assert TypeSpec().override(crs=crs_obj).crs is crs_obj
+
+    crs_obj = TypeSpec().override(crs=ProjJsonCrs({})).crs
+    assert isinstance(crs_obj, ProjJsonCrs)
+    assert TypeSpec().override(crs=crs_obj).crs is crs_obj
+
+
+def test_type_spec_metadata_crs_pyproj():
+    pyproj = pytest.importorskip("pyproj")
+
+    spec = TypeSpec(edge_type=EdgeType.PLANAR, crs=pyproj.CRS("EPSG:32620"))
+    metadata_obj = json.loads(spec.extension_metadata())
+    assert metadata_obj["crs"] == pyproj.CRS("EPSG:32620").to_json_dict()
+    assert metadata_obj["crs_type"] == "projjson"
+
+    spec2 = TypeSpec.from_extension_metadata(spec.extension_metadata())
+    assert isinstance(spec2.crs, ProjJsonCrs)
+    assert pyproj.CRS(spec2.crs) == pyproj.CRS("EPSG:32620")
+    assert spec2.crs == pyproj.CRS("EPSG:32620")
+    assert pyproj.CRS("EPSG:32620") == spec2.crs
+
+    crs_obj = TypeSpec().override(crs=pyproj.CRS("EPSG:32620")).crs
+    assert isinstance(crs_obj, pyproj.CRS)
+    assert TypeSpec().override(crs=crs_obj).crs is crs_obj
 
 
 def test_type_spec_create():

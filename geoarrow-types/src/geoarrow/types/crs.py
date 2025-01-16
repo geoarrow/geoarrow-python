@@ -305,8 +305,12 @@ def create(obj) -> Optional[Crs]:
         return None
     elif hasattr(obj, "to_json_dict"):
         return obj
-    else:
+    elif isinstance(obj, dict):
         return ProjJsonCrs(obj)
+    elif isinstance(obj, (str, bytes)):
+        return StringCrs(obj)
+    else:
+        raise ValueError(f"Can't create geoarrow.types.Crs from {obj}")
 
 
 def _coalesce2(value, default):
