@@ -246,8 +246,8 @@ class GeoArrowExtensionArray(_pd.api.extensions.ExtensionArray):
 
         return _np.array(list(self), dtype=object)
 
-    def __array__(self, dtype=None):
-        return self.to_numpy(dtype=dtype)
+    def __array__(self, dtype=None, copy=True):
+        return self.to_numpy(dtype=dtype, copy=copy)
 
 
 @_pd.api.extensions.register_extension_dtype
