@@ -126,10 +126,10 @@ jobs:
           python -m coverage xml
           popd
 
-          # pushd geoarrow-pandas
-          # python -m pytest --cov ./src/geoarrow tests --import-mode=importlib
-          # python -m coverage xml
-          # popd
+          pushd geoarrow-pandas
+          python -m pytest --cov ./src/geoarrow tests --import-mode=importlib
+          python -m coverage xml
+          popd
 
       - name: Upload coverage to codecov
         uses: codecov/codecov-action@v2
