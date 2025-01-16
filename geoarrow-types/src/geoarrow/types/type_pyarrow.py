@@ -797,6 +797,12 @@ def _generate_storage_types():
                 storage_type = _nested_type(coord, names)
                 all_storage_types[key] = storage_type
 
+    # Circular logic!
+    # for coord_type in all_coord_types:
+    #     all_coord_types[(GeometryType.GEOMETRY, coord_type, Dimensions.UNKNOWN)] = (
+    #         _generate_union_storage(coord_type=coord_type)
+    #     )
+
     return all_storage_types
 
 
