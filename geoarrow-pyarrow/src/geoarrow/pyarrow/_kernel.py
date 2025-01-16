@@ -2,8 +2,22 @@ import sys
 
 import pyarrow as pa
 import pyarrow_hotfix as _  # noqa: F401
-from geoarrow.c import lib
 from geoarrow.pyarrow._type import GeometryExtensionType
+
+
+_lazy_lib = None
+
+
+def _geoarrow_c():
+    global _lazy_lib
+    if _lazy_lib is None:
+        try:
+            from geoarrow.c import lib
+        except ImportError as e:
+            raise ImportError("Requested operation requires geoarrow-c") from e
+
+        _lazy_lib = lib
+    return _lazy_lib
 
 
 class Kernel:
@@ -12,11 +26,11 @@ class Kernel:
             raise TypeError("Expected `type_in` to inherit from pyarrow.DataType")
 
         self._name = str(name)
-        self._kernel = lib.CKernel(self._name.encode("UTF-8"))
+        self._kernel = _geoarrow_c().CKernel(self._name.encode("UTF-8"))
         # True for all the kernels that currently exist
         self._is_agg = self._name.endswith("_agg")
 
-        type_in_schema = lib.SchemaHolder()
+        type_in_schema = _geoarrow_c().SchemaHolder()
         type_in._export_to_c(type_in_schema._addr())
 
         options = Kernel._pack_options(kwargs)
@@ -40,7 +54,7 @@ class Kernel:
                 f"Expected pyarrow.Array or pyarrow.ChunkedArray but got {type(arr)}"
             )
 
-        array_in = lib.ArrayHolder()
+        array_in = _geoarrow_c().ArrayHolder()
         arr._export_to_c(array_in._addr())
 
         if self._is_agg:
