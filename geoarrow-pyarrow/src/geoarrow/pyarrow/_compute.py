@@ -103,7 +103,7 @@ def unique_geometry_types(obj):
             [
                 {
                     "geometry_type": obj.type.geometry_type.value,
-                    "dimensions": _DIMENSIONS_TO_ISO[obj.type.dimensions],
+                    "dimensions": obj.type.dimensions.value,
                 }
             ],
             type=out_type,
@@ -132,14 +132,6 @@ def unique_geometry_types(obj):
         py_geometry_types.append({"geometry_type": item_int, "dimensions": dimensions})
 
     return pa.array(py_geometry_types, type=out_type)
-
-
-_DIMENSIONS_TO_ISO = {
-    Dimensions.XY: 0,
-    Dimensions.XYZ: 1000,
-    Dimensions.XYM: 2000,
-    Dimensions.XYZM: 3000,
-}
 
 
 def infer_type_common(obj, coord_type=None, promote_multi=False, _geometry_types=None):
@@ -381,12 +373,16 @@ def box(obj):
     obj = obj_as_array_or_chunked(obj)
 
     # Spherical edges aren't supported by this algorithm
-    if obj.type.edge_type == EdgeType.SPHERICAL:
-        raise TypeError("Can't compute box of type with spherical edges")
+    if obj.type.edge_type != EdgeType.PLANAR:
+        raise TypeError("Can't compute box of type with non-planar edges")
 
     # Optimization: a box of points is just x, x, y, y with zero-copy
     # if the coord type is struct
-    if obj.type.coord_type == CoordType.SEPARATED and len(obj) > 0:
+    if (
+        obj.type.coord_type == CoordType.SEPARATED
+        and len(obj) > 0
+        and obj.null_count == 0
+    ):
         if obj.type.geometry_type == GeometryType.POINT and isinstance(
             obj, pa.ChunkedArray
         ):

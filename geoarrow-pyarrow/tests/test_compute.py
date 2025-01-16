@@ -114,7 +114,7 @@ def test_unique_geometry_types():
     ga_array = ga.as_geoarrow(pa.array([], type=pa.utf8()), ga.point())
     out = _compute.unique_geometry_types(ga_array).flatten()
     assert out[0] == pa.array([ga.GeometryType.POINT.value], type=pa.int32())
-    assert out[1] == pa.array([0], type=pa.int32())
+    assert out[1] == pa.array([ga.Dimensions.XY.value], type=pa.int32())
 
     wkt_array = ga.array(
         [
