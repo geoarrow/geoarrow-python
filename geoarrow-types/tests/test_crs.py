@@ -38,6 +38,33 @@ def test_projjson_crs_repr():
     assert repr(crs_invalid_json) == 'ProjJsonCrs({"this is not valid json)'
 
 
+def test_string_crs():
+    crs_obj = crs.StringCrs("arbitrary string")
+    assert crs_obj.__geoarrow_crs_json_values__() == {"crs": "arbitrary string"}
+    assert repr(crs_obj) == "StringCrs(arbitrary string)"
+
+
+def test_string_crs_quoted_json_string():
+    crs_obj = crs.StringCrs('"this is json"')
+    assert crs_obj.__geoarrow_crs_json_values__() == {"crs": "this is json"}
+    assert repr(crs_obj) == "StringCrs(this is json)"
+
+
+def test_string_crs_json_object():
+    crs_obj = crs.StringCrs('{"valid": "object"}')
+    assert crs_obj.to_json() == '{"valid": "object"}'
+    assert crs_obj.to_json_dict() == {"valid": "object"}
+
+
+def test_string_crs_pyproj():
+    pyproj = pytest.importorskip("pyproj")
+
+    crs_obj = crs.StringCrs("OGC:CRS84")
+    assert crs_obj.to_json_dict() == pyproj.CRS("OGC:CRS84").to_json_dict()
+    assert crs_obj.to_json() == pyproj.CRS("OGC:CRS84").to_json()
+    assert crs_obj.to_wkt() == pyproj.CRS("OGC:CRS84").to_wkt()
+
+
 def test_crs_coalesce():
     assert crs._coalesce2(crs.UNSPECIFIED, crs.OGC_CRS84) is crs.OGC_CRS84
     assert crs._coalesce2(None, crs.OGC_CRS84) is None

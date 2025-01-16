@@ -102,6 +102,14 @@ class ProjJsonCrs(Crs):
 
         return deepcopy(self._obj)
 
+    def to_wkt(self) -> str:
+        # This could in theory be written to not use pyproj; however, the
+        # main purpose of this method is to enable pyproj.CRS(self) so it
+        # may not matter.
+        import pyproj
+
+        return pyproj.CRS(self.to_json_dict()).to_wkt()
+
     def __repr__(self) -> str:
         try:
             crs_dict = self.to_json_dict()
@@ -161,8 +169,17 @@ class StringCrs(Crs):
     def to_json_dict(self) -> Mapping:
         return json.loads(self.to_json())
 
+    def to_wkt(self) -> str:
+        import pyproj
+
+        crs_repr = self.__geoarrow_crs_json_values__()["crs"]
+        return pyproj.CRS(crs_repr).to_wkt()
+
+    def __repr__(self) -> str:
+        crs_repr = self.__geoarrow_crs_json_values__()["crs"]
+        return f"StringCrs({crs_repr})"
+
     def _try_parse_json_object(self) -> Optional[dict]:
-        # If this is valid JSON and is a dictionary, assume it's PROJJSON
         try:
             obj = json.loads(self._crs)
             if isinstance(obj, dict):
