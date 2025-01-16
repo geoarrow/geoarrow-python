@@ -1,9 +1,7 @@
 import pyarrow as pa
 import pyarrow_hotfix as _  # noqa: F401
 
-from geoarrow.c import lib
-
-from geoarrow.pyarrow._kernel import Kernel
+from geoarrow.pyarrow._kernel import Kernel, _geoarrow_c
 from geoarrow.pyarrow._type import (
     GeometryExtensionType,
     wkb,
@@ -17,6 +15,8 @@ class GeometryExtensionArray(pa.ExtensionArray):
     def geobuffers(self):
         import numpy as np
 
+        lib = _geoarrow_c()
+
         cschema = lib.SchemaHolder()
         self.type._export_to_c(cschema._addr())
         carray = lib.ArrayHolder()
@@ -27,6 +27,16 @@ class GeometryExtensionArray(pa.ExtensionArray):
         return [np.array(b) if b is not None else None for b in buffers]
 
     def __repr__(self):
+        # Pretty WKT printing needs geoarrow-c
+        try:
+            from geoarrow import c  # noqa: F401
+        except ImportError:
+            return (
+                super().__repr__()
+                + "\n"
+                + "* pip install geoarrow-c for prettier printing of geometry arrays"
+            )
+
         n_values_to_show = 10
         max_width = 70
 

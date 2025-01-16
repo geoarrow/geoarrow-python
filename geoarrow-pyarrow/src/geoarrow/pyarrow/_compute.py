@@ -13,7 +13,7 @@ from geoarrow.types import (
 )
 from geoarrow.pyarrow import _type
 from geoarrow.pyarrow._array import array
-from geoarrow.pyarrow._kernel import Kernel
+from geoarrow.pyarrow._kernel import Kernel, _geoarrow_c
 
 
 def obj_as_array_or_chunked(obj_in):
@@ -264,7 +264,7 @@ def as_geoarrow(obj, type=None, coord_type=None, promote_multi=False):
     if obj.type.spec == type.spec:
         return obj
 
-    from geoarrow.c import lib
+    lib = _geoarrow_c()
 
     cschema = lib.SchemaHolder()
     type._export_to_c(cschema._addr())
