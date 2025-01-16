@@ -60,6 +60,8 @@ class GeometryExtensionType(pa.ExtensionType):
         )
 
     def to_pandas_dtype(self):
+        # Note that returning geopandas.array.GeometryDtype() here
+        # doesn't result in a GeoSeries or GeoDataFrame.
         from pandas import ArrowDtype
 
         return ArrowDtype(self)
