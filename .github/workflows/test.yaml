@@ -17,7 +17,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
+        python-version: ['3.9', '3.10', '3.11', '3.12', '3.13']
 
     steps:
       - uses: actions/checkout@v4
@@ -58,19 +58,19 @@ jobs:
           pytest geoarrow-pandas/tests -v -s
 
       - name: Run doctests (geoarrow-pyarrow)
-        if: success() && matrix.python-version == '3.12'
+        if: success() && matrix.python-version == '3.13'
         run: |
           cd geoarrow-pyarrow
           pytest --pyargs geoarrow.pyarrow --doctest-modules --import-mode=importlib
 
       - name: Run doctests (geoarrow-types)
-        if: success() && matrix.python-version == '3.12'
+        if: success() && matrix.python-version == '3.13'
         run: |
           cd geoarrow-types
           pytest --pyargs geoarrow.types --doctest-modules --import-mode=importlib
 
       - name: Run doctests (geoarrow-pandas)
-        if: success() && matrix.python-version == '3.12'
+        if: success() && matrix.python-version == '3.13'
         run: |
           cd geoarrow-pandas
           pytest --pyargs geoarrow.pandas --doctest-modules --import-mode=importlib
@@ -86,7 +86,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.12'
+          python-version: '3.13'
           cache: 'pip'
 
       - name: Install (geoarrow-pyarrow)
@@ -134,4 +134,5 @@ jobs:
       - name: Upload coverage to codecov
         uses: codecov/codecov-action@v2
         with:
-          files: 'geoarrow-pyarrow/coverage.xml,geoarrow-ptypes/coverage.xml,geoarrow-pandas/coverage.xml'
+          files: 'geoarrow-pyarrow/coverage.xml,geoarrow-types/coverage.xml,geoarrow-pandas/coverage.xml'
+          token: ${{ secrets.CODECOV_TOKEN }}
