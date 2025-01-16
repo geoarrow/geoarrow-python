@@ -55,10 +55,10 @@ class GeometryExtensionArray(pa.ExtensionArray):
         tail_str = [f"<{item.as_py()}>" for item in tail]
         for i in range(len(head)):
             if len(head_str[i]) > max_width:
-                head_str[i] = f"{head_str[i][:(max_width - 4)]}...>"
+                head_str[i] = f"{head_str[i][: (max_width - 4)]}...>"
         for i in range(len(tail)):
             if len(tail_str[i]) > max_width:
-                tail_str[i] = f"{tail_str[i][:(max_width - 4)]}...>"
+                tail_str[i] = f"{tail_str[i][: (max_width - 4)]}...>"
 
         type_name = type(self).__name__
         head_str = "\n".join(head_str)
@@ -138,7 +138,7 @@ def array(obj, type_=None, *args, **kwargs) -> GeometryExtensionArray:
     # Convert GeoPandas to WKB
     if type(obj).__name__ == "GeoSeries":
         if obj.crs:
-            type_ = wkb().with_crs(obj.crs.to_json(), lib.CrsType.PROJJSON)
+            type_ = wkb().with_crs(obj.crs)
         else:
             type_ = wkb()
 

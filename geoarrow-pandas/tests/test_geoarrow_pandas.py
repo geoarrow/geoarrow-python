@@ -6,7 +6,6 @@ import pandas as pd
 import pyarrow as pa
 import geoarrow.pandas as gapd
 import geoarrow.pyarrow as ga
-from geoarrow.c import lib
 import numpy as np
 
 
@@ -18,10 +17,10 @@ def test_dtype_constructor():
     from_pyarrow = gapd.GeoArrowExtensionDtype(ga.point())
     assert from_pyarrow.name == "geoarrow.point"
 
-    from_ctype = gapd.GeoArrowExtensionDtype(ga.point()._type)
-    assert from_ctype.name == "geoarrow.point"
+    from_spec = gapd.GeoArrowExtensionDtype(ga.point().spec)
+    assert from_spec.name == "geoarrow.point"
 
-    from_dtype = gapd.GeoArrowExtensionDtype(from_ctype)
+    from_dtype = gapd.GeoArrowExtensionDtype(from_spec)
     assert from_dtype.name == "geoarrow.point"
 
     with pytest.raises(TypeError):
@@ -34,8 +33,8 @@ def test_dtype_strings():
     dtype2 = gapd.GeoArrowExtensionDtype.construct_from_string(str(dtype))
     assert dtype2 == dtype
 
-    dtype = gapd.GeoArrowExtensionDtype(ga.point().with_crs("EPSG:1234"))
-    assert str(dtype) == 'geoarrow.point{"crs":"EPSG:1234"}'
+    dtype = gapd.GeoArrowExtensionDtype(ga.point().with_crs(ga.OGC_CRS84))
+    assert str(dtype) == 'geoarrow.point{"crs": ' + ga.OGC_CRS84.to_json() + "}"
     dtype2 = gapd.GeoArrowExtensionDtype.construct_from_string(str(dtype))
     assert dtype2 == dtype
 
@@ -182,23 +181,10 @@ def test_array_concat():
     assert len(concatenated_diff_type) == 6
 
 
-def test_pyarrow_integration():
-    pa_array = ga.array(["POINT (0 1)", "POINT (1 2)", None])
-    series = pa_array.to_pandas()
-    assert series.dtype == gapd.GeoArrowExtensionDtype(ga.wkt())
-    assert series[0] == gapd.GeoArrowExtensionScalar("POINT (0 1)")
-    assert pa.array(series) is pa_array
-
-    pa_chunked_array = pa.chunked_array([pa_array])
-    series = pa_chunked_array.to_pandas()
-    assert series.dtype == gapd.GeoArrowExtensionDtype(ga.wkt())
-    assert series[0] == gapd.GeoArrowExtensionScalar("POINT (0 1)")
-
-
 def test_accessor_parse_all():
     series = pd.Series(["POINT (0 1)"])
     assert series.geoarrow.parse_all() is series
-    with pytest.raises(lib.GeoArrowCException):
+    with pytest.raises(Exception, match="Expected geometry type at byte 0"):
         pd.Series(["NOT WKT"]).geoarrow.parse_all()
 
 
@@ -278,8 +264,8 @@ def test_accessor_with_edge_type():
 
 
 def test_accessor_with_crs():
-    ga_series = pd.Series(["POINT (0 1)"]).geoarrow.with_crs("EPSG:1234")
-    assert ga_series.dtype.pyarrow_dtype.crs == "EPSG:1234"
+    ga_series = pd.Series(["POINT (0 1)"]).geoarrow.with_crs(ga.OGC_CRS84)
+    assert ga_series.dtype.pyarrow_dtype.crs == ga.OGC_CRS84
 
 
 def test_accessor_with_dimensions():

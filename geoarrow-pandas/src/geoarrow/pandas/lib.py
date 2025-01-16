@@ -3,7 +3,7 @@ import pandas as _pd
 import pyarrow as _pa
 import pyarrow_hotfix as _  # noqa: F401
 import numpy as _np
-from geoarrow.c import lib
+from geoarrow.types import TypeSpec, type_spec, Encoding
 import geoarrow.pyarrow as _ga
 
 
@@ -83,8 +83,7 @@ class GeoArrowExtensionArray(_pd.api.extensions.ExtensionArray):
     def __init__(self, obj, type=None):
         if type is not None:
             self._dtype = GeoArrowExtensionDtype(type)
-            arrow_type = _ga.GeometryExtensionType._from_ctype(self._dtype._parent)
-            self._data = _ga.array(obj, arrow_type)
+            self._data = _ga.array(obj, self._dtype._parent)
         else:
             self._data = _ga.array(obj)
             self._dtype = GeoArrowExtensionDtype(self._data.type)
@@ -247,8 +246,8 @@ class GeoArrowExtensionArray(_pd.api.extensions.ExtensionArray):
 
         return _np.array(list(self), dtype=object)
 
-    def __array__(self, dtype=None):
-        return self.to_numpy(dtype=dtype)
+    def __array__(self, dtype=None, copy=True):
+        return self.to_numpy(dtype=dtype, copy=copy)
 
 
 @_pd.api.extensions.register_extension_dtype
@@ -271,20 +270,20 @@ class GeoArrowExtensionDtype(_pd.api.extensions.ExtensionDtype):
 
     def __init__(self, parent):
         if isinstance(parent, _ga.GeometryExtensionType):
-            self._parent = parent._type
-        elif isinstance(parent, lib.CVectorType):
             self._parent = parent
+        elif isinstance(parent, TypeSpec):
+            self._parent = _ga.extension_type(parent)
         elif isinstance(parent, GeoArrowExtensionDtype):
             self._parent = parent._parent
         else:
             raise TypeError(
-                "`geoarrow_type` must inherit from geoarrow.pyarrow.VectorType, "
-                "geoarrow.CVectorType, or geoarrow.pandas.GeoArrowExtensionDtype"
+                "`geoarrow_type` must be a pyarrow extension type, "
+                "geoarrow.types.TypeSpec, or geoarrow.pandas.GeoArrowExtensionDtype"
             )
 
     @property
     def pyarrow_dtype(self):
-        return _ga.GeometryExtensionType._from_ctype(self._parent)
+        return self._parent
 
     @property
     def type(self):
@@ -323,9 +322,9 @@ class GeoArrowExtensionDtype(_pd.api.extensions.ExtensionDtype):
         if params["coord_type"] == "[interleaved]":
             coord_type = _ga.CoordType.INTERLEAVED
         elif params["type"] in ("wkt", "wkb"):
-            coord_type = _ga.CoordType.UNKNOWN
+            coord_type = _ga.CoordType.UNSPECIFIED
         else:
-            coord_type = _ga.CoordType.SEPARATE
+            coord_type = _ga.CoordType.SEPARATED
 
         if params["type"] == "point":
             geometry_type = _ga.GeometryType.POINT
@@ -347,7 +346,9 @@ class GeoArrowExtensionDtype(_pd.api.extensions.ExtensionDtype):
         elif params["type"] == "wkt":
             base_type = _ga.wkt()
         else:
-            base_type = _ga.extension_type(geometry_type, dims, coord_type)
+            base_type = _ga.extension_type(
+                type_spec(Encoding.GEOARROW, geometry_type, dims, coord_type)
+            )
 
         try:
             if params["metadata"]:
@@ -368,7 +369,7 @@ class GeoArrowExtensionDtype(_pd.api.extensions.ExtensionDtype):
         ext_name = self._parent.extension_name
         ext_dims = self._parent.dimensions
         ext_coord = self._parent.coord_type
-        ext_meta = self._parent.extension_metadata.decode("UTF-8")
+        ext_meta = self._parent.__arrow_ext_serialize__().decode("UTF-8")
 
         if ext_dims == _ga.Dimensions.XYZ:
             dims_str = "[z]"
@@ -440,7 +441,14 @@ class GeoArrowAccessor:
         )
 
     def _obj_is_geoarrow(self):
-        return isinstance(self._obj.dtype, GeoArrowExtensionDtype)
+        if isinstance(self._obj.dtype, GeoArrowExtensionDtype):
+            return True
+
+        if not isinstance(self._obj.dtype, _pd.ArrowDtype):
+            return False
+
+        arrow_type = self._obj.dtype.pyarrow_dtype
+        return isinstance(arrow_type, _ga.GeometryExtensionType)
 
     def parse_all(self):
         """See :func:`geoarrow.pyarrow.parse_all`"""
@@ -529,9 +537,9 @@ class GeoArrowAccessor:
         """See :func:`geoarrow.pyarrow.with_edge_type`"""
         return self._wrap_series(_ga.with_edge_type(self._obj, edge_type))
 
-    def with_crs(self, crs, crs_type=None):
+    def with_crs(self, crs):
         """See :func:`geoarrow.pyarrow.with_crs`"""
-        return self._wrap_series(_ga.with_crs(self._obj, crs=crs, crs_type=crs_type))
+        return self._wrap_series(_ga.with_crs(self._obj, crs=crs))
 
     def with_dimensions(self, dimensions):
         """See :func:`geoarrow.pyarrow.with_dimensions`"""

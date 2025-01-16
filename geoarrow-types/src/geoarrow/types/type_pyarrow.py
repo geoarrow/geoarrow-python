@@ -19,6 +19,8 @@ class GeometryExtensionType(pa.ExtensionType):
     """Extension type base class for vector geometry types."""
 
     _extension_name = None
+    _array_cls_from_name = None
+    _scalar_cls_from_name = None
 
     def __init__(
         self, spec: TypeSpec, *, storage_type=None, validate_storage_type=True
@@ -46,7 +48,7 @@ class GeometryExtensionType(pa.ExtensionType):
         pa.ExtensionType.__init__(self, storage_type, self._spec.extension_name())
 
     def __repr__(self):
-        return f"{type(self).__name__}({repr(self._spec)})"
+        return f"{type(self).__name__}({_spec_short_repr(self.spec, self._extension_name)})"
 
     def __arrow_ext_serialize__(self):
         return self._spec.extension_metadata().encode()
@@ -61,6 +63,46 @@ class GeometryExtensionType(pa.ExtensionType):
         from pandas import ArrowDtype
 
         return ArrowDtype(self)
+
+    def __arrow_ext_class__(self):
+        if GeometryExtensionType._array_cls_from_name:
+            return GeometryExtensionType._array_cls_from_name(self.extension_name)
+        else:
+            return super().__arrow_ext_class__()
+
+    def __arrow_ext_scalar_class__(self):
+        if GeometryExtensionType._scalar_cls_from_name:
+            return GeometryExtensionType._scalar_cls_from_name(self.extension_name)
+        else:
+            return super().__arrow_ext_scalar_class__()
+
+    def from_geobuffers(self, *args, **kwargs):
+        """Create an array from the appropriate number of buffers
+        for this type.
+        """
+        raise NotImplementedError()
+
+    def wrap_array(self, storage):
+        # Often this storage has the correct type except for nullable/
+        # non/nullable-ness of children. First check for the easy case
+        # (exactly correct storage type).
+        if storage.type == self.storage_type:
+            return super().wrap_array(storage)
+
+        # A cast won't work because pyarrow won't cast nullable to
+        # non-nullable; however, we can attempt to export to C and
+        # reimport against this after making sure that the storage parses
+        # to the appropriate geometry type.
+
+        # Handle ChunkedArray
+        if isinstance(storage, pa.ChunkedArray):
+            chunks = [self.wrap_array(chunk) for chunk in storage.chunks]
+            return pa.chunked_array(chunks, self)
+
+        _, c_array = storage.__arrow_c_array__()
+        c_schema = self.storage_type.__arrow_c_schema__()
+        storage = pa.Array._import_from_c_capsule(c_schema, c_array)
+        return super().wrap_array(storage)
 
     @property
     def spec(self) -> TypeSpec:
@@ -101,10 +143,10 @@ class GeometryExtensionType(pa.ExtensionType):
         """The :class:`CoordType` of this type.
 
         >>> import geoarrow.pyarrow as ga
-        >>> ga.linestring().coord_type == ga.CoordType.SEPARATE
+        >>> ga.linestring().coord_type == ga.CoordType.SEPARATED
         True
         >>> ga.linestring().with_coord_type(ga.CoordType.INTERLEAVED).coord_type
-        <GeoArrowCoordType.GEOARROW_COORD_TYPE_INTERLEAVED: 2>
+        <CoordType.INTERLEAVED: 2>
         """
         return self._spec.coord_type
 
@@ -116,7 +158,7 @@ class GeometryExtensionType(pa.ExtensionType):
         >>> ga.linestring().edge_type == ga.EdgeType.PLANAR
         True
         >>> ga.linestring().with_edge_type(ga.EdgeType.SPHERICAL).edge_type
-        <GeoArrowEdgeType.GEOARROW_EDGE_TYPE_SPHERICAL: 1>
+        <EdgeType.SPHERICAL: 2>
         """
         return self._spec.edge_type
 
@@ -125,10 +167,71 @@ class GeometryExtensionType(pa.ExtensionType):
         """The coordinate reference system of this type.
 
         >>> import geoarrow.pyarrow as ga
-        >>> ga.point().with_crs("EPSG:1234").crs
-        'EPSG:1234'
+        >>> ga.point().with_crs(ga.OGC_CRS84).crs
+        ProjJsonCrs(OGC:CRS84)
         """
         return self._spec.crs
+
+    def with_metadata(self, metadata):
+        """This type with the extension metadata (e.g., copied from some other type)
+        >>> import geoarrow.pyarrow as ga
+        >>> ga.linestring().with_metadata('{"edges": "spherical"}').edge_type
+        <EdgeType.SPHERICAL: 2>
+        """
+        if isinstance(metadata, str):
+            metadata = metadata.encode("UTF-8")
+        return type(self).__arrow_ext_deserialize__(self.storage_type, metadata)
+
+    def with_geometry_type(self, geometry_type):
+        """Returns a new type with the specified :class:`geoarrow.GeometryType`.
+        >>> import geoarrow.pyarrow as ga
+        >>> ga.point().with_geometry_type(ga.GeometryType.LINESTRING)
+        LinestringType(geoarrow.linestring)
+        """
+        spec = type_spec(Encoding.GEOARROW, geometry_type=geometry_type)
+        spec = TypeSpec.coalesce(spec, self.spec).canonicalize()
+        return extension_type(spec)
+
+    def with_dimensions(self, dimensions):
+        """Returns a new type with the specified :class:`geoarrow.Dimensions`.
+        >>> import geoarrow.pyarrow as ga
+        >>> ga.point().with_dimensions(ga.Dimensions.XYZ)
+        PointType(geoarrow.point_z)
+        """
+        spec = type_spec(dimensions=dimensions)
+        spec = TypeSpec.coalesce(spec, self.spec).canonicalize()
+        return extension_type(spec)
+
+    def with_coord_type(self, coord_type):
+        """Returns a new type with the specified :class:`geoarrow.CoordType`.
+        >>> import geoarrow.pyarrow as ga
+        >>> ga.point().with_coord_type(ga.CoordType.INTERLEAVED)
+        PointType(interleaved geoarrow.point)
+        """
+        spec = type_spec(coord_type=coord_type)
+        spec = TypeSpec.coalesce(spec, self.spec).canonicalize()
+        return extension_type(spec)
+
+    def with_edge_type(self, edge_type):
+        """Returns a new type with the specified :class:`geoarrow.EdgeType`.
+        >>> import geoarrow.pyarrow as ga
+        >>> ga.linestring().with_edge_type(ga.EdgeType.SPHERICAL)
+        LinestringType(spherical geoarrow.linestring)
+        """
+        spec = type_spec(edge_type=edge_type)
+        spec = TypeSpec.coalesce(spec, self.spec).canonicalize()
+        return extension_type(spec)
+
+    def with_crs(self, crs):
+        """Returns a new type with the specified coordinate reference system
+        :class:`geoarrow.CrsType` combination.
+        >>> import geoarrow.pyarrow as ga
+        >>> ga.linestring().with_crs(ga.OGC_CRS84)
+        LinestringType(geoarrow.linestring <ProjJsonCrs(OGC:CRS84)>)
+        """
+        spec = type_spec(crs=crs)
+        spec = TypeSpec.coalesce(spec, self.spec).canonicalize()
+        return extension_type(spec)
 
 
 class WkbType(GeometryExtensionType):
@@ -156,6 +259,10 @@ class PointType(GeometryExtensionType):
 
     _extension_name = "geoarrow.point"
 
+    def from_geobuffers(self, validity, x, y=None, z_or_m=None, m=None):
+        storage = _from_buffers_point(self.storage_type, validity, x, y, z_or_m, m)
+        return self.wrap_array(storage)
+
 
 class LinestringType(GeometryExtensionType):
     """Extension type whose storage is an array of linestrings stored
@@ -163,6 +270,12 @@ class LinestringType(GeometryExtensionType):
     """
 
     _extension_name = "geoarrow.linestring"
+
+    def from_geobuffers(self, validity, coord_offsets, x, y=None, z_or_m=None, m=None):
+        storage = _from_buffers_linestring(
+            self.storage_type, validity, coord_offsets, x, y, z_or_m, m
+        )
+        return self.wrap_array(storage)
 
 
 class PolygonType(GeometryExtensionType):
@@ -172,6 +285,14 @@ class PolygonType(GeometryExtensionType):
 
     _extension_name = "geoarrow.polygon"
 
+    def from_geobuffers(
+        self, validity, ring_offsets, coord_offsets, x, y=None, z_or_m=None, m=None
+    ):
+        storage = _from_buffers_polygon(
+            self.storage_type, validity, ring_offsets, coord_offsets, x, y, z_or_m, m
+        )
+        return self.wrap_array(storage)
+
 
 class MultiPointType(GeometryExtensionType):
     """Extension type whose storage is an array of polygons stored
@@ -179,6 +300,12 @@ class MultiPointType(GeometryExtensionType):
     """
 
     _extension_name = "geoarrow.multipoint"
+
+    def from_geobuffers(self, validity, coord_offsets, x, y=None, z_or_m=None, m=None):
+        storage = _from_buffers_linestring(
+            self.storage_type, validity, coord_offsets, x, y, z_or_m, m
+        )
+        return self.wrap_array(storage)
 
 
 class MultiLinestringType(GeometryExtensionType):
@@ -188,6 +315,28 @@ class MultiLinestringType(GeometryExtensionType):
 
     _extension_name = "geoarrow.multilinestring"
 
+    def from_geobuffers(
+        self,
+        validity,
+        linestring_offsets,
+        coord_offsets,
+        x,
+        y=None,
+        z_or_m=None,
+        m=None,
+    ):
+        storage = _from_buffers_polygon(
+            self.storage_type,
+            validity,
+            linestring_offsets,
+            coord_offsets,
+            x,
+            y,
+            z_or_m,
+            m,
+        )
+        return self.wrap_array(storage)
+
 
 class MultiPolygonType(GeometryExtensionType):
     """Extension type whose storage is an array of multilinestrings stored
@@ -195,6 +344,30 @@ class MultiPolygonType(GeometryExtensionType):
     """
 
     _extension_name = "geoarrow.multipolygon"
+
+    def from_geobuffers(
+        self,
+        validity,
+        polygon_offsets,
+        ring_offsets,
+        coord_offsets,
+        x,
+        y=None,
+        z_or_m=None,
+        m=None,
+    ):
+        storage = _from_buffers_multipolygon(
+            self.storage_type,
+            validity,
+            polygon_offsets,
+            ring_offsets,
+            coord_offsets,
+            x,
+            y,
+            z_or_m,
+            m,
+        )
+        return self.wrap_array(storage)
 
 
 def extension_type(
@@ -479,6 +652,94 @@ def _nested_type(coord, names):
         return coord
 
 
+def _from_buffer_ordinate(x):
+    mv = memoryview(x)
+    if mv.format != "d":
+        mv = mv.cast("d")
+
+    return pa.array(mv, pa.float64())
+
+
+def _pybuffer_offset(x):
+    mv = memoryview(x)
+    if mv.format != "i":
+        mv = mv.cast("i")
+
+    return len(mv), pa.py_buffer(mv)
+
+
+def _from_buffers_point(type_, validity, x, y=None, z_or_m=None, m=None):
+    validity = pa.py_buffer(validity) if validity is not None else None
+    children = [_from_buffer_ordinate(x)]
+    if y is not None:
+        children.append(_from_buffer_ordinate(y))
+    if z_or_m is not None:
+        children.append(_from_buffer_ordinate(z_or_m))
+    if m is not None:
+        children.append(_from_buffer_ordinate(m))
+
+    if pa_types.is_fixed_size_list(type_):
+        length = len(x) // type_.list_size
+    else:
+        length = len(x)
+
+    return pa.Array.from_buffers(type_, length, buffers=[validity], children=children)
+
+
+def _from_buffers_linestring(
+    type_, validity, coord_offsets, x, y=None, z_or_m=None, m=None
+):
+    validity = pa.py_buffer(validity) if validity is not None else None
+    n_offsets, coord_offsets = _pybuffer_offset(coord_offsets)
+    coords = _from_buffers_point(type_.field(0).type, None, x, y, z_or_m, m)
+    return pa.Array.from_buffers(
+        type_,
+        n_offsets - 1,
+        buffers=[validity, pa.py_buffer(coord_offsets)],
+        children=[coords],
+    )
+
+
+def _from_buffers_polygon(
+    type_, validity, ring_offsets, coord_offsets, x, y=None, z_or_m=None, m=None
+):
+    validity = pa.py_buffer(validity) if validity is not None else None
+    rings = _from_buffers_linestring(
+        type_.field(0).type, None, coord_offsets, x, y, z_or_m, m
+    )
+    n_offsets, ring_offsets = _pybuffer_offset(ring_offsets)
+    return pa.Array.from_buffers(
+        type_,
+        n_offsets - 1,
+        buffers=[validity, pa.py_buffer(ring_offsets)],
+        children=[rings],
+    )
+
+
+def _from_buffers_multipolygon(
+    type_,
+    validity,
+    polygon_offsets,
+    ring_offsets,
+    coord_offsets,
+    x,
+    y=None,
+    z_or_m=None,
+    m=None,
+):
+    validity = pa.py_buffer(validity) if validity is not None else None
+    polygons = _from_buffers_polygon(
+        type_.field(0).type, None, ring_offsets, coord_offsets, x, y, z_or_m, m
+    )
+    n_offsets, polygon_offsets = _pybuffer_offset(polygon_offsets)
+    return pa.Array.from_buffers(
+        type_,
+        n_offsets - 1,
+        buffers=[validity, pa.py_buffer(ring_offsets)],
+        children=[polygons],
+    )
+
+
 def _generate_storage_types():
     coord_storage = {
         (CoordType.SEPARATED, Dimensions.XY): _struct_fields("xy"),
@@ -515,6 +776,41 @@ def _generate_storage_types():
                 all_storage_types[key] = storage_type
 
     return all_storage_types
+
+
+# A shorter version of repr(spec) that matches what geoarrow-c used to do
+# (to reduce mayhem on docstring updates).
+def _spec_short_repr(spec, ext_name):
+    non_planar = spec.edge_type != EdgeType.PLANAR
+    interleaved = spec.coord_type == CoordType.INTERLEAVED
+
+    if spec.dimensions == Dimensions.XYZM:
+        dims = "_zm"
+    elif spec.dimensions == Dimensions.XYZ:
+        dims = "_z"
+    elif spec.dimensions == Dimensions.XYM:
+        dims = "_m"
+    else:
+        dims = ""
+
+    if non_planar and interleaved:
+        type_prefix = f"{spec.edge_type.name.lower()} interleaved "
+    elif non_planar:
+        type_prefix = f"{spec.edge_type.name.lower()} "
+    elif interleaved:
+        type_prefix = "interleaved "
+    else:
+        type_prefix = ""
+
+    if spec.crs is not None:
+        crs = f" <{repr(spec.crs)}>"
+    else:
+        crs = ""
+
+    if len(crs) > 40:
+        crs = crs[:36] + "...>"
+
+    return f"{type_prefix}{ext_name}{dims}{crs}"
 
 
 _EXTENSION_CLASSES = {

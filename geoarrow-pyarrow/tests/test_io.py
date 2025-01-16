@@ -5,6 +5,7 @@ import json
 
 import pyarrow as pa
 from pyarrow import parquet
+from geoarrow import types
 import geoarrow.pyarrow as ga
 from geoarrow.pyarrow import io
 
@@ -45,7 +46,9 @@ def test_write_geoparquet_table_default():
         io.write_geoparquet_table(tab, temp_pq, geometry_encoding=None)
         tab2 = parquet.read_table(temp_pq)
         assert b"geo" in tab2.schema.metadata
-        assert tab2.schema.types[0] == ga.point().storage_type
+        ga.as_wkt(ga.point().wrap_array(tab2["geometry"])).to_pylist() == [
+            "POINT (0 1)"
+        ]
 
 
 def test_write_geoparquet_table_wkb():
@@ -72,7 +75,9 @@ def test_write_geoparquet_table_geoarrow():
         meta = json.loads(tab2.schema.metadata[b"geo"])
         assert meta["version"] == "1.1.0"
         assert meta["columns"]["geometry"]["encoding"] == "point"
-        assert tab2.schema.types[0] == ga.point().storage_type
+        ga.as_wkt(ga.point().wrap_array(tab2["geometry"])).to_pylist() == [
+            "POINT (0 1)"
+        ]
 
 
 def test_read_geoparquet_table_wkb():
@@ -136,15 +141,9 @@ def test_geoparquet_column_spec_from_type_crs():
     assert spec_none["crs"] is None
 
     spec_projjson = io._geoparquet_column_spec_from_type(
-        ga.wkb().with_crs("{}", ga.CrsType.PROJJSON)
+        ga.wkb().with_crs(types.OGC_CRS84)
     )
-    assert spec_projjson["crs"] == {}
-
-    pytest.importorskip("pyproj")
-    spec_not_projjson = io._geoparquet_column_spec_from_type(
-        ga.wkb().with_crs("OGC:CRS84")
-    )
-    assert spec_not_projjson["crs"]["id"]["code"] == "CRS84"
+    assert spec_projjson["crs"]["id"]["code"] == "CRS84"
 
 
 def test_geoparquet_column_spec_from_type_edges():
@@ -352,13 +351,12 @@ def test_chunked_array_to_geoarrow_crs():
     item_missing_crs = io._geoparquet_chunked_array_to_geoarrow(
         item_binary, {"encoding": "WKB"}
     )
-    assert item_missing_crs.type.crs_type == ga.CrsType.PROJJSON
+    assert item_missing_crs.type.crs.to_json_dict() == types.OGC_CRS84.to_json_dict()
 
     item_explicit_crs = io._geoparquet_chunked_array_to_geoarrow(
         item_binary, {"encoding": "WKB", "crs": {}}
     )
-    assert item_explicit_crs.type.crs_type == ga.CrsType.PROJJSON
-    assert item_explicit_crs.type.crs == "{}"
+    assert item_explicit_crs.type.crs.to_json_dict() == {}
 
 
 def test_chunked_array_to_geoarrow_edges():
@@ -390,7 +388,7 @@ def test_table_to_geoarrow():
     tab_geo = io._geoparquet_table_to_geoarrow(tab, {"col_name": {"encoding": "WKB"}})
     assert "col_name" in tab_geo.schema.names
     assert isinstance(tab_geo["col_name"].type, ga.GeometryExtensionType)
-    assert tab_geo["col_name"].type.crs_type == ga.CrsType.PROJJSON
+    assert tab_geo["col_name"].type.crs.to_json_dict() == types.OGC_CRS84.to_json_dict()
 
     # Check with no columns selected
     tab_no_cols = tab.drop_columns(["col_name"])

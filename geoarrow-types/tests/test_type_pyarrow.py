@@ -1,8 +1,25 @@
+import numpy as np
 import pyarrow as pa
 import pytest
 
 import geoarrow.types as gt
 from geoarrow.types import type_pyarrow
+
+
+def test_wrap_array_non_exact():
+    from pyarrow import compute as pc
+
+    storage = pc.make_struct(
+        pa.array([1.0, 2.0, 3.0]), pa.array([3.0, 4.0, 5.0]), field_names=["x", "y"]
+    )
+    point = gt.point().to_pyarrow()
+    point_ext = point.wrap_array(storage)
+    assert point_ext.type.storage_type.field(0).nullable is False
+
+    storage_chunked = pa.chunked_array([storage, storage])
+    point_chunked_ext = point.wrap_array(storage_chunked)
+    assert point_chunked_ext.type.storage_type.field(0).nullable is False
+    assert point_chunked_ext.num_chunks == 2
 
 
 def test_classes_serialized():
@@ -266,6 +283,113 @@ def test_deserialize_infer_dimensions_interleaved():
         type_pyarrow._deserialize_storage(
             pa.list_(pa.field("xyz", pa.float64()), list_size=4)
         )
+
+
+def test_point_array_from_geobuffers():
+    pa_type = gt.point(dimensions=gt.Dimensions.XYZM).to_pyarrow()
+    arr = pa_type.from_geobuffers(
+        b"\xff",
+        np.array([1.0, 2.0, 3.0]),
+        np.array([4.0, 5.0, 6.0]),
+        np.array([7.0, 8.0, 9.0]),
+        np.array([10.0, 11.0, 12.0]),
+    )
+    assert len(arr) == 3
+    assert arr.type == pa_type
+    assert arr.storage == pa.array(
+        [
+            {"x": 1.0, "y": 4.0, "z": 7.0, "m": 10.0},
+            {"x": 2.0, "y": 5.0, "z": 8.0, "m": 11.0},
+            {"x": 3.0, "y": 6.0, "z": 9.0, "m": 12.0},
+        ],
+        pa_type.storage_type,
+    )
+
+    pa_type = gt.point(coord_type=gt.CoordType.INTERLEAVED).to_pyarrow()
+    arr = pa_type.from_geobuffers(None, np.array([1.0, 2.0, 3.0, 4.0, 5.0, 6.0]))
+    assert len(arr) == 3
+    assert arr.storage == pa.array(
+        [[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]], pa_type.storage_type
+    )
+
+
+@pytest.mark.parametrize(
+    "pa_type", [gt.linestring().to_pyarrow(), gt.multipoint().to_pyarrow()]
+)
+def test_linestringish_array_from_geobuffers(pa_type):
+    arr = pa_type.from_geobuffers(
+        b"\xff",
+        np.array([0, 4], np.int32),
+        np.array([0.0, 1.0, 0.0, 0.0]),
+        np.array([0.0, 0.0, 1.0, 0.0]),
+    )
+    assert len(arr) == 1
+    assert arr.storage == pa.array(
+        [
+            [
+                {"x": 0.0, "y": 0.0},
+                {"x": 1.0, "y": 0.0},
+                {"x": 0.0, "y": 1.0},
+                {"x": 0.0, "y": 0.0},
+            ]
+        ],
+        pa_type.storage_type,
+    )
+
+
+@pytest.mark.parametrize(
+    "pa_type", [gt.polygon().to_pyarrow(), gt.multilinestring().to_pyarrow()]
+)
+def test_polygonish_array_from_geobuffers(pa_type):
+    arr = pa_type.from_geobuffers(
+        b"\xff",
+        np.array([0, 1], np.int32),
+        np.array([0, 4], np.int32),
+        np.array([0.0, 1.0, 0.0, 0.0]),
+        np.array([0.0, 0.0, 1.0, 0.0]),
+    )
+    assert len(arr) == 1
+    assert arr.storage == pa.array(
+        [
+            [
+                [
+                    {"x": 0.0, "y": 0.0},
+                    {"x": 1.0, "y": 0.0},
+                    {"x": 0.0, "y": 1.0},
+                    {"x": 0.0, "y": 0.0},
+                ]
+            ]
+        ],
+        pa_type.storage_type,
+    )
+
+
+def test_multipolygon_array_from_geobuffers():
+    pa_type = gt.multipolygon().to_pyarrow()
+    arr = pa_type.from_geobuffers(
+        b"\xff",
+        np.array([0, 1], np.int32),
+        np.array([0, 1], np.int32),
+        np.array([0, 4], np.int32),
+        np.array([0.0, 1.0, 0.0, 0.0]),
+        np.array([0.0, 0.0, 1.0, 0.0]),
+    )
+    assert len(arr) == 1
+    assert arr.storage == pa.array(
+        [
+            [
+                [
+                    [
+                        {"x": 0.0, "y": 0.0},
+                        {"x": 1.0, "y": 0.0},
+                        {"x": 0.0, "y": 1.0},
+                        {"x": 0.0, "y": 0.0},
+                    ]
+                ]
+            ]
+        ],
+        pa_type.storage_type,
+    )
 
 
 @pytest.mark.parametrize(
