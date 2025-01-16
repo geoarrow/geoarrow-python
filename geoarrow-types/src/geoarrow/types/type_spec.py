@@ -604,12 +604,14 @@ _SERIALIZED_EXT_NAMES = {
 }
 
 _GEOARROW_EXT_NAMES = {
+    GeometryType.GEOMETRY: "geoarrow.geometry",
     GeometryType.POINT: "geoarrow.point",
     GeometryType.LINESTRING: "geoarrow.linestring",
     GeometryType.POLYGON: "geoarrow.polygon",
     GeometryType.MULTIPOINT: "geoarrow.multipoint",
     GeometryType.MULTILINESTRING: "geoarrow.multilinestring",
     GeometryType.MULTIPOLYGON: "geoarrow.multipolygon",
+    GeometryType.GEOMETRYCOLLECTION: "geoarrow.geometrycollection",
 }
 
 _GEOMETRY_TYPE_FROM_EXT = {v: k for k, v in _GEOARROW_EXT_NAMES.items()}

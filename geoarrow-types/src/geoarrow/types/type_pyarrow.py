@@ -253,6 +253,14 @@ class WktType(GeometryExtensionType):
     _extension_name = "geoarrow.wkt"
 
 
+class GeometryUnionType(GeometryExtensionType):
+    _extension_name = "geoarrow.geometry"
+
+
+class GeometryCollectionUnionType(GeometryExtensionType):
+    _extension_name = "geoarrow.geometrycollection"
+
+
 class PointType(GeometryExtensionType):
     """Extension type whose storage is an array of points stored
     as either a struct with one child per dimension or a fixed-size
@@ -456,12 +464,14 @@ def register_extension_types(lazy: bool = True) -> None:
     all_types = [
         type_spec(Encoding.WKT).to_pyarrow(),
         type_spec(Encoding.WKB).to_pyarrow(),
+        # type_spec(Encoding.GEOARROW, GeometryType.GEOMETRY).to_pyarrow(),
         type_spec(Encoding.GEOARROW, GeometryType.POINT).to_pyarrow(),
         type_spec(Encoding.GEOARROW, GeometryType.LINESTRING).to_pyarrow(),
         type_spec(Encoding.GEOARROW, GeometryType.POLYGON).to_pyarrow(),
         type_spec(Encoding.GEOARROW, GeometryType.MULTIPOINT).to_pyarrow(),
         type_spec(Encoding.GEOARROW, GeometryType.MULTILINESTRING).to_pyarrow(),
         type_spec(Encoding.GEOARROW, GeometryType.MULTIPOLYGON).to_pyarrow(),
+        # type_spec(Encoding.GEOARROW, GeometryType.GEOMETRYCOLLECTION).to_pyarrow(),
     ]
 
     n_registered = 0
@@ -533,6 +543,13 @@ def _parse_storage(storage_type):
     elif isinstance(storage_type, pa.ListType):
         f = storage_type.field(0)
         return [("list", (f.name,))] + _parse_storage(f.type)
+    elif isinstance(storage_type, pa.DenseUnionType):
+        n_fields = storage_type.num_fields
+        names = tuple(str(code) for code in storage_type.type_codes)
+        parsed_children = tuple(
+            _parse_storage(storage_type.field(i).type)[0] for i in range(n_fields)
+        )
+        return ["dense_union", (names, parsed_children)]
     elif isinstance(storage_type, pa.StructType):
         n_fields = storage_type.num_fields
         names = tuple(storage_type.field(i).name for i in range(n_fields))
@@ -780,6 +797,77 @@ def _generate_storage_types():
     return all_storage_types
 
 
+def _generate_union_storage(
+    geometry_types=(
+        GeometryType.POINT,
+        GeometryType.LINESTRING,
+        GeometryType.POLYGON,
+        GeometryType.MULTIPOINT,
+        GeometryType.MULTILINESTRING,
+        GeometryType.MULTIPOLYGON,
+        GeometryType.GEOMETRYCOLLECTION,
+    ),
+    dimensions=(Dimensions.XY, Dimensions.XYZ, Dimensions.XYM, Dimensions.XYZM),
+    coord_type=CoordType.SEPARATED,
+):
+    child_fields = []
+    type_codes = []
+    for dimension in dimensions:
+        for geometry_type in geometry_types:
+            spec = type_spec(
+                encoding=Encoding.GEOARROW,
+                geometry_type=geometry_type,
+                dimensions=dimension,
+                coord_type=coord_type,
+            )
+
+            if spec.geometry_type == GeometryType.GEOMETRYCOLLECTION:
+                storage_type = _generate_union_storage(
+                    geometry_types=[
+                        GeometryType.POINT,
+                        GeometryType.LINESTRING,
+                        GeometryType.POLYGON,
+                        GeometryType.MULTIPOINT,
+                        GeometryType.MULTILINESTRING,
+                        GeometryType.MULTIPOLYGON,
+                    ],
+                    dimensions=[spec.dimensions],
+                    coord_type=coord_type,
+                )
+            else:
+                storage_type = extension_type(spec).storage_type
+
+            type_id = _UNION_TYPE_ID_FROM_SPEC[(spec.geometry_type, spec.dimension)]
+            geometry_type_lab = _UNION_GEOMETRY_TYPE_LABELS[spec.geometry_type.value]
+            dimension_lab = _UNION_DIMENSION_LABELS[spec.dimensions.value]
+
+            child_fields.append(
+                pa.field(f"{geometry_type_lab}{dimension_lab}", storage_type)
+            )
+            type_codes.append(type_id)
+
+    return pa.dense_union(child_fields, type_codes)
+
+
+def _generate_union_type_id_mapping():
+    geometry_types = [
+        GeometryType.POINT,
+        GeometryType.LINESTRING,
+        GeometryType.POLYGON,
+        GeometryType.MULTIPOINT,
+        GeometryType.MULTILINESTRING,
+        GeometryType.MULTIPOLYGON,
+        GeometryType.GEOMETRYCOLLECTION,
+    ]
+    dimensions = [Dimensions.XY, Dimensions.XYZ, Dimensions.XYM, Dimensions.XYZM]
+    out = {}
+    for dimension in dimensions:
+        for geometry_type in geometry_types:
+            type_id = (dimension.value - 1) * 10 + geometry_type.value
+            out[type_id] = (geometry_type, dimension)
+    return out
+
+
 # A shorter version of repr(spec) that matches what geoarrow-c used to do
 # (to reduce mayhem on docstring updates).
 def _spec_short_repr(spec, ext_name):
@@ -845,6 +933,10 @@ _SPEC_FROM_TYPE_NESTING = {
         geometry_type=GeometryType.POINT,
         coord_type=CoordType.SEPARATED,
     ),
+    ("dense_union",): TypeSpec(
+        encoding=Encoding.GEOARROW,
+        geometry_type=GeometryType.GEOMETRY,
+    ),
     ("list", "struct"): TypeSpec(
         encoding=Encoding.GEOARROW, coord_type=CoordType.SEPARATED
     ),
@@ -872,6 +964,10 @@ _SPEC_FROM_TYPE_NESTING = {
         coord_type=CoordType.INTERLEAVED,
         geometry_type=GeometryType.MULTIPOLYGON,
     ),
+    ("list", "dense_union"): TypeSpec(
+        encoding=Encoding.GEOARROW,
+        geometry_type=GeometryType.GEOMETRYCOLLECTION,
+    ),
 }
 
 _DIMS_FROM_NAMES = {
@@ -884,3 +980,19 @@ _DIMS_FROM_NAMES = {
     ("x", "y", "m"): Dimensions.XYM,
     ("x", "y", "z", "m"): Dimensions.XYZM,
 }
+
+_SPEC_FROM_UNION_TYPE_ID = _generate_union_type_id_mapping()
+_UNION_TYPE_ID_FROM_SPEC = {v: k for k, v in _SPEC_FROM_UNION_TYPE_ID.items()}
+
+_UNION_GEOMETRY_TYPE_LABELS = [
+    "Geometry",
+    "Point",
+    "LineString",
+    "Polygon",
+    "MultiPoint",
+    "MultiLineString",
+    "MultiPolygon",
+    "GeometryCollection",
+]
+
+_UNION_DIMENSION_LABELS = [None, "", " Z", " M", " ZM"]
