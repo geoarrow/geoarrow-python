@@ -350,6 +350,9 @@ def test_with_crs():
     assert isinstance(crsified.type, ga.WktType)
     assert crsified.type.crs.to_json_dict() == types.OGC_CRS84.to_json_dict()
 
+    crsified2 = _compute.with_crs(crsified, "OGC:CRS84")
+    assert repr(crsified2.type.crs) == "StringCrs(OGC:CRS84)"
+
     crsnope = _compute.with_crs(crsified, None)
     assert crsnope.type.crs is None
 
