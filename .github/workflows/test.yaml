@@ -40,11 +40,10 @@ jobs:
           pushd geoarrow-types
           pip install ".[test]"
 
-      # TODO: Reenable geoarrow-pandas (or remove it!)
-      # - name: Install (geoarrow-pandas)
-      #   run: |
-      #     pushd geoarrow-pandas
-      #     pip install ".[test]"
+      - name: Install (geoarrow-pandas)
+        run: |
+          pushd geoarrow-pandas
+          pip install ".[test]"
 
       - name: Run tests (geoarrow-pyarrow)
         run: |
@@ -54,9 +53,9 @@ jobs:
         run: |
           pytest geoarrow-types/tests -v -s
 
-      # - name: Run tests (geoarrow-pandas)
-      #   run: |
-      #     pytest geoarrow-pandas/tests -v -s
+      - name: Run tests (geoarrow-pandas)
+        run: |
+          pytest geoarrow-pandas/tests -v -s
 
       - name: Run doctests (geoarrow-pyarrow)
         if: success() && matrix.python-version == '3.12'
@@ -70,11 +69,11 @@ jobs:
           cd geoarrow-types
           pytest --pyargs geoarrow.types --doctest-modules --import-mode=importlib
 
-      # - name: Run doctests (geoarrow-pandas)
-      #   if: success() && matrix.python-version == '3.12'
-      #   run: |
-      #     cd geoarrow-pandas
-      #     pytest --pyargs geoarrow.pandas --doctest-modules --import-mode=importlib
+      - name: Run doctests (geoarrow-pandas)
+        if: success() && matrix.python-version == '3.12'
+        run: |
+          cd geoarrow-pandas
+          pytest --pyargs geoarrow.pandas --doctest-modules --import-mode=importlib
 
   coverage:
     needs: [test]
@@ -100,10 +99,10 @@ jobs:
           pushd geoarrow-types
           pip install -e ".[test]"
 
-      # - name: Install (geoarrow-pandas)
-      #   run: |
-      #     pushd geoarrow-pandas
-      #     pip install -e ".[test]"
+      - name: Install (geoarrow-pandas)
+        run: |
+          pushd geoarrow-pandas
+          pip install -e ".[test]"
 
       - name: Install coverage dependencies
         run: |
