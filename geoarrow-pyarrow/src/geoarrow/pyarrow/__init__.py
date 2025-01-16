@@ -9,7 +9,14 @@ Examples
 
 from geoarrow.types._version import __version__, __version_tuple__  # NOQA: F401
 
-from geoarrow.types import GeometryType, Dimensions, CoordType, EdgeType, Encoding
+from geoarrow.types import (
+    GeometryType,
+    Dimensions,
+    CoordType,
+    EdgeType,
+    Encoding,
+    OGC_CRS84,
+)
 
 from geoarrow.pyarrow._type import (
     GeometryExtensionType,
@@ -76,6 +83,7 @@ __all__ = [
     "GeometryExtensionType",
     "WktType",
     "WkbType",
+    "OGC_CRS84",
     "PointType",
     "LinestringType",
     "PolygonType",

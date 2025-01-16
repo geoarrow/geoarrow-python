@@ -72,7 +72,7 @@ def point() -> PointType:
     >>> ga.point()
     PointType(geoarrow.point)
     >>> ga.point().storage_type
-    StructType(struct<x: double, y: double>)
+    StructType(struct<x: double not null, y: double not null>)
     """
     return extension_type(types.point())
 
@@ -84,7 +84,7 @@ def linestring() -> LinestringType:
     >>> ga.linestring()
     LinestringType(geoarrow.linestring)
     >>> ga.linestring().storage_type
-    ListType(list<vertices: struct<x: double, y: double>>)
+    ListType(list<vertices: struct<x: double not null, y: double not null> not null>)
     """
     return extension_type(types.linestring())
 
@@ -96,7 +96,7 @@ def polygon() -> PolygonType:
     >>> ga.polygon()
     PolygonType(geoarrow.polygon)
     >>> ga.polygon().storage_type
-    ListType(list<rings: list<vertices: struct<x: double, y: double>>>)
+    ListType(list<vertices: list<rings: struct<x: double not null, y: double not null> not null> not null>)
     """
     return extension_type(types.polygon())
 
@@ -108,7 +108,7 @@ def multipoint() -> MultiPointType:
     >>> ga.multipoint()
     MultiPointType(geoarrow.multipoint)
     >>> ga.multipoint().storage_type
-    ListType(list<points: struct<x: double, y: double>>)
+    ListType(list<points: struct<x: double not null, y: double not null> not null>)
     """
     return extension_type(types.multipoint())
 
@@ -120,7 +120,7 @@ def multilinestring() -> MultiLinestringType:
     >>> ga.multilinestring()
     MultiLinestringType(geoarrow.multilinestring)
     >>> ga.multilinestring().storage_type
-    ListType(list<linestrings: list<vertices: struct<x: double, y: double>>>)
+    ListType(list<vertices: list<linestrings: struct<x: double not null, y: double not null> not null> not null>)
     """
     return extension_type(types.multilinestring())
 
@@ -132,7 +132,7 @@ def multipolygon() -> MultiPolygonType:
     >>> ga.multipolygon()
     MultiPolygonType(geoarrow.multipolygon)
     >>> ga.multipolygon().storage_type
-    ListType(list<polygons: list<rings: list<vertices: struct<x: double, y: double>>>>)
+    ListType(list<vertices: list<rings: list<polygons: struct<x: double not null, y: double not null> not null> not null> not null>)
     """
     return extension_type(types.multipolygon())
 

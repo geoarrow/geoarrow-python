@@ -48,7 +48,7 @@ class GeometryExtensionType(pa.ExtensionType):
         pa.ExtensionType.__init__(self, storage_type, self._spec.extension_name())
 
     def __repr__(self):
-        return f"{type(self).__name__}({repr(self._spec)})"
+        return f"{type(self).__name__}({_spec_short_repr(self.spec, self._extension_name)})"
 
     def __arrow_ext_serialize__(self):
         return self._spec.extension_metadata().encode()
@@ -143,10 +143,10 @@ class GeometryExtensionType(pa.ExtensionType):
         """The :class:`CoordType` of this type.
 
         >>> import geoarrow.pyarrow as ga
-        >>> ga.linestring().coord_type == ga.CoordType.SEPARATE
+        >>> ga.linestring().coord_type == ga.CoordType.SEPARATED
         True
         >>> ga.linestring().with_coord_type(ga.CoordType.INTERLEAVED).coord_type
-        <GeoArrowCoordType.GEOARROW_COORD_TYPE_INTERLEAVED: 2>
+        <CoordType.INTERLEAVED: 2>
         """
         return self._spec.coord_type
 
@@ -158,7 +158,7 @@ class GeometryExtensionType(pa.ExtensionType):
         >>> ga.linestring().edge_type == ga.EdgeType.PLANAR
         True
         >>> ga.linestring().with_edge_type(ga.EdgeType.SPHERICAL).edge_type
-        <GeoArrowEdgeType.GEOARROW_EDGE_TYPE_SPHERICAL: 1>
+        <EdgeType.SPHERICAL: 2>
         """
         return self._spec.edge_type
 
@@ -167,16 +167,16 @@ class GeometryExtensionType(pa.ExtensionType):
         """The coordinate reference system of this type.
 
         >>> import geoarrow.pyarrow as ga
-        >>> ga.point().with_crs("EPSG:1234").crs
-        'EPSG:1234'
+        >>> ga.point().with_crs(ga.OGC_CRS84).crs
+        ProjJsonCrs(OGC:CRS84)
         """
         return self._spec.crs
 
     def with_metadata(self, metadata):
         """This type with the extension metadata (e.g., copied from some other type)
         >>> import geoarrow.pyarrow as ga
-        >>> ga.point().with_metadata('{"crs": "EPSG:1234"}').crs
-        'EPSG:1234'
+        >>> ga.linestring().with_metadata('{"edges": "spherical"}').edge_type
+        <EdgeType.SPHERICAL: 2>
         """
         if isinstance(metadata, str):
             metadata = metadata.encode("UTF-8")
@@ -226,8 +226,8 @@ class GeometryExtensionType(pa.ExtensionType):
         """Returns a new type with the specified coordinate reference system
         :class:`geoarrow.CrsType` combination.
         >>> import geoarrow.pyarrow as ga
-        >>> ga.linestring().with_crs("EPSG:1234")
-        LinestringType(geoarrow.linestring <EPSG:1234>)
+        >>> ga.linestring().with_crs(ga.OGC_CRS84)
+        LinestringType(geoarrow.linestring <ProjJsonCrs(OGC:CRS84)>)
         """
         spec = type_spec(crs=crs)
         spec = TypeSpec.coalesce(spec, self.spec).canonicalize()
@@ -776,6 +776,41 @@ def _generate_storage_types():
                 all_storage_types[key] = storage_type
 
     return all_storage_types
+
+
+# A shorter version of repr(spec) that matches what geoarrow-c used to do
+# (to reduce mayhem on docstring updates).
+def _spec_short_repr(spec, ext_name):
+    non_planar = spec.edge_type != EdgeType.PLANAR
+    interleaved = spec.coord_type == CoordType.INTERLEAVED
+
+    if spec.dimensions == Dimensions.XYZM:
+        dims = "_zm"
+    elif spec.dimensions == Dimensions.XYZ:
+        dims = "_z"
+    elif spec.dimensions == Dimensions.XYM:
+        dims = "_m"
+    else:
+        dims = ""
+
+    if non_planar and interleaved:
+        type_prefix = f"{spec.edge_type.name.lower()} interleaved "
+    elif non_planar:
+        type_prefix = f"{spec.edge_type.name.lower()} "
+    elif interleaved:
+        type_prefix = "interleaved "
+    else:
+        type_prefix = ""
+
+    if spec.crs is not None:
+        crs = f" <{repr(spec.crs)}>"
+    else:
+        crs = ""
+
+    if len(crs) > 40:
+        crs = crs[:36] + "...>"
+
+    return f"{type_prefix}{ext_name}{dims}{crs}"
 
 
 _EXTENSION_CLASSES = {

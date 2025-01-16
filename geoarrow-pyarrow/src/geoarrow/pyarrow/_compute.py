@@ -521,8 +521,8 @@ def with_crs(obj, crs):
     """Force a :class:`geoarrow.CrsType`/crs value on an array.
 
     >>> import geoarrow.pyarrow as ga
-    >>> ga.with_crs(["POINT (0 1)"], "EPSG:1234")
-    GeometryExtensionArray:WktType(geoarrow.wkt <EPSG:1234>)[1]
+    >>> ga.with_crs(["POINT (0 1)"], ga.OGC_CRS84)
+    GeometryExtensionArray:WktType(geoarrow.wkt <ProjJsonCrs(OGC:CRS84)>)[1]
     <POINT (0 1)>
     """
     obj = obj_as_array_or_chunked(obj)
