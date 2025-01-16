@@ -116,6 +116,61 @@ class ProjJsonCrs(Crs):
         return f"ProjJsonCrs({self.to_json()[:80]})"
 
 
+class StringCrs(Crs):
+    def __init__(self, crs: Union[str, bytes]):
+        if isinstance(crs, bytes):
+            self._crs = crs.decode()
+        else:
+            self._crs = str(crs)
+
+    def __geoarrow_crs_json_values__(self):
+        # Try to avoid escaping valid JSON into a JSON string
+        try:
+            return {"crs": json.loads(self._crs)}
+        except ValueError:
+            return {"crs": self._crs}
+
+    def __eq__(self, value):
+        if isinstance(value, UnspecifiedCrs):
+            return False
+        elif isinstance(value, StringCrs) and self._crs == value._crs:
+            return True
+        elif hasattr(value, "to_json_dict"):
+            return self.to_json_dict() == value.to_json_dict()
+        else:
+            return False
+
+    @classmethod
+    def from_json(cls, crs_json: str) -> "StringCrs":
+        return StringCrs(crs_json)
+
+    @classmethod
+    def from_json_dict(cls, crs_dict: Mapping) -> "Crs":
+        return StringCrs(json.dumps(crs_dict))
+
+    def to_json(self) -> str:
+        out = self._try_parse_json_object()
+        if out:
+            return self._crs
+
+        # Fall back on pyproj
+        import pyproj
+
+        return pyproj.CRS(self._crs).to_json()
+
+    def to_json_dict(self) -> Mapping:
+        return json.loads(self.to_json())
+
+    def _try_parse_json_object(self) -> Optional[dict]:
+        # If this is valid JSON and is a dictionary, assume it's PROJJSON
+        try:
+            obj = json.loads(self._crs)
+            if isinstance(obj, dict):
+                return obj
+        except ValueError:
+            return None
+
+
 _CRS_LONLAT_DICT = {
     "$schema": "https://proj.org/schemas/v0.7/projjson.schema.json",
     "type": "GeographicCRS",
