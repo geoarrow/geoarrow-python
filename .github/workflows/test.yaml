@@ -134,5 +134,5 @@ jobs:
       - name: Upload coverage to codecov
         uses: codecov/codecov-action@v2
         with:
-          files: 'geoarrow-pyarrow/coverage.xml,geoarrow-ptypes/coverage.xml,geoarrow-pandas/coverage.xml'
+          files: 'geoarrow-pyarrow/coverage.xml,geoarrow-types/coverage.xml,geoarrow-pandas/coverage.xml'
           token: ${{ secrets.CODECOV_TOKEN }}
