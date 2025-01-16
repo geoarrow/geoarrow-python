@@ -594,9 +594,12 @@ def _deserialize_storage(storage_type, extension_name=None, extension_metadata=N
     spec = _SPEC_FROM_TYPE_NESTING[parsed_type_names]
     spec = TypeSpec.from_extension_metadata(extension_metadata).with_defaults(spec)
 
-    # If this is a serialized type, we don't need to infer any more information
-    # from the storage type.
-    if spec.encoding.is_serialized():
+    # If this is a serialized type or a union, we don't need to infer any more information
+    # from the storage type (because we don't currently validate union types).
+    if spec.encoding.is_serialized() or spec.geometry_type in (
+        GeometryType.GEOMETRY,
+        GeometryType.GEOMETRYCOLLECTION,
+    ):
         if extension_name is not None and spec.extension_name() != extension_name:
             raise ValueError(f"Can't interpret {storage_type} as {extension_name}")
 
@@ -907,11 +910,13 @@ _EXTENSION_CLASSES = {
     "geoarrow.wkb": WkbType,
     "geoarrow.wkt": WktType,
     "geoarrow.point": PointType,
+    "geoarrow.geometry": GeometryUnionType,
     "geoarrow.linestring": LinestringType,
     "geoarrow.polygon": PolygonType,
     "geoarrow.multipoint": MultiPointType,
     "geoarrow.multilinestring": MultiLinestringType,
     "geoarrow.multipolygon": MultiPolygonType,
+    "geoarrow.geometrycollection": GeometryCollectionUnionType,
 }
 
 _SERIALIZED_STORAGE_TYPES = {
