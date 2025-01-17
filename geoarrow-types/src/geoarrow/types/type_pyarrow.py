@@ -387,7 +387,7 @@ class MultiPolygonType(GeometryExtensionType):
 def extension_type(
     spec: TypeSpec, storage_type=None, validate_storage_type=True
 ) -> GeometryExtensionType:
-    spec = spec.with_defaults()
+    spec = type_spec(spec).with_defaults()
     extension_cls = _EXTENSION_CLASSES[spec.extension_name()]
     return extension_cls(
         spec, storage_type=storage_type, validate_storage_type=validate_storage_type
@@ -829,17 +829,8 @@ def _generate_union_storage(
             )
 
             if spec.geometry_type == GeometryType.GEOMETRYCOLLECTION:
-                storage_type = _generate_union_storage(
-                    geometry_types=[
-                        GeometryType.POINT,
-                        GeometryType.LINESTRING,
-                        GeometryType.POLYGON,
-                        GeometryType.MULTIPOINT,
-                        GeometryType.MULTILINESTRING,
-                        GeometryType.MULTIPOLYGON,
-                    ],
-                    dimensions=[spec.dimensions],
-                    coord_type=coord_type,
+                storage_type = _generate_union_collection_storage(
+                    spec.dimensions, coord_type
                 )
             else:
                 storage_type = extension_type(spec).storage_type
@@ -854,6 +845,23 @@ def _generate_union_storage(
             type_codes.append(type_id)
 
     return pa.dense_union(child_fields, type_codes)
+
+
+def _generate_union_collection_storage(dimensions, coord_type):
+    storage_union = _generate_union_storage(
+        geometry_types=[
+            GeometryType.POINT,
+            GeometryType.LINESTRING,
+            GeometryType.POLYGON,
+            GeometryType.MULTIPOINT,
+            GeometryType.MULTILINESTRING,
+            GeometryType.MULTIPOLYGON,
+        ],
+        dimensions=[dimensions],
+        coord_type=coord_type,
+    )
+    storage_union_field = pa.field("geometries", storage_union, nullable=False)
+    return pa.list_(storage_union_field)
 
 
 def _generate_union_type_id_mapping():
@@ -879,9 +887,23 @@ def _add_union_types_to_native_storage_types():
     global _NATIVE_STORAGE_TYPES
 
     for coord_type in [CoordType.SEPARATED, CoordType.INTERLEAVED]:
-        _NATIVE_STORAGE_TYPES[
-            (GeometryType.GEOMETRY, coord_type, Dimensions.UNKNOWN)
-        ] = _generate_union_storage(coord_type=coord_type)
+        # We register the same type for every dimensions (including unknown)
+        # because the Geometry union does not currently disambiguate them
+        for dimension in Dimensions.__members__.values():
+            _NATIVE_STORAGE_TYPES[(GeometryType.GEOMETRY, coord_type, dimension)] = (
+                _generate_union_storage(coord_type=coord_type)
+            )
+
+    for coord_type in [CoordType.SEPARATED, CoordType.INTERLEAVED]:
+        for dimension in [
+            Dimensions.XY,
+            Dimensions.XYZ,
+            Dimensions.XYM,
+            Dimensions.XYZM,
+        ]:
+            _NATIVE_STORAGE_TYPES[
+                (GeometryType.GEOMETRYCOLLECTION, coord_type, dimension)
+            ] = _generate_union_collection_storage(dimension, coord_type)
 
 
 # A shorter version of repr(spec) that matches what geoarrow-c used to do
