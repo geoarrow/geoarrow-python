@@ -468,14 +468,14 @@ def register_extension_types(lazy: bool = True) -> None:
     all_types = [
         type_spec(Encoding.WKT).to_pyarrow(),
         type_spec(Encoding.WKB).to_pyarrow(),
-        # type_spec(Encoding.GEOARROW, GeometryType.GEOMETRY).to_pyarrow(),
+        type_spec(Encoding.GEOARROW, GeometryType.GEOMETRY).to_pyarrow(),
         type_spec(Encoding.GEOARROW, GeometryType.POINT).to_pyarrow(),
         type_spec(Encoding.GEOARROW, GeometryType.LINESTRING).to_pyarrow(),
         type_spec(Encoding.GEOARROW, GeometryType.POLYGON).to_pyarrow(),
         type_spec(Encoding.GEOARROW, GeometryType.MULTIPOINT).to_pyarrow(),
         type_spec(Encoding.GEOARROW, GeometryType.MULTILINESTRING).to_pyarrow(),
         type_spec(Encoding.GEOARROW, GeometryType.MULTIPOLYGON).to_pyarrow(),
-        # type_spec(Encoding.GEOARROW, GeometryType.GEOMETRYCOLLECTION).to_pyarrow(),
+        type_spec(Encoding.GEOARROW, GeometryType.GEOMETRYCOLLECTION).to_pyarrow(),
     ]
 
     n_registered = 0
