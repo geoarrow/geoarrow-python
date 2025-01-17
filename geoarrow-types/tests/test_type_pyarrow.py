@@ -285,6 +285,22 @@ def test_deserialize_infer_dimensions_interleaved():
         )
 
 
+def test_geometry_union_type():
+    geometry = gt.type_spec(gt.Encoding.GEOARROW, gt.GeometryType.GEOMETRY).to_pyarrow()
+    assert isinstance(geometry, type_pyarrow.GeometryUnionType)
+    assert geometry.encoding == gt.Encoding.GEOARROW
+    assert geometry.geometry_type == gt.GeometryType.GEOMETRY
+
+
+def test_geometry_collection_union_type():
+    geometry = gt.type_spec(
+        gt.Encoding.GEOARROW, gt.GeometryType.GEOMETRYCOLLECTION
+    ).to_pyarrow()
+    assert isinstance(geometry, type_pyarrow.GeometryCollectionUnionType)
+    assert geometry.encoding == gt.Encoding.GEOARROW
+    assert geometry.geometry_type == gt.GeometryType.GEOMETRYCOLLECTION
+
+
 def test_point_array_from_geobuffers():
     pa_type = gt.point(dimensions=gt.Dimensions.XYZM).to_pyarrow()
     arr = pa_type.from_geobuffers(
@@ -417,6 +433,9 @@ def test_multipolygon_array_from_geobuffers():
         gt.point(dimensions="xyz", coord_type="interleaved"),
         gt.point(dimensions="xym", coord_type="interleaved"),
         gt.point(dimensions="xyzm", coord_type="interleaved"),
+        # Union types
+        gt.type_spec(gt.Encoding.GEOARROW, gt.GeometryType.GEOMETRY),
+        gt.type_spec(gt.Encoding.GEOARROW, gt.GeometryType.GEOMETRYCOLLECTION),
     ],
 )
 def test_roundtrip_extension_type(spec):

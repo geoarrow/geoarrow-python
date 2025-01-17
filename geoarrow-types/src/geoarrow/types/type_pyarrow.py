@@ -553,7 +553,7 @@ def _parse_storage(storage_type):
         parsed_children = tuple(
             _parse_storage(storage_type.field(i).type)[0] for i in range(n_fields)
         )
-        return ["dense_union", (names, parsed_children)]
+        return [("dense_union", (names, parsed_children))]
     elif isinstance(storage_type, pa.StructType):
         n_fields = storage_type.num_fields
         names = tuple(storage_type.field(i).name for i in range(n_fields))
