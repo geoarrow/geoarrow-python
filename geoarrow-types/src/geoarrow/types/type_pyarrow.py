@@ -37,13 +37,17 @@ class GeometryExtensionType(pa.ExtensionType):
             )
 
         if storage_type is None:
-            if spec.encoding == Encoding.GEOARROW:
-                key = spec.geometry_type, spec.coord_type, spec.dimensions
+            if self._spec.encoding == Encoding.GEOARROW:
+                key = (
+                    self._spec.geometry_type,
+                    self._spec.coord_type,
+                    self._spec.dimensions,
+                )
                 storage_type = _NATIVE_STORAGE_TYPES[key]
             else:
-                storage_type = _SERIALIZED_STORAGE_TYPES[spec.encoding]
+                storage_type = _SERIALIZED_STORAGE_TYPES[self._spec.encoding]
         elif validate_storage_type:
-            _validate_storage_type(storage_type, spec)
+            _validate_storage_type(storage_type, self._spec)
 
         pa.ExtensionType.__init__(self, storage_type, self._spec.extension_name())
 
@@ -220,7 +224,7 @@ class GeometryExtensionType(pa.ExtensionType):
         >>> ga.linestring().with_edge_type(ga.EdgeType.SPHERICAL)
         LinestringType(spherical geoarrow.linestring)
         """
-        spec = type_spec(edge_type=edge_type)
+        spec = type_spec(edge_type=edge_type, crs=self.crs)
         spec = TypeSpec.coalesce(spec, self.spec).canonicalize()
         return extension_type(spec)
 
@@ -797,12 +801,6 @@ def _generate_storage_types():
                 storage_type = _nested_type(coord, names)
                 all_storage_types[key] = storage_type
 
-    # Circular logic!
-    # for coord_type in all_coord_types:
-    #     all_coord_types[(GeometryType.GEOMETRY, coord_type, Dimensions.UNKNOWN)] = (
-    #         _generate_union_storage(coord_type=coord_type)
-    #     )
-
     return all_storage_types
 
 
@@ -846,7 +844,7 @@ def _generate_union_storage(
             else:
                 storage_type = extension_type(spec).storage_type
 
-            type_id = _UNION_TYPE_ID_FROM_SPEC[(spec.geometry_type, spec.dimension)]
+            type_id = _UNION_TYPE_ID_FROM_SPEC[(spec.geometry_type, spec.dimensions)]
             geometry_type_lab = _UNION_GEOMETRY_TYPE_LABELS[spec.geometry_type.value]
             dimension_lab = _UNION_DIMENSION_LABELS[spec.dimensions.value]
 
@@ -875,6 +873,15 @@ def _generate_union_type_id_mapping():
             type_id = (dimension.value - 1) * 10 + geometry_type.value
             out[type_id] = (geometry_type, dimension)
     return out
+
+
+def _add_union_types_to_native_storage_types():
+    global _NATIVE_STORAGE_TYPES
+
+    for coord_type in [CoordType.SEPARATED, CoordType.INTERLEAVED]:
+        _NATIVE_STORAGE_TYPES[
+            (GeometryType.GEOMETRY, coord_type, Dimensions.UNKNOWN)
+        ] = _generate_union_storage(coord_type=coord_type)
 
 
 # A shorter version of repr(spec) that matches what geoarrow-c used to do
@@ -925,6 +932,23 @@ _EXTENSION_CLASSES = {
     "geoarrow.geometrycollection": GeometryCollectionUnionType,
 }
 
+
+_SPEC_FROM_UNION_TYPE_ID = _generate_union_type_id_mapping()
+_UNION_TYPE_ID_FROM_SPEC = {v: k for k, v in _SPEC_FROM_UNION_TYPE_ID.items()}
+
+_UNION_GEOMETRY_TYPE_LABELS = [
+    "Geometry",
+    "Point",
+    "LineString",
+    "Polygon",
+    "MultiPoint",
+    "MultiLineString",
+    "MultiPolygon",
+    "GeometryCollection",
+]
+
+_UNION_DIMENSION_LABELS = [None, "", " Z", " M", " ZM"]
+
 _SERIALIZED_STORAGE_TYPES = {
     Encoding.WKT: pa.utf8(),
     Encoding.LARGE_WKT: pa.large_utf8(),
@@ -933,6 +957,7 @@ _SERIALIZED_STORAGE_TYPES = {
 }
 
 _NATIVE_STORAGE_TYPES = _generate_storage_types()
+_add_union_types_to_native_storage_types()
 
 _SPEC_FROM_TYPE_NESTING = {
     ("binary",): Encoding.WKB,
@@ -991,19 +1016,3 @@ _DIMS_FROM_NAMES = {
     ("x", "y", "m"): Dimensions.XYM,
     ("x", "y", "z", "m"): Dimensions.XYZM,
 }
-
-_SPEC_FROM_UNION_TYPE_ID = _generate_union_type_id_mapping()
-_UNION_TYPE_ID_FROM_SPEC = {v: k for k, v in _SPEC_FROM_UNION_TYPE_ID.items()}
-
-_UNION_GEOMETRY_TYPE_LABELS = [
-    "Geometry",
-    "Point",
-    "LineString",
-    "Polygon",
-    "MultiPoint",
-    "MultiLineString",
-    "MultiPolygon",
-    "GeometryCollection",
-]
-
-_UNION_DIMENSION_LABELS = [None, "", " Z", " M", " ZM"]
