@@ -890,9 +890,9 @@ def _add_union_types_to_native_storage_types():
         # We register the same type for every dimensions (including unknown)
         # because the Geometry union does not currently disambiguate them
         for dimension in Dimensions.__members__.values():
-            _NATIVE_STORAGE_TYPES[(GeometryType.GEOMETRY, coord_type, dimension)] = (
-                _generate_union_storage(coord_type=coord_type)
-            )
+            _NATIVE_STORAGE_TYPES[
+                (GeometryType.GEOMETRY, coord_type, dimension)
+            ] = _generate_union_storage(coord_type=coord_type)
 
     for coord_type in [CoordType.SEPARATED, CoordType.INTERLEAVED]:
         for dimension in [
