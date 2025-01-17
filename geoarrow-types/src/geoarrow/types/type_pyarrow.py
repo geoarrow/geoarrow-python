@@ -224,7 +224,7 @@ class GeometryExtensionType(pa.ExtensionType):
         >>> ga.linestring().with_edge_type(ga.EdgeType.SPHERICAL)
         LinestringType(spherical geoarrow.linestring)
         """
-        spec = type_spec(edge_type=edge_type, crs=self.crs)
+        spec = type_spec(edge_type=edge_type)
         spec = TypeSpec.coalesce(spec, self.spec).canonicalize()
         return extension_type(spec)
 
