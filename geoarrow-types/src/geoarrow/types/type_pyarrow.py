@@ -886,21 +886,26 @@ def _generate_union_type_id_mapping():
 def _add_union_types_to_native_storage_types():
     global _NATIVE_STORAGE_TYPES
 
-    for coord_type in [CoordType.SEPARATED, CoordType.INTERLEAVED]:
-        # We register the same type for every dimensions (including unknown)
-        # because the Geometry union does not currently disambiguate them
-        for dimension in Dimensions.__members__.values():
-            _NATIVE_STORAGE_TYPES[
-                (GeometryType.GEOMETRY, coord_type, dimension)
-            ] = _generate_union_storage(coord_type=coord_type)
+    all_dimensions = [
+        Dimensions.XY,
+        Dimensions.XYZ,
+        Dimensions.XYM,
+        Dimensions.XYZM,
+    ]
 
     for coord_type in [CoordType.SEPARATED, CoordType.INTERLEAVED]:
-        for dimension in [
-            Dimensions.XY,
-            Dimensions.XYZ,
-            Dimensions.XYM,
-            Dimensions.XYZM,
-        ]:
+        for dimension in all_dimensions:
+            _NATIVE_STORAGE_TYPES[(GeometryType.GEOMETRY, coord_type, dimension)] = (
+                _generate_union_storage(coord_type=coord_type, dimensions=[dimension])
+            )
+
+        # With unknown dimensions, we reigster the massive catch-all union
+        _NATIVE_STORAGE_TYPES[(GeometryType.GEOMETRY, coord_type, Dimensions.UNKNOWN)] = (
+            _generate_union_storage(coord_type=coord_type)
+        )
+
+    for coord_type in [CoordType.SEPARATED, CoordType.INTERLEAVED]:
+        for dimension in all_dimensions:
             _NATIVE_STORAGE_TYPES[
                 (GeometryType.GEOMETRYCOLLECTION, coord_type, dimension)
             ] = _generate_union_collection_storage(dimension, coord_type)
