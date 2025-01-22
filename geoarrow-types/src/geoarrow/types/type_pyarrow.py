@@ -647,7 +647,7 @@ def _deserialize_storage(storage_type, extension_name=None, extension_metadata=N
                 f"Expected box names {names} in root type but got nested list"
             )
         spec = spec.override(geometry_type=GeometryType.BOX)
-        dims = _BOX_DIMS_FROM_NAMES
+        dims = _BOX_DIMS_FROM_NAMES[names]
     elif names in _DIMS_FROM_NAMES:
         dims = _DIMS_FROM_NAMES[names]
         if n_dims != dims.count():

@@ -301,6 +301,27 @@ def test_geometry_collection_union_type():
     assert geometry.geometry_type == gt.GeometryType.GEOMETRYCOLLECTION
 
 
+def test_box_array_from_geobuffers():
+    pa_type = gt.box(dimensions=gt.Dimensions.XY).to_pyarrow()
+    arr = pa_type.from_geobuffers(
+        b"\xff",
+        np.array([1.0, 2.0, 3.0]),
+        np.array([4.0, 5.0, 6.0]),
+        np.array([7.0, 8.0, 9.0]),
+        np.array([10.0, 11.0, 12.0]),
+    )
+    assert len(arr) == 3
+    assert arr.type == pa_type
+    assert arr.storage == pa.array(
+        [
+            {"xmin": 1.0, "ymin": 4.0, "xmax": 7.0, "ymax": 10.0},
+            {"xmin": 2.0, "ymin": 5.0, "xmax": 8.0, "ymax": 11.0},
+            {"xmin": 3.0, "ymin": 6.0, "xmax": 9.0, "ymax": 12.0},
+        ],
+        pa_type.storage_type,
+    )
+
+
 def test_point_array_from_geobuffers():
     pa_type = gt.point(dimensions=gt.Dimensions.XYZM).to_pyarrow()
     arr = pa_type.from_geobuffers(
@@ -417,6 +438,7 @@ def test_multipolygon_array_from_geobuffers():
         gt.wkb(),
         gt.large_wkb(),
         # Geometry types
+        gt.box(),
         gt.point(),
         gt.linestring(),
         gt.polygon(),
