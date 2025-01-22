@@ -480,6 +480,7 @@ def register_extension_types(lazy: bool = True) -> None:
     all_types = [
         type_spec(Encoding.WKT).to_pyarrow(),
         type_spec(Encoding.WKB).to_pyarrow(),
+        type_spec(Encoding.GEOARROW, GeometryType.BOX).to_pyarrow(),
         type_spec(Encoding.GEOARROW, GeometryType.GEOMETRY).to_pyarrow(),
         type_spec(Encoding.GEOARROW, GeometryType.POINT).to_pyarrow(),
         type_spec(Encoding.GEOARROW, GeometryType.LINESTRING).to_pyarrow(),
@@ -639,7 +640,15 @@ def _deserialize_storage(storage_type, extension_name=None, extension_metadata=N
         names, n_dims, parsed_children = params
         n_dims_infer = n_dims
 
-    if names in _DIMS_FROM_NAMES:
+    # Make sure we catch box field names (e.g., xmin, ymin, ...)
+    if names in _BOX_DIMS_FROM_NAMES:
+        if spec.geometry_type != GeometryType.POINT:
+            raise ValueError(
+                f"Expected box names {names} in root type but got nested list"
+            )
+        spec = spec.override(geometry_type=GeometryType.BOX)
+        dims = _BOX_DIMS_FROM_NAMES
+    elif names in _DIMS_FROM_NAMES:
         dims = _DIMS_FROM_NAMES[names]
         if n_dims != dims.count():
             raise ValueError(f"Expected {n_dims} dimensions but got Dimensions.{dims}")

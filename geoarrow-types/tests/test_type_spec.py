@@ -317,7 +317,7 @@ def test_type_spec_shortcuts():
     assert gt.large_wkt() == TypeSpec(encoding=Encoding.LARGE_WKT)
 
     assert gt.geoarrow() == TypeSpec(encoding=Encoding.GEOARROW)
-    assert gt.point() == TypeSpec(
+    assert gt.box() == TypeSpec(
         encoding=Encoding.GEOARROW, geometry_type=GeometryType.BOX
     )
     assert gt.point() == TypeSpec(
