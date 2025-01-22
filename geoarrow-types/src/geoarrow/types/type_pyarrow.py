@@ -37,13 +37,17 @@ class GeometryExtensionType(pa.ExtensionType):
             )
 
         if storage_type is None:
-            if spec.encoding == Encoding.GEOARROW:
-                key = spec.geometry_type, spec.coord_type, spec.dimensions
+            if self._spec.encoding == Encoding.GEOARROW:
+                key = (
+                    self._spec.geometry_type,
+                    self._spec.coord_type,
+                    self._spec.dimensions,
+                )
                 storage_type = _NATIVE_STORAGE_TYPES[key]
             else:
-                storage_type = _SERIALIZED_STORAGE_TYPES[spec.encoding]
+                storage_type = _SERIALIZED_STORAGE_TYPES[self._spec.encoding]
         elif validate_storage_type:
-            _validate_storage_type(storage_type, spec)
+            _validate_storage_type(storage_type, self._spec)
 
         pa.ExtensionType.__init__(self, storage_type, self._spec.extension_name())
 
@@ -253,6 +257,14 @@ class WktType(GeometryExtensionType):
     _extension_name = "geoarrow.wkt"
 
 
+class GeometryUnionType(GeometryExtensionType):
+    _extension_name = "geoarrow.geometry"
+
+
+class GeometryCollectionUnionType(GeometryExtensionType):
+    _extension_name = "geoarrow.geometrycollection"
+
+
 class PointType(GeometryExtensionType):
     """Extension type whose storage is an array of points stored
     as either a struct with one child per dimension or a fixed-size
@@ -375,7 +387,7 @@ class MultiPolygonType(GeometryExtensionType):
 def extension_type(
     spec: TypeSpec, storage_type=None, validate_storage_type=True
 ) -> GeometryExtensionType:
-    spec = spec.with_defaults()
+    spec = type_spec(spec).with_defaults()
     extension_cls = _EXTENSION_CLASSES[spec.extension_name()]
     return extension_cls(
         spec, storage_type=storage_type, validate_storage_type=validate_storage_type
@@ -456,12 +468,14 @@ def register_extension_types(lazy: bool = True) -> None:
     all_types = [
         type_spec(Encoding.WKT).to_pyarrow(),
         type_spec(Encoding.WKB).to_pyarrow(),
+        type_spec(Encoding.GEOARROW, GeometryType.GEOMETRY).to_pyarrow(),
         type_spec(Encoding.GEOARROW, GeometryType.POINT).to_pyarrow(),
         type_spec(Encoding.GEOARROW, GeometryType.LINESTRING).to_pyarrow(),
         type_spec(Encoding.GEOARROW, GeometryType.POLYGON).to_pyarrow(),
         type_spec(Encoding.GEOARROW, GeometryType.MULTIPOINT).to_pyarrow(),
         type_spec(Encoding.GEOARROW, GeometryType.MULTILINESTRING).to_pyarrow(),
         type_spec(Encoding.GEOARROW, GeometryType.MULTIPOLYGON).to_pyarrow(),
+        type_spec(Encoding.GEOARROW, GeometryType.GEOMETRYCOLLECTION).to_pyarrow(),
     ]
 
     n_registered = 0
@@ -533,6 +547,13 @@ def _parse_storage(storage_type):
     elif isinstance(storage_type, pa.ListType):
         f = storage_type.field(0)
         return [("list", (f.name,))] + _parse_storage(f.type)
+    elif isinstance(storage_type, pa.DenseUnionType):
+        n_fields = storage_type.num_fields
+        names = tuple(str(code) for code in storage_type.type_codes)
+        parsed_children = tuple(
+            _parse_storage(storage_type.field(i).type)[0] for i in range(n_fields)
+        )
+        return [("dense_union", (names, parsed_children))]
     elif isinstance(storage_type, pa.StructType):
         n_fields = storage_type.num_fields
         names = tuple(storage_type.field(i).name for i in range(n_fields))
@@ -577,9 +598,12 @@ def _deserialize_storage(storage_type, extension_name=None, extension_metadata=N
     spec = _SPEC_FROM_TYPE_NESTING[parsed_type_names]
     spec = TypeSpec.from_extension_metadata(extension_metadata).with_defaults(spec)
 
-    # If this is a serialized type, we don't need to infer any more information
-    # from the storage type.
-    if spec.encoding.is_serialized():
+    # If this is a serialized type or a union, we don't need to infer any more information
+    # from the storage type (because we don't currently validate union types).
+    if spec.encoding.is_serialized() or spec.geometry_type in (
+        GeometryType.GEOMETRY,
+        GeometryType.GEOMETRYCOLLECTION,
+    ):
         if extension_name is not None and spec.extension_name() != extension_name:
             raise ValueError(f"Can't interpret {storage_type} as {extension_name}")
 
@@ -742,6 +766,27 @@ def _from_buffers_multipolygon(
     )
 
 
+ALL_DIMENSIONS = [Dimensions.XY, Dimensions.XYZ, Dimensions.XYM, Dimensions.XYZM]
+ALL_COORD_TYPES = [CoordType.INTERLEAVED, CoordType.SEPARATED]
+ALL_GEOMETRY_TYPES = [
+    GeometryType.POINT,
+    GeometryType.LINESTRING,
+    GeometryType.POLYGON,
+    GeometryType.MULTIPOINT,
+    GeometryType.MULTILINESTRING,
+    GeometryType.MULTIPOLYGON,
+    GeometryType.GEOMETRYCOLLECTION,
+]
+ALL_GEOMETRY_TYPES_EXCEPT_GEOMETRYCOLLECTION = [
+    GeometryType.POINT,
+    GeometryType.LINESTRING,
+    GeometryType.POLYGON,
+    GeometryType.MULTIPOINT,
+    GeometryType.MULTILINESTRING,
+    GeometryType.MULTIPOLYGON,
+]
+
+
 def _generate_storage_types():
     coord_storage = {
         (CoordType.SEPARATED, Dimensions.XY): _struct_fields("xy"),
@@ -763,14 +808,10 @@ def _generate_storage_types():
         GeometryType.MULTIPOLYGON: ["polygons", "rings", "vertices"],
     }
 
-    all_geoemetry_types = list(field_names.keys())
-    all_coord_types = [CoordType.INTERLEAVED, CoordType.SEPARATED]
-    all_dimensions = [Dimensions.XY, Dimensions.XYZ, Dimensions.XYM, Dimensions.XYZM]
-
     all_storage_types = {}
-    for geometry_type in all_geoemetry_types:
-        for coord_type in all_coord_types:
-            for dimensions in all_dimensions:
+    for geometry_type in ALL_GEOMETRY_TYPES_EXCEPT_GEOMETRYCOLLECTION:
+        for coord_type in ALL_COORD_TYPES:
+            for dimensions in ALL_DIMENSIONS:
                 names = field_names[geometry_type]
                 coord = coord_storage[(coord_type, dimensions)]
                 key = geometry_type, coord_type, dimensions
@@ -778,6 +819,81 @@ def _generate_storage_types():
                 all_storage_types[key] = storage_type
 
     return all_storage_types
+
+
+def _generate_union_storage(
+    geometry_types=ALL_GEOMETRY_TYPES,
+    dimensions=ALL_DIMENSIONS,
+    coord_type=CoordType.SEPARATED,
+):
+    child_fields = []
+    type_codes = []
+    for dimension in dimensions:
+        for geometry_type in geometry_types:
+            spec = type_spec(
+                encoding=Encoding.GEOARROW,
+                geometry_type=geometry_type,
+                dimensions=dimension,
+                coord_type=coord_type,
+            )
+
+            if spec.geometry_type == GeometryType.GEOMETRYCOLLECTION:
+                storage_type = _generate_union_collection_storage(
+                    spec.dimensions, coord_type
+                )
+            else:
+                storage_type = extension_type(spec).storage_type
+
+            type_id = _UNION_TYPE_ID_FROM_SPEC[(spec.geometry_type, spec.dimensions)]
+            geometry_type_lab = _UNION_GEOMETRY_TYPE_LABELS[spec.geometry_type.value]
+            dimension_lab = _UNION_DIMENSION_LABELS[spec.dimensions.value]
+
+            child_fields.append(
+                pa.field(f"{geometry_type_lab}{dimension_lab}", storage_type)
+            )
+            type_codes.append(type_id)
+
+    return pa.dense_union(child_fields, type_codes)
+
+
+def _generate_union_collection_storage(dimensions, coord_type):
+    storage_union = _generate_union_storage(
+        geometry_types=ALL_GEOMETRY_TYPES_EXCEPT_GEOMETRYCOLLECTION,
+        dimensions=[dimensions],
+        coord_type=coord_type,
+    )
+    storage_union_field = pa.field("geometries", storage_union, nullable=False)
+    return pa.list_(storage_union_field)
+
+
+def _generate_union_type_id_mapping():
+    out = {}
+    for dimension in ALL_DIMENSIONS:
+        for geometry_type in ALL_GEOMETRY_TYPES:
+            type_id = (dimension.value - 1) * 10 + geometry_type.value
+            out[type_id] = (geometry_type, dimension)
+    return out
+
+
+def _add_union_types_to_native_storage_types():
+    global _NATIVE_STORAGE_TYPES
+
+    for coord_type in ALL_COORD_TYPES:
+        for dimension in ALL_DIMENSIONS:
+            _NATIVE_STORAGE_TYPES[
+                (GeometryType.GEOMETRY, coord_type, dimension)
+            ] = _generate_union_storage(coord_type=coord_type, dimensions=[dimension])
+
+        # With unknown dimensions, we reigster the massive catch-all union
+        _NATIVE_STORAGE_TYPES[
+            (GeometryType.GEOMETRY, coord_type, Dimensions.UNKNOWN)
+        ] = _generate_union_storage(coord_type=coord_type)
+
+    for coord_type in ALL_COORD_TYPES:
+        for dimension in ALL_DIMENSIONS:
+            _NATIVE_STORAGE_TYPES[
+                (GeometryType.GEOMETRYCOLLECTION, coord_type, dimension)
+            ] = _generate_union_collection_storage(dimension, coord_type)
 
 
 # A shorter version of repr(spec) that matches what geoarrow-c used to do
@@ -819,12 +935,31 @@ _EXTENSION_CLASSES = {
     "geoarrow.wkb": WkbType,
     "geoarrow.wkt": WktType,
     "geoarrow.point": PointType,
+    "geoarrow.geometry": GeometryUnionType,
     "geoarrow.linestring": LinestringType,
     "geoarrow.polygon": PolygonType,
     "geoarrow.multipoint": MultiPointType,
     "geoarrow.multilinestring": MultiLinestringType,
     "geoarrow.multipolygon": MultiPolygonType,
+    "geoarrow.geometrycollection": GeometryCollectionUnionType,
 }
+
+
+_SPEC_FROM_UNION_TYPE_ID = _generate_union_type_id_mapping()
+_UNION_TYPE_ID_FROM_SPEC = {v: k for k, v in _SPEC_FROM_UNION_TYPE_ID.items()}
+
+_UNION_GEOMETRY_TYPE_LABELS = [
+    "Geometry",
+    "Point",
+    "LineString",
+    "Polygon",
+    "MultiPoint",
+    "MultiLineString",
+    "MultiPolygon",
+    "GeometryCollection",
+]
+
+_UNION_DIMENSION_LABELS = [None, "", " Z", " M", " ZM"]
 
 _SERIALIZED_STORAGE_TYPES = {
     Encoding.WKT: pa.utf8(),
@@ -834,6 +969,7 @@ _SERIALIZED_STORAGE_TYPES = {
 }
 
 _NATIVE_STORAGE_TYPES = _generate_storage_types()
+_add_union_types_to_native_storage_types()
 
 _SPEC_FROM_TYPE_NESTING = {
     ("binary",): Encoding.WKB,
@@ -844,6 +980,10 @@ _SPEC_FROM_TYPE_NESTING = {
         encoding=Encoding.GEOARROW,
         geometry_type=GeometryType.POINT,
         coord_type=CoordType.SEPARATED,
+    ),
+    ("dense_union",): TypeSpec(
+        encoding=Encoding.GEOARROW,
+        geometry_type=GeometryType.GEOMETRY,
     ),
     ("list", "struct"): TypeSpec(
         encoding=Encoding.GEOARROW, coord_type=CoordType.SEPARATED
@@ -871,6 +1011,10 @@ _SPEC_FROM_TYPE_NESTING = {
         encoding=Encoding.GEOARROW,
         coord_type=CoordType.INTERLEAVED,
         geometry_type=GeometryType.MULTIPOLYGON,
+    ),
+    ("list", "dense_union"): TypeSpec(
+        encoding=Encoding.GEOARROW,
+        geometry_type=GeometryType.GEOMETRYCOLLECTION,
     ),
 }
 

@@ -161,4 +161,11 @@ def geometry_type_common(
 
     specs = [t.spec for t in type_objects]
     spec = types.TypeSpec.common(*specs).canonicalize()
+
+    if (
+        spec.encoding == types.Encoding.GEOARROW
+        and spec.geometry_type == types.GeometryType.GEOMETRY
+    ):
+        spec = types.TypeSpec.coalesce(types.wkb(), spec)
+
     return extension_type(spec)

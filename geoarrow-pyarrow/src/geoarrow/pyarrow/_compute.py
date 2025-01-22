@@ -180,11 +180,12 @@ def infer_type_common(obj, coord_type=None, promote_multi=False, _geometry_types
     if promote_multi and geometry_type.value in (1, 2, 3):
         geometry_type = GeometryType(geometry_type.value + 3)
 
-    spec = TypeSpec.coalesce(
-        type_spec(Encoding.GEOARROW, dims, geometry_type, coord_type=coord_type),
-        obj.type.spec,
-    ).canonicalize()
+    if geometry_type == GeometryType.GEOMETRY:
+        spec = type_spec(Encoding.WKB)
+    else:
+        spec = type_spec(Encoding.GEOARROW, dims, geometry_type, coord_type=coord_type)
 
+    spec = TypeSpec.coalesce(spec, obj.type.spec).canonicalize()
     return _type.extension_type(spec)
 
 
