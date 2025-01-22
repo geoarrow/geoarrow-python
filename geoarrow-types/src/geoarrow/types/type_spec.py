@@ -428,6 +428,29 @@ def point(
     )
 
 
+def box(
+    *,
+    dimensions=None,
+    coord_type=None,
+    edge_type=None,
+    crs=crs.UNSPECIFIED,
+) -> TypeSpec:
+    """GeoArrow box
+
+    Create a :class:`TypeSpec` denoting a preference for GeoArrow Box
+    type without an explicit request for dimensions or coordinate type.
+    See :func:`type_spec` for parameter definitions.
+    """
+    return type_spec(
+        encoding=Encoding.GEOARROW,
+        geometry_type=GeometryType.BOX,
+        dimensions=dimensions,
+        coord_type=coord_type,
+        edge_type=edge_type,
+        crs=crs,
+    )
+
+
 def linestring(
     *,
     dimensions=None,
@@ -599,6 +622,7 @@ _SERIALIZED_EXT_NAMES = {
 }
 
 _GEOARROW_EXT_NAMES = {
+    GeometryType.BOX: "geoarrow.box",
     GeometryType.GEOMETRY: "geoarrow.geometry",
     GeometryType.POINT: "geoarrow.point",
     GeometryType.LINESTRING: "geoarrow.linestring",

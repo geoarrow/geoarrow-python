@@ -265,6 +265,18 @@ class GeometryCollectionUnionType(GeometryExtensionType):
     _extension_name = "geoarrow.geometrycollection"
 
 
+class BoxType(GeometryExtensionType):
+    """Extension type whose storage is an array of boxes stored
+    as a struct with two children per dimension.
+    """
+
+    _extension_name = "geoarrow.box"
+
+    def from_geobuffers(self, validity, xmin, ymin, *bounds):
+        storage = _from_buffers_box(self.storage_type, validity, xmin, ymin, *bounds)
+        return self.wrap_array(storage)
+
+
 class PointType(GeometryExtensionType):
     """Extension type whose storage is an array of points stored
     as either a struct with one child per dimension or a fixed-size
@@ -504,12 +516,15 @@ def unregister_extension_types(lazy=True):
     all_type_names = [
         "geoarrow.wkb",
         "geoarrow.wkt",
+        "geoarrow.box",
+        "geoarrow.geometry",
         "geoarrow.point",
         "geoarrow.linestring",
         "geoarrow.polygon",
         "geoarrow.multipoint",
         "geoarrow.multilinestring",
         "geoarrow.multipolygon",
+        "geoarrow.geometrycollection",
     ]
 
     n_unregistered = 0
@@ -694,6 +709,13 @@ def _pybuffer_offset(x):
     return len(mv), pa.py_buffer(mv)
 
 
+def _from_buffers_box(type_, validity, *bounds):
+    length = len(bounds[0])
+    validity = pa.py_buffer(validity) if validity is not None else None
+    children = [_from_buffer_ordinate(bound) for bound in bounds]
+    return pa.Array.from_buffers(type_, length, buffers=[validity], children=children)
+
+
 def _from_buffers_point(type_, validity, x, y=None, z_or_m=None, m=None):
     validity = pa.py_buffer(validity) if validity is not None else None
     children = [_from_buffer_ordinate(x)]
@@ -785,6 +807,13 @@ ALL_GEOMETRY_TYPES_EXCEPT_GEOMETRYCOLLECTION = [
     GeometryType.MULTILINESTRING,
     GeometryType.MULTIPOLYGON,
 ]
+_BOX_DIMS_FROM_NAMES = {
+    ("xmin", "ymin", "xmax", "ymax"): Dimensions.XY,
+    ("xmin", "ymin", "zmin", "xmax", "ymax", "zmax"): Dimensions.XYZ,
+    ("xmin", "ymin", "mmin", "xmax", "ymax", "mmax"): Dimensions.XYM,
+    ("xmin", "ymin", "zmin", "mmin", "xmax", "ymax", "zmax", "mmax"): Dimensions.XYZM,
+}
+_BOX_NAMES_FROM_DIMS = {v: k for k, v in _BOX_DIMS_FROM_NAMES.items()}
 
 
 def _generate_storage_types():
@@ -817,6 +846,13 @@ def _generate_storage_types():
                 key = geometry_type, coord_type, dimensions
                 storage_type = _nested_type(coord, names)
                 all_storage_types[key] = storage_type
+
+    for dimensions in ALL_DIMENSIONS:
+        storage_type = _nested_type(
+            _struct_fields(_BOX_NAMES_FROM_DIMS[dimensions]), []
+        )
+        key = GeometryType.BOX, CoordType.SEPARATED, dimensions
+        all_storage_types[key] = storage_type
 
     return all_storage_types
 
@@ -934,8 +970,9 @@ def _spec_short_repr(spec, ext_name):
 _EXTENSION_CLASSES = {
     "geoarrow.wkb": WkbType,
     "geoarrow.wkt": WktType,
-    "geoarrow.point": PointType,
+    "geoarrow.box": BoxType,
     "geoarrow.geometry": GeometryUnionType,
+    "geoarrow.point": PointType,
     "geoarrow.linestring": LinestringType,
     "geoarrow.polygon": PolygonType,
     "geoarrow.multipoint": MultiPointType,
