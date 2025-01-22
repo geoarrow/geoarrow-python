@@ -766,6 +766,27 @@ def _from_buffers_multipolygon(
     )
 
 
+ALL_DIMENSIONS = [Dimensions.XY, Dimensions.XYZ, Dimensions.XYM, Dimensions.XYZM]
+ALL_COORD_TYPES = [CoordType.INTERLEAVED, CoordType.SEPARATED]
+ALL_GEOMETRY_TYPES = [
+    GeometryType.POINT,
+    GeometryType.LINESTRING,
+    GeometryType.POLYGON,
+    GeometryType.MULTIPOINT,
+    GeometryType.MULTILINESTRING,
+    GeometryType.MULTIPOLYGON,
+    GeometryType.GEOMETRYCOLLECTION,
+]
+ALL_GEOMETRY_TYPES_EXCEPT_GEOMETRYCOLLECTION = [
+    GeometryType.POINT,
+    GeometryType.LINESTRING,
+    GeometryType.POLYGON,
+    GeometryType.MULTIPOINT,
+    GeometryType.MULTILINESTRING,
+    GeometryType.MULTIPOLYGON,
+]
+
+
 def _generate_storage_types():
     coord_storage = {
         (CoordType.SEPARATED, Dimensions.XY): _struct_fields("xy"),
@@ -787,14 +808,10 @@ def _generate_storage_types():
         GeometryType.MULTIPOLYGON: ["polygons", "rings", "vertices"],
     }
 
-    all_geoemetry_types = list(field_names.keys())
-    all_coord_types = [CoordType.INTERLEAVED, CoordType.SEPARATED]
-    all_dimensions = [Dimensions.XY, Dimensions.XYZ, Dimensions.XYM, Dimensions.XYZM]
-
     all_storage_types = {}
-    for geometry_type in all_geoemetry_types:
-        for coord_type in all_coord_types:
-            for dimensions in all_dimensions:
+    for geometry_type in ALL_GEOMETRY_TYPES_EXCEPT_GEOMETRYCOLLECTION:
+        for coord_type in ALL_COORD_TYPES:
+            for dimensions in ALL_DIMENSIONS:
                 names = field_names[geometry_type]
                 coord = coord_storage[(coord_type, dimensions)]
                 key = geometry_type, coord_type, dimensions
@@ -805,16 +822,8 @@ def _generate_storage_types():
 
 
 def _generate_union_storage(
-    geometry_types=(
-        GeometryType.POINT,
-        GeometryType.LINESTRING,
-        GeometryType.POLYGON,
-        GeometryType.MULTIPOINT,
-        GeometryType.MULTILINESTRING,
-        GeometryType.MULTIPOLYGON,
-        GeometryType.GEOMETRYCOLLECTION,
-    ),
-    dimensions=(Dimensions.XY, Dimensions.XYZ, Dimensions.XYM, Dimensions.XYZM),
+    geometry_types=ALL_GEOMETRY_TYPES,
+    dimensions=ALL_DIMENSIONS,
     coord_type=CoordType.SEPARATED,
 ):
     child_fields = []
@@ -849,14 +858,7 @@ def _generate_union_storage(
 
 def _generate_union_collection_storage(dimensions, coord_type):
     storage_union = _generate_union_storage(
-        geometry_types=[
-            GeometryType.POINT,
-            GeometryType.LINESTRING,
-            GeometryType.POLYGON,
-            GeometryType.MULTIPOINT,
-            GeometryType.MULTILINESTRING,
-            GeometryType.MULTIPOLYGON,
-        ],
+        geometry_types=ALL_GEOMETRY_TYPES_EXCEPT_GEOMETRYCOLLECTION,
         dimensions=[dimensions],
         coord_type=coord_type,
     )
@@ -865,19 +867,9 @@ def _generate_union_collection_storage(dimensions, coord_type):
 
 
 def _generate_union_type_id_mapping():
-    geometry_types = [
-        GeometryType.POINT,
-        GeometryType.LINESTRING,
-        GeometryType.POLYGON,
-        GeometryType.MULTIPOINT,
-        GeometryType.MULTILINESTRING,
-        GeometryType.MULTIPOLYGON,
-        GeometryType.GEOMETRYCOLLECTION,
-    ]
-    dimensions = [Dimensions.XY, Dimensions.XYZ, Dimensions.XYM, Dimensions.XYZM]
     out = {}
-    for dimension in dimensions:
-        for geometry_type in geometry_types:
+    for dimension in ALL_DIMENSIONS:
+        for geometry_type in ALL_GEOMETRY_TYPES:
             type_id = (dimension.value - 1) * 10 + geometry_type.value
             out[type_id] = (geometry_type, dimension)
     return out
@@ -886,26 +878,19 @@ def _generate_union_type_id_mapping():
 def _add_union_types_to_native_storage_types():
     global _NATIVE_STORAGE_TYPES
 
-    all_dimensions = [
-        Dimensions.XY,
-        Dimensions.XYZ,
-        Dimensions.XYM,
-        Dimensions.XYZM,
-    ]
-
-    for coord_type in [CoordType.SEPARATED, CoordType.INTERLEAVED]:
-        for dimension in all_dimensions:
+    for coord_type in ALL_COORD_TYPES:
+        for dimension in ALL_DIMENSIONS:
             _NATIVE_STORAGE_TYPES[(GeometryType.GEOMETRY, coord_type, dimension)] = (
                 _generate_union_storage(coord_type=coord_type, dimensions=[dimension])
             )
 
         # With unknown dimensions, we reigster the massive catch-all union
-        _NATIVE_STORAGE_TYPES[(GeometryType.GEOMETRY, coord_type, Dimensions.UNKNOWN)] = (
-            _generate_union_storage(coord_type=coord_type)
-        )
+        _NATIVE_STORAGE_TYPES[
+            (GeometryType.GEOMETRY, coord_type, Dimensions.UNKNOWN)
+        ] = _generate_union_storage(coord_type=coord_type)
 
-    for coord_type in [CoordType.SEPARATED, CoordType.INTERLEAVED]:
-        for dimension in all_dimensions:
+    for coord_type in ALL_COORD_TYPES:
+        for dimension in ALL_DIMENSIONS:
             _NATIVE_STORAGE_TYPES[
                 (GeometryType.GEOMETRYCOLLECTION, coord_type, dimension)
             ] = _generate_union_collection_storage(dimension, coord_type)
