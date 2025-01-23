@@ -75,6 +75,10 @@ jobs:
           cd geoarrow-pandas
           pytest --pyargs geoarrow.pandas --doctest-modules --import-mode=importlib
 
+  # This is a test of geoarrow-types on Python 3.7 (which implies pyarrow 12
+  # since this is the last supported version there). Python 3.7 is still the
+  # runtime available on some hosted platforms (e.g., it is the minimum required
+  # version for apache-sedona Python)
   oldest-supported:
     runs-on: ubuntu-latest
     container:
