@@ -1,6 +1,12 @@
 from copy import deepcopy
 import json
-from typing import Union, Mapping, Protocol, Optional
+from typing import Union, Mapping, Optional
+
+try:
+    from typing import Protocol
+except ImportError:
+    class Protocol:
+        pass
 
 
 class Crs(Protocol):

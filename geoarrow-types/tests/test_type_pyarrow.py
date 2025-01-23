@@ -7,6 +7,10 @@ from geoarrow.types import type_pyarrow
 
 
 def test_wrap_array_non_exact():
+    pa_version_tuple = tuple(int(component) for component in pa.__version__.split("."))
+    if pa_version_tuple < (14,):
+        pytest.skip("wrap_array with non-exact type requires pyarrow >= 14")
+
     from pyarrow import compute as pc
 
     storage = pc.make_struct(
@@ -448,6 +452,10 @@ def test_roundtrip_extension_type(spec):
 
 
 def test_register_extension_type():
+    pa_version_tuple = tuple(int(component) for component in pa.__version__.split("."))
+    if pa_version_tuple < (14,):
+        pytest.skip("Can't test extension type registration pyarrow < 14")
+
     with type_pyarrow.registered_extension_types():
         schema_capsule = gt.point().to_pyarrow().__arrow_c_schema__()
         pa_type = pa.DataType._import_from_c_capsule(schema_capsule)

@@ -17,7 +17,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        python-version: ['3.9', '3.10', '3.11', '3.12', '3.13']
+        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12', '3.13']
 
     steps:
       - uses: actions/checkout@v4
@@ -75,25 +75,27 @@ jobs:
           cd geoarrow-pandas
           pytest --pyargs geoarrow.pandas --doctest-modules --import-mode=importlib
 
-  python-old:
+  oldest-supported:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-        python-version: ['3.8']
+    container:
+      image: python:3.7
 
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '${{ matrix.python-version }}'
-          cache: 'pip'
+
+      # setuptools_scm available for Python 3.7 does not support version_file
+      # (it can still be installed on Python 3.7, it just can't be built there
+      # without this modification)
+      - name: Patch pyproject.toml
+        run:
+          pushd geoarrow-types
+          sed -i.bak '/^version_file/d' pyproject.toml
 
       - name: Install (geoarrow-types)
         run: |
+          pip install --upgrade setuptools
           pushd geoarrow-types
           pip install -e ".[test]"
 
