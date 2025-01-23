@@ -17,7 +17,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        python-version: ['3.9', '3.10', '3.11', '3.12', '3.13']
+        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12', '3.13']
 
     steps:
       - uses: actions/checkout@v4
@@ -74,6 +74,46 @@ jobs:
         run: |
           cd geoarrow-pandas
           pytest --pyargs geoarrow.pandas --doctest-modules --import-mode=importlib
+
+  # This is a test of geoarrow-types on Python 3.7 (which implies pyarrow 12
+  # since this is the last supported version there). Python 3.7 is still the
+  # runtime available on some hosted platforms (e.g., it is the minimum required
+  # version for apache-sedona Python)
+  oldest-supported:
+    runs-on: ubuntu-latest
+    container:
+      image: python:3.7
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          tags: true
+
+      - name: Check git setup
+        run: |
+          git config --global --add safe.directory "$(pwd)"
+          git describe --long --match='geoarrow-types-*'
+
+      # setuptools_scm available for Python 3.7 does not support version_file
+      # (it can still be installed on Python 3.7, it just can't be built there
+      # without this modification)
+      - name: Patch pyproject.toml
+        run: |
+          cd geoarrow-types
+          sed -i.bak '/^version_file/d' pyproject.toml
+          echo '__version__ = "0.0.0"' > src/geoarrow/types/_version.py
+          echo '__version_tuple__ = (0, 0, 0)' >> src/geoarrow/types/_version.py
+
+      - name: Install (geoarrow-types)
+        run: |
+          pip install --upgrade setuptools setuptools_scm
+          cd geoarrow-types
+          pip install ".[test]"
+
+      - name: Run tests (geoarrow-types)
+        run: |
+          pytest geoarrow-types/tests -v -s
 
   coverage:
     needs: [test]
