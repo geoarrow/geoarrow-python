@@ -89,7 +89,7 @@ jobs:
       # (it can still be installed on Python 3.7, it just can't be built there
       # without this modification)
       - name: Patch pyproject.toml
-        run:
+        run: |
           cd geoarrow-types
           sed -i.bak '/^version_file/d' pyproject.toml
 
