@@ -90,14 +90,14 @@ jobs:
       # without this modification)
       - name: Patch pyproject.toml
         run:
-          pushd geoarrow-types
+          cd geoarrow-types
           sed -i.bak '/^version_file/d' pyproject.toml
 
       - name: Install (geoarrow-types)
         run: |
           pip install --upgrade setuptools
-          pushd geoarrow-types
-          pip install -e ".[test]"
+          cd geoarrow-types
+          pip install ".[test]"
 
       - name: Run tests (geoarrow-types)
         run: |
