@@ -84,6 +84,12 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          tags: true
+
+      - name: Check git setup
+        run: |
+          git fetch origin --tags
+          git describe --long --match='geoarrow-types-*'
 
       # setuptools_scm available for Python 3.7 does not support version_file
       # (it can still be installed on Python 3.7, it just can't be built there
