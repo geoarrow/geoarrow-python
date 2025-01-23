@@ -98,6 +98,7 @@ jobs:
         run: |
           cd geoarrow-types
           sed -i.bak '/^version_file/d' pyproject.toml
+          echo '__version__ = __version_tuple__ = None' > src/geoarrow/types/_version.py
 
       - name: Install (geoarrow-types)
         run: |
