@@ -455,6 +455,11 @@ def test_multipolygon_array_from_geobuffers():
         gt.point(dimensions="xyz", coord_type="interleaved"),
         gt.point(dimensions="xym", coord_type="interleaved"),
         gt.point(dimensions="xyzm", coord_type="interleaved"),
+        # Box with all dimensions
+        gt.box(dimensions="xy"),
+        gt.box(dimensions="xyz"),
+        gt.box(dimensions="xym"),
+        gt.box(dimensions="xyzm"),
         # Union types
         gt.type_spec(gt.Encoding.GEOARROW, gt.GeometryType.GEOMETRY),
         gt.type_spec(gt.Encoding.GEOARROW, gt.GeometryType.GEOMETRYCOLLECTION),
