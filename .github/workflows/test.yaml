@@ -75,6 +75,32 @@ jobs:
           cd geoarrow-pandas
           pytest --pyargs geoarrow.pandas --doctest-modules --import-mode=importlib
 
+  python-old:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ['3.7', '3.8']
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.13'
+          cache: 'pip'
+
+      - name: Install (geoarrow-types)
+        run: |
+          pushd geoarrow-types
+          pip install -e ".[test]"
+
+      - name: Run tests (geoarrow-types)
+        run: |
+          pytest geoarrow-types/tests -v -s
+
   coverage:
     needs: [test]
 
