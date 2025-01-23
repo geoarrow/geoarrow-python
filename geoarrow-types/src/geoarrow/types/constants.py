@@ -142,6 +142,9 @@ class GeometryType(TypeSpecEnum):
     GEOMETRYCOLLECTION = 7
     """Geometry collection geometry type"""
 
+    BOX = 990
+    """Box geometry type"""
+
     @classmethod
     def _common2(cls, lhs, rhs):
         out = super()._common2(lhs, rhs)
