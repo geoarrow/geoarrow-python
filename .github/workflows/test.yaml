@@ -95,7 +95,7 @@ jobs:
 
       - name: Install (geoarrow-types)
         run: |
-          pip install --upgrade setuptools
+          pip install --upgrade setuptools setuptools_scm
           cd geoarrow-types
           pip install ".[test]"
 
