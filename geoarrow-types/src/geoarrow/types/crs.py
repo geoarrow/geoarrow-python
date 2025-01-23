@@ -5,6 +5,7 @@ from typing import Union, Mapping, Optional
 try:
     from typing import Protocol
 except ImportError:
+
     class Protocol:
         pass
 
