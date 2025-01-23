@@ -88,7 +88,7 @@ jobs:
 
       - name: Check git setup
         run: |
-          git fetch origin --tags
+          git config --global --add safe.directory "$(pwd)"
           git describe --long --match='geoarrow-types-*'
 
       # setuptools_scm available for Python 3.7 does not support version_file
