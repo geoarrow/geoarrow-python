@@ -603,24 +603,66 @@ def point_coords(obj, dimensions=None):
 
 
 def to_geopandas(obj):
-    """Convert a geoarrow-like array into a ``geopandas.GeoSeries``.
+    """Convert a geoarrow-like array or table into a GeoSeries/DataFrame
 
+    These are thin wrappers around ``GeoSeries.from_arrow()`` and
+    ``GeoDataFrame.from_arrow()`` where available, falling back on conversion
+    through WKB if using an older version of GeoPandas or an Arrow array type
+    that GeoPandas doesn't support.
+
+    >>> import pyarrow as pa
     >>> import geoarrow.pyarrow as ga
     >>> array = ga.as_geoarrow(["POINT (0 1)"])
     >>> ga.to_geopandas(array)
     0    POINT (0 1)
     dtype: geometry
+    >>> table = pa.table({"geometry": array})
+    >>> ga.to_geopandas(table)
+          geometry
+    0  POINT (0 1)
     """
     import geopandas
     import pandas as pd
 
+    # Heuristic to detect table-like objects
+    is_table_like = (
+        hasattr(obj, "schema")
+        and not callable(obj.schema)
+        and isinstance(obj.schema, pa.Schema)
+    )
+
     # Attempt GeoPandas from_arrow first
     try:
-        return geopandas.GeoSeries.from_arrow(obj)
+        if is_table_like:
+            return geopandas.GeoDataFrame.from_arrow(obj)
+        else:
+            return geopandas.GeoSeries.from_arrow(obj)
     except ValueError:
+        pass
+    except TypeError:
         pass
     except AttributeError:
         pass
+
+    if is_table_like:
+        obj = pa.table(obj)
+        is_geo_column = [
+            isinstance(col.type, _type.GeometryExtensionType) for col in obj.columns
+        ]
+        new_cols = [
+            to_geopandas(col) if is_geo else col
+            for is_geo, col in zip(is_geo_column, obj.columns)
+        ]
+
+        # Set the geometry column if there is exactly one geometry column
+        geo_column_names = [
+            name for name, is_geo in zip(obj.column_names, is_geo_column) if is_geo
+        ]
+        geometry = geo_column_names[0] if len(geo_column_names) == 1 else None
+        return geopandas.GeoDataFrame(
+            {name: col for name, col in zip(obj.column_names, new_cols)},
+            geometry=geometry,
+        )
 
     # Fall back on wkb conversion
     wkb_array_or_chunked = as_wkb(obj)

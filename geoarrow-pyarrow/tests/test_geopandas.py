@@ -1,4 +1,5 @@
 import pytest
+import pyarrow as pa
 from geoarrow import types
 import geoarrow.pyarrow as ga
 
@@ -23,8 +24,18 @@ def test_scalar_to_shapely():
     assert array[0].to_shapely().wkt == "POINT (30 10)"
 
 
-def test_to_geopandas():
-    array = ga.array(["POINT (30 10)"])
+def test_to_geopandas_unsupported_type():
+    # GeoPandas doesn't support geoarrow.wkt, so this goes through the branch
+    # that handles any GeoPandas failure
+    array = ga.as_wkt(["POINT (30 10)"])
+    geoseries = ga.to_geopandas(array)
+    assert isinstance(geoseries, geopandas.GeoSeries)
+    assert len(geoseries) == 1
+    assert geoseries.to_wkt()[0] == "POINT (30 10)"
+
+
+def test_to_geopandas_using_geopandas():
+    array = ga.as_wkb(["POINT (30 10)"])
     geoseries = ga.to_geopandas(array)
     assert isinstance(geoseries, geopandas.GeoSeries)
     assert len(geoseries) == 1
@@ -32,9 +43,40 @@ def test_to_geopandas():
 
 
 def test_to_geopandas_with_crs():
-    array = ga.with_crs(ga.array(["POINT (30 10)"]), types.OGC_CRS84)
+    array = ga.with_crs(ga.as_wkt(["POINT (30 10)"]), types.OGC_CRS84)
     geoseries = ga.to_geopandas(array)
     assert isinstance(geoseries, geopandas.GeoSeries)
     assert len(geoseries) == 1
     assert geoseries.to_wkt()[0] == "POINT (30 10)"
     assert geoseries.crs.to_authority() == ("OGC", "CRS84")
+
+
+def test_to_geopandas_with_crs_using_geopandas():
+    array = ga.with_crs(ga.as_wkb(["POINT (30 10)"]), types.OGC_CRS84)
+    geoseries = ga.to_geopandas(array)
+    assert isinstance(geoseries, geopandas.GeoSeries)
+    assert len(geoseries) == 1
+    assert geoseries.to_wkt()[0] == "POINT (30 10)"
+    assert geoseries.crs.to_authority() == ("OGC", "CRS84")
+
+
+def test_table_to_geopandas_unsupported_type():
+    # GeoPandas doesn't support geoarrow.wkt, so this goes through the branch
+    # that handles any GeoPandas failure
+    table = pa.table({"geom": ga.as_wkt(["POINT (30 10)"])})
+    gdf = ga.to_geopandas(table)
+    assert isinstance(gdf, geopandas.GeoDataFrame)
+
+    geoseries = gdf.geometry
+    assert len(geoseries) == 1
+    assert geoseries.to_wkt()[0] == "POINT (30 10)"
+
+
+def test_table_to_geopandas_using_geopandas():
+    table = pa.table({"geom": ga.as_wkb(["POINT (30 10)"])})
+    gdf = ga.to_geopandas(table)
+    assert isinstance(gdf, geopandas.GeoDataFrame)
+
+    geoseries = gdf.geometry
+    assert len(geoseries) == 1
+    assert geoseries.to_wkt()[0] == "POINT (30 10)"
