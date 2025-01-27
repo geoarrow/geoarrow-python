@@ -78,49 +78,8 @@ class GeometryExtensionArray(pa.ExtensionArray):
         return f"{type_name}:{repr(self.type)}[{len(self)}]\n{items_str}".strip()
 
 
-class PointArray(GeometryExtensionArray):
-    pass
-
-
-class LinestringArray(GeometryExtensionArray):
-    pass
-
-
-class PolygonArray(GeometryExtensionArray):
-    pass
-
-
-class MultiPointArray(GeometryExtensionArray):
-    pass
-
-
-class MultiLinestringArray(GeometryExtensionArray):
-    pass
-
-
-class MultiPolygonArray(GeometryExtensionArray):
-    pass
-
-
 def array_cls_from_name(name):
-    if name == "geoarrow.wkb":
-        return GeometryExtensionArray
-    elif name == "geoarrow.wkt":
-        return GeometryExtensionArray
-    elif name == "geoarrow.point":
-        return PointArray
-    elif name == "geoarrow.linestring":
-        return LinestringArray
-    elif name == "geoarrow.polygon":
-        return PolygonArray
-    elif name == "geoarrow.multipoint":
-        return MultiPointArray
-    elif name == "geoarrow.multilinestring":
-        return MultiLinestringArray
-    elif name == "geoarrow.multipolygon":
-        return MultiPolygonArray
-    else:
-        raise ValueError(f'Expected valid extension name but got "{name}"')
+    return GeometryExtensionArray
 
 
 # Inject array_cls_from_name exactly once to avoid circular import

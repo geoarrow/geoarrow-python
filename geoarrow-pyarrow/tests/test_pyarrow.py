@@ -171,7 +171,7 @@ def test_scalar_geoarrow():
     array = ga.as_geoarrow(["POINT (0 1)"])
     assert array[0].wkt == "POINT (0 1)"
     assert array[0].wkb == ga.as_wkb(array).storage[0].as_py()
-    assert repr(array[0]).startswith("PointScalar")
+    assert repr(array[0]).startswith("GeometryExtensionScalar")
 
 
 def test_scalar_repr():
@@ -227,7 +227,7 @@ def test_kernel_as():
     out = kernel.push(array)
     assert out.type.extension_name == "geoarrow.point"
     assert out.type.crs.to_json_dict() == types.OGC_CRS84.to_json_dict()
-    assert isinstance(out, _array.PointArray)
+    assert isinstance(out, _array.GeometryExtensionArray)
 
 
 def test_kernel_format():

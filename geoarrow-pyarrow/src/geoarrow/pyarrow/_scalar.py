@@ -72,49 +72,13 @@ class WkbScalar(GeometryExtensionScalar):
         return self.value.as_py()
 
 
-class PointScalar(GeometryExtensionScalar):
-    pass
-
-
-class LinestringScalar(GeometryExtensionScalar):
-    pass
-
-
-class PolygonScalar(GeometryExtensionScalar):
-    pass
-
-
-class MultiPointScalar(GeometryExtensionScalar):
-    pass
-
-
-class MultiLinestringScalar(GeometryExtensionScalar):
-    pass
-
-
-class MultiPolygonScalar(GeometryExtensionScalar):
-    pass
-
-
 def scalar_cls_from_name(name):
     if name == "geoarrow.wkb":
         return WkbScalar
     elif name == "geoarrow.wkt":
         return WktScalar
-    elif name == "geoarrow.point":
-        return PointScalar
-    elif name == "geoarrow.linestring":
-        return LinestringScalar
-    elif name == "geoarrow.polygon":
-        return PolygonScalar
-    elif name == "geoarrow.multipoint":
-        return MultiPointScalar
-    elif name == "geoarrow.multilinestring":
-        return MultiLinestringScalar
-    elif name == "geoarrow.multipolygon":
-        return MultiPolygonScalar
     else:
-        raise ValueError(f'Expected valid extension name but got "{name}"')
+        return GeometryExtensionScalar
 
 
 # Inject array_cls_from_name exactly once to avoid circular import
