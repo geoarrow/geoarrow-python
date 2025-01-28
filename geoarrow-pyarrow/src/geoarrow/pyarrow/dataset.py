@@ -213,7 +213,7 @@ class GeoDataset:
 
         if isinstance(target, str):
             target = [target]
-        target_box = box_agg(target)
+        target_box = box_agg(target).as_py()
         maybe_intersects = GeoDataset._index_box_intersects(
             self.index_fragments(), target_box, self.geometry_columns
         )
@@ -255,7 +255,7 @@ class GeoDataset:
         kernel = Kernel.box_agg(type)
         for batch in reader:
             kernel.push(batch.column(0))
-        return kernel.finish()
+        return kernel.finish().storage
 
     @staticmethod
     def _index_fragments(fragments, columns, types, num_threads=None):
@@ -295,7 +295,7 @@ class GeoDataset:
 
     @staticmethod
     def _index_box_intersects(index, box, columns):
-        xmin, xmax, ymin, ymax = box.as_py().values()
+        xmin, ymin, xmax, ymax = box.values()
         expressions = []
         for col in columns:
             expr = (

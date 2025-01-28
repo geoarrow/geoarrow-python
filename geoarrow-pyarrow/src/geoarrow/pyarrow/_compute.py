@@ -338,10 +338,11 @@ def make_point(x, y, z=None, m=None, crs=None):
 
 def _box_point_struct(storage):
     arrays = storage.flatten()
-    return pa.StructArray.from_arrays(
-        [arrays[0], arrays[0], arrays[1], arrays[1]],
-        names=["xmin", "xmax", "ymin", "ymax"],
+    box_storage = pa.StructArray.from_arrays(
+        [arrays[0], arrays[1], arrays[0], arrays[1]],
+        names=["xmin", "ymin", "xmax", "ymax"],
     )
+    return _type.types.box().to_pyarrow().wrap_array(box_storage)
 
 
 def box(obj):
@@ -399,15 +400,15 @@ def _box_agg_point_struct(arrays):
     out = [list(pc.min_max(array).values()) for array in arrays]
     out_dict = {
         "xmin": out[0][0].as_py(),
-        "xmax": out[0][1].as_py(),
         "ymin": out[1][0].as_py(),
+        "xmax": out[0][1].as_py(),
         "ymax": out[1][1].as_py(),
     }
 
     # Apparently pyarrow reorders dict keys when inferring scalar types?
-    return pa.scalar(
-        out_dict, pa.struct([(nm, pa.float64()) for nm in out_dict.keys()])
-    )
+    storage_type = pa.struct([(nm, pa.float64()) for nm in out_dict.keys()])
+    storage_array = pa.array([out_dict], storage_type)
+    return _type.types.box().to_pyarrow().wrap_array(storage_array)[0]
 
 
 def box_agg(obj):
