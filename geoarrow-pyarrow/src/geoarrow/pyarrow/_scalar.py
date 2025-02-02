@@ -78,7 +78,8 @@ class BoxScalar(GeometryExtensionScalar):
     @property
     def bounds(self) -> dict:
         storage = self._array1().storage
-        return {k: v[0].as_py() for k, v in zip(storage.type.names, storage.flatten())}
+        fields = [storage.type.field(i) for i in range(storage.type.num_fields)]
+        return {k.name: v[0].as_py() for k, v in zip(fields, storage.flatten())}
 
     @property
     def xmin(self) -> float:
