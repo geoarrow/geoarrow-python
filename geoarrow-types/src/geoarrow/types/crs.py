@@ -133,7 +133,9 @@ class ProjJsonCrs(Crs):
 
 class StringCrs(Crs):
     def __init__(self, crs: Union[str, bytes]):
-        if isinstance(crs, bytes):
+        if isinstance(crs, str):
+            self._crs = crs
+        elif isinstance(crs, bytes):
             self._crs = crs.decode()
         else:
             self._crs = str(crs)
