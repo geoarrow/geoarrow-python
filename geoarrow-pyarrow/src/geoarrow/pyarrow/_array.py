@@ -78,8 +78,18 @@ class GeometryExtensionArray(pa.ExtensionArray):
         return f"{type_name}:{repr(self.type)}[{len(self)}]\n{items_str}".strip()
 
 
+class BoxArray(GeometryExtensionArray):
+    def __repr__(self):
+        type_name = type(self).__name__
+        items_str = "\n".join(repr(item.bounds) for item in self)
+        return f"{type_name}:{repr(self.type)}[{len(self)}]\n{items_str}".strip()
+
+
 def array_cls_from_name(name):
-    return GeometryExtensionArray
+    if name == "geoarrow.box":
+        return BoxArray
+    else:
+        return GeometryExtensionArray
 
 
 # Inject array_cls_from_name exactly once to avoid circular import

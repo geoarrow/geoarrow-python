@@ -174,6 +174,20 @@ def test_scalar_geoarrow():
     assert repr(array[0]).startswith("GeometryExtensionScalar")
 
 
+def test_scalar_box():
+    # The box kernel doesn't yet implement non XY boxes
+    array = ga.box(["LINESTRING ZM (0 1 2 3, 4 5 6 7)"])
+    assert array[0].xmin == 0
+    assert array[0].ymin == 1
+    assert array[0].zmin is None
+    assert array[0].mmin is None
+    assert array[0].xmax == 4
+    assert array[0].ymax == 5
+    assert array[0].zmax is None
+    assert array[0].mmax is None
+    assert repr(array[0]).startswith("BoxScalar")
+
+
 def test_scalar_repr():
     array = ga.array(
         ["LINESTRING (100000 100000, 100000 100000, 100000 100000, 100000 100000)"]
