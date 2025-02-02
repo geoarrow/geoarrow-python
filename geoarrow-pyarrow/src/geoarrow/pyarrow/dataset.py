@@ -160,7 +160,7 @@ class GeoDataset:
         >>> table = pa.table([ga.array(["POINT (0.5 1.5)"])], ["geometry"])
         >>> dataset = gads.dataset(table)
         >>> dataset.index_fragments().to_pylist()
-        [{'_fragment_index': 0, 'geometry': {'xmin': 0.5, 'xmax': 0.5, 'ymin': 1.5, 'ymax': 1.5}}]
+        [{'_fragment_index': 0, 'geometry': {'xmin': 0.5, 'ymin': 1.5, 'xmax': 0.5, 'ymax': 1.5}}]
         """
         if self._index is None:
             self._index = self._build_index(

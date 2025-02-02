@@ -1,3 +1,5 @@
+from typing import Optional
+
 import pyarrow as pa
 import pyarrow_hotfix as _  # noqa: F401
 from geoarrow.pyarrow._kernel import Kernel
@@ -72,11 +74,55 @@ class WkbScalar(GeometryExtensionScalar):
         return self.value.as_py()
 
 
+class BoxScalar(GeometryExtensionScalar):
+    @property
+    def bounds(self) -> dict:
+        storage = self._array1().storage
+        return {k: v[0].as_py() for k, v in zip(storage.type.names, storage.flatten())}
+
+    @property
+    def xmin(self) -> float:
+        return self.bounds["xmin"]
+
+    @property
+    def ymin(self) -> float:
+        return self.bounds["ymin"]
+
+    @property
+    def xmax(self) -> float:
+        return self.bounds["xmax"]
+
+    @property
+    def ymax(self) -> float:
+        return self.bounds["ymax"]
+
+    @property
+    def zmin(self) -> Optional[float]:
+        return self.bounds["zmin"] if "zmin" in self.bounds else None
+
+    @property
+    def zmax(self) -> Optional[float]:
+        return self.bounds["zmax"] if "zmax" in self.bounds else None
+
+    @property
+    def mmin(self) -> Optional[float]:
+        return self.bounds["mmin"] if "mmin" in self.bounds else None
+
+    @property
+    def mmax(self) -> Optional[float]:
+        return self.bounds["mmax"] if "mmax" in self.bounds else None
+
+    def __repr__(self) -> str:
+        return f"BoxScalar({self.bounds})"
+
+
 def scalar_cls_from_name(name):
     if name == "geoarrow.wkb":
         return WkbScalar
     elif name == "geoarrow.wkt":
         return WktScalar
+    elif name == "geoarrow.box":
+        return BoxScalar
     else:
         return GeometryExtensionScalar
 

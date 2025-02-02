@@ -251,7 +251,7 @@ def as_geoarrow(obj, type=None, coord_type=None, promote_multi=False):
 
     >>> import geoarrow.pyarrow as ga
     >>> ga.as_geoarrow(["POINT (0 1)", "MULTIPOINT Z (0 1 2, 4 5 6)"])
-    MultiPointArray:MultiPointType(geoarrow.multipoint_z)[2]
+    GeometryExtensionArray:MultiPointType(geoarrow.multipoint_z)[2]
     <MULTIPOINT Z (0 1 nan)>
     <MULTIPOINT Z (0 1 2, 4 5 6)>
     """
@@ -307,7 +307,7 @@ def make_point(x, y, z=None, m=None, crs=None):
 
     >>> import geoarrow.pyarrow as ga
     >>> ga.make_point([1, 2, 3], [4, 5, 6])
-    PointArray:PointType(geoarrow.point)[3]
+    GeometryExtensionArray:PointType(geoarrow.point)[3]
     <POINT (1 4)>
     <POINT (2 5)>
     <POINT (3 6)>
@@ -351,7 +351,7 @@ def box(obj):
 
     >>> import geoarrow.pyarrow as ga
     >>> ga.box(["LINESTRING (0 10, 34 -1)"]).type
-    StructType(struct<xmin: double, xmax: double, ymin: double, ymax: double>)
+    BoxType(geoarrow.box)
     >>> print(str(ga.box(["LINESTRING (0 10, 34 -1)"])))
     -- is_valid: all not null
     -- child 0 type: double
@@ -360,11 +360,11 @@ def box(obj):
       ]
     -- child 1 type: double
       [
-        34
+        -1
       ]
     -- child 2 type: double
       [
-        -1
+        34
       ]
     -- child 3 type: double
       [
@@ -418,7 +418,7 @@ def box_agg(obj):
 
     >>> import geoarrow.pyarrow as ga
     >>> ga.box_agg(["POINT (0 10)", "POINT (34 -1)"])
-    <pyarrow.StructScalar: [('xmin', 0.0), ('xmax', 34.0), ('ymin', -1.0), ('ymax', 10.0)]>
+    BoxScalar({'xmin': 0.0, 'ymin': -1.0, 'xmax': 34.0, 'ymax': 10.0})
     """
 
     obj = obj_as_array_or_chunked(obj)
@@ -496,7 +496,7 @@ def with_coord_type(obj, coord_type):
 
     >>> import geoarrow.pyarrow as ga
     >>> ga.with_coord_type(["POINT (0 1)"], ga.CoordType.INTERLEAVED)
-    PointArray:PointType(interleaved geoarrow.point)[1]
+    GeometryExtensionArray:PointType(interleaved geoarrow.point)[1]
     <POINT (0 1)>
     """
     return as_geoarrow(obj, coord_type=coord_type)
@@ -538,10 +538,10 @@ def with_dimensions(obj, dimensions):
 
     >>> import geoarrow.pyarrow as ga
     >>> ga.with_dimensions(["POINT (0 1)"], ga.Dimensions.XYZM)
-    PointArray:PointType(geoarrow.point_zm)[1]
+    GeometryExtensionArray:PointType(geoarrow.point_zm)[1]
     <POINT ZM (0 1 nan nan)>
     >>> ga.with_dimensions(["POINT ZM (0 1 2 3)"], ga.Dimensions.XY)
-    PointArray:PointType(geoarrow.point)[1]
+    GeometryExtensionArray:PointType(geoarrow.point)[1]
     <POINT (0 1)>
     """
     obj = as_geoarrow(obj)
@@ -558,13 +558,13 @@ def with_geometry_type(obj, geometry_type):
 
     >>> import geoarrow.pyarrow as ga
     >>> ga.with_geometry_type(["POINT (0 1)"], ga.GeometryType.MULTIPOINT)
-    MultiPointArray:MultiPointType(geoarrow.multipoint)[1]
+    GeometryExtensionArray:MultiPointType(geoarrow.multipoint)[1]
     <MULTIPOINT (0 1)>
     >>> ga.with_geometry_type(["MULTIPOINT (0 1)"], ga.GeometryType.POINT)
-    PointArray:PointType(geoarrow.point)[1]
+    GeometryExtensionArray:PointType(geoarrow.point)[1]
     <POINT (0 1)>
     >>> ga.with_geometry_type(["LINESTRING EMPTY", "POINT (0 1)"], ga.GeometryType.POINT)
-    PointArray:PointType(geoarrow.point)[2]
+    GeometryExtensionArray:PointType(geoarrow.point)[2]
     <POINT (nan nan)>
     <POINT (0 1)>
     >>> ga.with_geometry_type(["MULTIPOINT (0 1, 2 3)"], ga.GeometryType.POINT)

@@ -101,7 +101,7 @@ def array(obj, type_=None, *args, **kwargs) -> GeometryExtensionArray:
     GeometryExtensionArray:WktType(geoarrow.wkt)[1]
     <POINT (0 1)>
     >>> ga.as_geoarrow(["POINT (0 1)"])
-    PointArray:PointType(geoarrow.point)[1]
+    GeometryExtensionArray:PointType(geoarrow.point)[1]
     <POINT (0 1)>
     """
     # Convert GeoPandas to WKB
