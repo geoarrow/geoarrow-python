@@ -171,7 +171,21 @@ def test_scalar_geoarrow():
     array = ga.as_geoarrow(["POINT (0 1)"])
     assert array[0].wkt == "POINT (0 1)"
     assert array[0].wkb == ga.as_wkb(array).storage[0].as_py()
-    assert repr(array[0]).startswith("PointScalar")
+    assert repr(array[0]).startswith("GeometryExtensionScalar")
+
+
+def test_scalar_box():
+    # The box kernel doesn't yet implement non XY boxes
+    array = ga.box(["LINESTRING ZM (0 1 2 3, 4 5 6 7)"])
+    assert array[0].xmin == 0
+    assert array[0].ymin == 1
+    assert array[0].zmin is None
+    assert array[0].mmin is None
+    assert array[0].xmax == 4
+    assert array[0].ymax == 5
+    assert array[0].zmax is None
+    assert array[0].mmax is None
+    assert repr(array[0]).startswith("BoxScalar")
 
 
 def test_scalar_repr():
@@ -227,7 +241,7 @@ def test_kernel_as():
     out = kernel.push(array)
     assert out.type.extension_name == "geoarrow.point"
     assert out.type.crs.to_json_dict() == types.OGC_CRS84.to_json_dict()
-    assert isinstance(out, _array.PointArray)
+    assert isinstance(out, _array.GeometryExtensionArray)
 
 
 def test_kernel_format():
@@ -371,6 +385,24 @@ def test_multipolygon_array_from_geobuffers():
     )
     assert len(arr) == 1
     assert ga.as_wkt(arr)[0].as_py() == "MULTIPOLYGON (((1 4, 2 5, 3 6, 1 4)))"
+
+
+def test_box_array_from_geobuffers():
+    arr = (
+        types.box()
+        .to_pyarrow()
+        .from_geobuffers(
+            b"\xff",
+            np.array([1.0, 2.0, 3.0]),
+            np.array([4.0, 5.0, 6.0]),
+            np.array([7.0, 8.0, 9.0]),
+            np.array([10.0, 11.0, 12.0]),
+        )
+    )
+    assert len(arr) == 3
+    assert arr[2].bounds == {"xmin": 3.0, "ymin": 6.0, "xmax": 9.0, "ymax": 12.0}
+    assert "BoxArray" in repr(arr)
+    assert "'xmin': 3.0" in repr(arr)
 
 
 # Easier to test here because we have actual geoarrow arrays to parse

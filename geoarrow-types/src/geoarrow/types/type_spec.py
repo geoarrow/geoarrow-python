@@ -272,7 +272,7 @@ class TypeSpec(NamedTuple):
             if "crs_type" in metadata and metadata["crs_type"] == "projjson":
                 out_crs = crs.ProjJsonCrs(metadata["crs"])
             else:
-                out_crs = crs.StringCrs(metadata["crs"])
+                out_crs = crs.create(metadata["crs"])
 
         return TypeSpec(edge_type=out_edges, crs=out_crs)
 

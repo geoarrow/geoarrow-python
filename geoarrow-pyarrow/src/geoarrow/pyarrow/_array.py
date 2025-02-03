@@ -78,49 +78,18 @@ class GeometryExtensionArray(pa.ExtensionArray):
         return f"{type_name}:{repr(self.type)}[{len(self)}]\n{items_str}".strip()
 
 
-class PointArray(GeometryExtensionArray):
-    pass
-
-
-class LinestringArray(GeometryExtensionArray):
-    pass
-
-
-class PolygonArray(GeometryExtensionArray):
-    pass
-
-
-class MultiPointArray(GeometryExtensionArray):
-    pass
-
-
-class MultiLinestringArray(GeometryExtensionArray):
-    pass
-
-
-class MultiPolygonArray(GeometryExtensionArray):
-    pass
+class BoxArray(GeometryExtensionArray):
+    def __repr__(self):
+        type_name = type(self).__name__
+        items_str = "\n".join(repr(item.bounds) for item in self)
+        return f"{type_name}:{repr(self.type)}[{len(self)}]\n{items_str}".strip()
 
 
 def array_cls_from_name(name):
-    if name == "geoarrow.wkb":
-        return GeometryExtensionArray
-    elif name == "geoarrow.wkt":
-        return GeometryExtensionArray
-    elif name == "geoarrow.point":
-        return PointArray
-    elif name == "geoarrow.linestring":
-        return LinestringArray
-    elif name == "geoarrow.polygon":
-        return PolygonArray
-    elif name == "geoarrow.multipoint":
-        return MultiPointArray
-    elif name == "geoarrow.multilinestring":
-        return MultiLinestringArray
-    elif name == "geoarrow.multipolygon":
-        return MultiPolygonArray
+    if name == "geoarrow.box":
+        return BoxArray
     else:
-        raise ValueError(f'Expected valid extension name but got "{name}"')
+        return GeometryExtensionArray
 
 
 # Inject array_cls_from_name exactly once to avoid circular import
@@ -142,7 +111,7 @@ def array(obj, type_=None, *args, **kwargs) -> GeometryExtensionArray:
     GeometryExtensionArray:WktType(geoarrow.wkt)[1]
     <POINT (0 1)>
     >>> ga.as_geoarrow(["POINT (0 1)"])
-    PointArray:PointType(geoarrow.point)[1]
+    GeometryExtensionArray:PointType(geoarrow.point)[1]
     <POINT (0 1)>
     """
     # Convert GeoPandas to WKB

@@ -508,6 +508,7 @@ _GEOPARQUET_GEOMETRY_TYPE_LABELS = [
     "MultiPoint",
     "MultiLineString",
     "MultiPolygon",
+    "GeometryCollection",
 ]
 
 _GEOPARQUET_DIMENSION_LABELS = [None, "", " Z", " M", " ZM"]

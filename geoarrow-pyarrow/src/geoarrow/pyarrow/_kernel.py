@@ -2,21 +2,29 @@ import sys
 
 import pyarrow as pa
 import pyarrow_hotfix as _  # noqa: F401
+from geoarrow.types import box as box_spec
 from geoarrow.pyarrow._type import GeometryExtensionType
 
 
 _lazy_lib = None
+_geoarrow_c_version = None
 
 
 def _geoarrow_c():
-    global _lazy_lib
+    global _lazy_lib, _geoarrow_c_version
     if _lazy_lib is None:
         try:
-            from geoarrow.c import lib
+            import geoarrow.c
+
         except ImportError as e:
             raise ImportError("Requested operation requires geoarrow-c") from e
 
-        _lazy_lib = lib
+        _lazy_lib = geoarrow.c.lib
+        if hasattr(geoarrow.c, "__version_tuple__"):
+            _geoarrow_c_version = geoarrow.c.__version_tuple__
+        else:
+            _geoarrow_c_version = (0, 1, 0)
+
     return _lazy_lib
 
 
@@ -109,11 +117,19 @@ class Kernel:
 
     @staticmethod
     def box(type_in):
-        return Kernel("box", type_in)
+        kernel = Kernel("box", type_in)
+        if _geoarrow_c_version <= (0, 1, 3):
+            return BoxKernelCompat(kernel)
+        else:
+            return kernel
 
     @staticmethod
     def box_agg(type_in):
-        return Kernel("box_agg", type_in)
+        kernel = Kernel("box_agg", type_in)
+        if _geoarrow_c_version <= (0, 1, 3):
+            return BoxKernelCompat(kernel)
+        else:
+            return kernel
 
     @staticmethod
     def _pack_options(options):
@@ -132,3 +148,29 @@ class Kernel:
             bytes += v.encode("UTF-8")
 
         return bytes
+
+
+class BoxKernelCompat:
+    """A wrapper around the "box" kernel that works for geoarrow-c 0.1.
+    This is mostly to ease the transition for geoarrow-python CI while
+    all the packages are being updated."""
+
+    def __init__(self, parent: Kernel):
+        self.parent = parent
+        self.type_out = box_spec().to_pyarrow().with_crs(parent._type_in.crs)
+
+    def push(self, arr):
+        parent_result = self.parent.push(arr)
+        return (
+            None if parent_result is None else self._old_box_to_new_box(parent_result)
+        )
+
+    def finish(self):
+        return self._old_box_to_new_box(self.parent.finish())
+
+    def _old_box_to_new_box(self, array):
+        xmin, xmax, ymin, ymax = array.flatten()
+        storage = pa.StructArray.from_arrays(
+            [xmin, ymin, xmax, ymax], names=["xmin", "ymin", "xmax", "ymax"]
+        )
+        return self.type_out.wrap_array(storage)

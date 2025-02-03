@@ -507,18 +507,18 @@ class GeoArrowAccessor:
         """See :func:`geoarrow.pyarrow.box`"""
         array_or_chunked = _ga.box(self._obj)
         if isinstance(array_or_chunked, _pa.ChunkedArray):
-            flattened = [chunk.flatten() for chunk in array_or_chunked.chunks]
+            flattened = [chunk.storage.flatten() for chunk in array_or_chunked.chunks]
             seriesish = [
                 _pa.chunked_array(item, _pa.float64()) for item in zip(*flattened)
             ]
         else:
-            seriesish = array_or_chunked.flatten()
+            seriesish = array_or_chunked.storage.flatten()
 
         return _pd.DataFrame(
             {
                 "xmin": seriesish[0],
-                "xmax": seriesish[1],
-                "ymin": seriesish[2],
+                "xmax": seriesish[2],
+                "ymin": seriesish[1],
                 "ymax": seriesish[3],
             },
             index=self._obj.index,
