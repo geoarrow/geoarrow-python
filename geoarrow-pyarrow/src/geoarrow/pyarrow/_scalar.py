@@ -14,6 +14,16 @@ class GeometryExtensionScalar(pa.ExtensionScalar):
         if pa_version[0] < 13:
             return super().__repr__()
 
+        # Pretty WKT printing needs geoarrow-c
+        try:
+            from geoarrow import c  # noqa: F401
+        except ImportError:
+            return (
+                super().__repr__()
+                + "\n"
+                + "* pip install geoarrow-c for prettier printing of geometry scalars"
+            )
+
         max_width = 70
 
         try:
@@ -26,7 +36,7 @@ class GeometryExtensionScalar(pa.ExtensionScalar):
         if len(string_formatted) >= max_width:
             string_formatted = string_formatted[: (max_width - 3)] + "..."
 
-        return f"{type(self).__name__}\n<{string_formatted}>"
+        return f"{type(self).__name__}:{repr(self.type)}\n<{string_formatted}>"
 
     def _array1(self):
         return self.type.wrap_array(pa.array([self.value]))
@@ -77,9 +87,7 @@ class WkbScalar(GeometryExtensionScalar):
 class BoxScalar(GeometryExtensionScalar):
     @property
     def bounds(self) -> dict:
-        storage = self._array1().storage
-        fields = [storage.type.field(i) for i in range(storage.type.num_fields)]
-        return {k.name: v[0].as_py() for k, v in zip(fields, storage.flatten())}
+        return self.as_py()
 
     @property
     def xmin(self) -> float:

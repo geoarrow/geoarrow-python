@@ -387,6 +387,24 @@ def test_multipolygon_array_from_geobuffers():
     assert ga.as_wkt(arr)[0].as_py() == "MULTIPOLYGON (((1 4, 2 5, 3 6, 1 4)))"
 
 
+def test_box_array_from_geobuffers():
+    arr = (
+        types.box()
+        .to_pyarrow()
+        .from_geobuffers(
+            b"\xff",
+            np.array([1.0, 2.0, 3.0]),
+            np.array([4.0, 5.0, 6.0]),
+            np.array([7.0, 8.0, 9.0]),
+            np.array([10.0, 11.0, 12.0]),
+        )
+    )
+    assert len(arr) == 3
+    assert arr[2].bounds == {"xmin": 3.0, "ymin": 6.0, "xmax": 9.0, "ymax": 12.0}
+    assert "BoxArray" in repr(arr)
+    assert "'xmin': 3.0" in repr(arr)
+
+
 # Easier to test here because we have actual geoarrow arrays to parse
 def test_c_array_view():
     arr = ga.as_geoarrow(["POLYGON ((0 0, 1 0, 0 1, 0 0))"])
