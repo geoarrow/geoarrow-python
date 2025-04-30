@@ -1,6 +1,5 @@
 from typing import Iterable
 import pyarrow as pa
-import pyarrow_hotfix as _  # noqa: F401
 
 from geoarrow import types
 from geoarrow.types.type_pyarrow import (

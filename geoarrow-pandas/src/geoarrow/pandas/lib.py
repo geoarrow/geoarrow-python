@@ -1,7 +1,6 @@
 import re as _re
 import pandas as _pd
 import pyarrow as _pa
-import pyarrow_hotfix as _  # noqa: F401
 import numpy as _np
 from geoarrow.types import TypeSpec, type_spec, Encoding
 import geoarrow.pyarrow as _ga
