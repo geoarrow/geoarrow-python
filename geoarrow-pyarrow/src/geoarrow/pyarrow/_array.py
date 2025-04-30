@@ -1,5 +1,4 @@
 import pyarrow as pa
-import pyarrow_hotfix as _  # noqa: F401
 
 from geoarrow.pyarrow._kernel import Kernel, _geoarrow_c
 from geoarrow.pyarrow._type import (

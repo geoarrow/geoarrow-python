@@ -1,6 +1,5 @@
 import pyarrow as pa
 import pyarrow.compute as pc
-import pyarrow_hotfix as _  # noqa: F401
 
 from geoarrow.types import (
     type_spec,

@@ -12,7 +12,6 @@ import geoarrow.pyarrow as _ga
 import pyarrow as _pa
 import pyarrow.parquet as _pq
 import pyarrow.types as _types
-import pyarrow_hotfix as _  # noqa: F401
 from geoarrow.pyarrow import _type
 from geoarrow.pyarrow import _compute
 
