@@ -77,8 +77,8 @@ class TypeSpec(NamedTuple):
                 "edge_type or crs is unspecified"
             )
 
-        if self.edge_type == EdgeType.SPHERICAL:
-            metadata["edges"] = "spherical"
+        if self.edge_type != EdgeType.PLANAR:
+            metadata["edges"] = self.edge_type.name.lower()
 
         if self.crs is None:
             pass
