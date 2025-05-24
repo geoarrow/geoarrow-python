@@ -423,8 +423,8 @@ def box_agg(obj):
     obj = obj_as_array_or_chunked(obj)
 
     # Spherical edges aren't supported by this algorithm
-    if obj.type.edge_type == EdgeType.SPHERICAL:
-        raise TypeError("Can't compute box of type with spherical edges")
+    if obj.type.edge_type != EdgeType.PLANAR:
+        raise TypeError("Can't compute box of type with non-planar edges")
 
     # Optimization: pyarrow's minmax kernel is fast and we can use it if we have struct
     # coords. So far, only a measurable improvement for points.

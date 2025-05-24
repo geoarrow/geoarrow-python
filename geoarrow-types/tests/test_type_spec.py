@@ -50,6 +50,10 @@ def test_type_spec_extension_metadata():
         == '{"edges": "spherical"}'
     )
     assert (
+        TypeSpec(edge_type=EdgeType.VINCENTY).with_defaults().extension_metadata()
+        == '{"edges": "vincenty"}'
+    )
+    assert (
         TypeSpec(crs=gt.OGC_CRS84)
         .with_defaults()
         .extension_metadata()
