@@ -243,6 +243,18 @@ class EdgeType(TypeSpecEnum):
     SPHERICAL = 2
     """Edges are geodesic on a sphere"""
 
+    VINCENTY = 3
+    """Edges are geodesic on a spheroid according to the Vincenty algorithm"""
+
+    THOMAS = 4
+    """Edges are geodesic on a spheroid according to the Thomas algorithm"""
+
+    ANDOYER = 5
+    """Edges are geodesic on a spheroid according to the Andoyer algorithm"""
+
+    KARNEY = 6
+    """Edges are geodesic on a spheroid according to the Karney algorithm"""
+
 
 _VALUE_COMMON_HELPER = {
     (Encoding.WKB, Encoding.LARGE_WKB): Encoding.LARGE_WKB,
