@@ -46,7 +46,7 @@ def wkb_view() -> WkbType:
     >>> import geoarrow.pyarrow as ga
     >>> ga.wkb_view()
     WkbType(geoarrow.wkb)
-    >>> ga.wkb().storage_type
+    >>> ga.wkb_view().storage_type
     DataType(binary_view)
     """
     return WkbType.__arrow_ext_deserialize__(pa.binary_view(), b"")
@@ -82,7 +82,7 @@ def wkt_view() -> WktType:
     >>> import geoarrow.pyarrow as ga
     >>> ga.wkt_view()
     WktType(geoarrow.wkt)
-    >>> ga.wkt().storage_type
+    >>> ga.wkt_view().storage_type
     DataType(string_view)
     """
     return WktType.__arrow_ext_deserialize__(pa.string_view(), b"")
