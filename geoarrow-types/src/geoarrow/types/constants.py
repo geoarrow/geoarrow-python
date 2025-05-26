@@ -73,7 +73,7 @@ class Encoding(TypeSpecEnum):
 
     >>> from geoarrow import types
     >>> types.Encoding.GEOARROW
-    <Encoding.GEOARROW: 5>
+    <Encoding.GEOARROW: 7>
     """
 
     UNSPECIFIED = 0
