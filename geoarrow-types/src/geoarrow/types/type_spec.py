@@ -357,10 +357,20 @@ def wkb(*, edge_type=None, crs=crs.UNSPECIFIED) -> TypeSpec:
 def large_wkb(*, edge_type=None, crs=crs.UNSPECIFIED) -> TypeSpec:
     """Large well-known binary encoding
 
-    Create a :class:`TypeSpec` denoting a well-known binary type  with
+    Create a :class:`TypeSpec` denoting a well-known binary type with
     64-bit data offsets. See :func:`type_spec` for parameter definitions.
     """
     return type_spec(encoding=Encoding.LARGE_WKB, edge_type=edge_type, crs=crs)
+
+
+def wkb_view(*, edge_type=None, crs=crs.UNSPECIFIED) -> TypeSpec:
+    """Well-known binary view encoding
+
+    Create a :class:`TypeSpec` denoting a well-known binary type using
+    binary views as the underlying storage type. See :func:`type_spec`
+    for parameter definitions.
+    """
+    return type_spec(encoding=Encoding.WKB_VIEW, edge_type=edge_type, crs=crs)
 
 
 def wkt(*, edge_type=None, crs=crs.UNSPECIFIED) -> TypeSpec:
@@ -379,6 +389,16 @@ def large_wkt(*, edge_type=None, crs=crs.UNSPECIFIED) -> TypeSpec:
     64-bit data offsets. See :func:`type_spec` for parameter definitions.
     """
     return type_spec(encoding=Encoding.LARGE_WKT, edge_type=edge_type, crs=crs)
+
+
+def wkt_view(*, edge_type=None, crs=crs.UNSPECIFIED) -> TypeSpec:
+    """Well-known text encoding
+
+    Create a :class:`TypeSpec` denoting a well-known text type using
+    string views as the underlying storage type. See :func:`type_spec`
+    for parameter definitions.
+    """
+    return type_spec(encoding=Encoding.WKT_VIEW, edge_type=edge_type, crs=crs)
 
 
 def geoarrow(
@@ -619,6 +639,8 @@ _SERIALIZED_EXT_NAMES = {
     Encoding.LARGE_WKB: "geoarrow.wkb",
     Encoding.WKT: "geoarrow.wkt",
     Encoding.LARGE_WKT: "geoarrow.wkt",
+    Encoding.WKB_VIEW: "geoarrow.wkb",
+    Encoding.WKT_VIEW: "geoarrow.wkt",
 }
 
 _GEOARROW_EXT_NAMES = {

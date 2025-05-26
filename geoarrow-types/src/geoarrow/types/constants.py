@@ -91,7 +91,13 @@ class Encoding(TypeSpecEnum):
     LARGE_WKT = 4
     """Well-known text encoding with 64-bit offsets"""
 
-    GEOARROW = 5
+    WKB_VIEW = 5
+    """Well-known binary encoding using binary views as a storage type"""
+
+    WKT_VIEW = 6
+    """Well-known binary encoding using string views as a storage type"""
+
+    GEOARROW = 7
     """GeoArrow native nested list encoding"""
 
     def is_serialized(self):
@@ -100,6 +106,8 @@ class Encoding(TypeSpecEnum):
             Encoding.LARGE_WKB,
             Encoding.WKT,
             Encoding.LARGE_WKT,
+            Encoding.WKB_VIEW,
+            Encoding.WKT_VIEW
         )
 
 

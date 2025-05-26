@@ -441,6 +441,8 @@ def test_multipolygon_array_from_geobuffers():
         gt.large_wkt(),
         gt.wkb(),
         gt.large_wkb(),
+        gt.wkt_view(),
+        gt.wkb_view(),
         # Geometry types
         gt.box(),
         gt.point(),
