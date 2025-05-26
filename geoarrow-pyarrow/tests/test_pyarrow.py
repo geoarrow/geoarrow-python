@@ -124,10 +124,6 @@ def test_array():
     assert array.type == ga.large_wkt()
     assert array.type.storage_type == pa.large_utf8()
 
-    array = ga.array(["POINT (30 10)"], ga.wkt_view())
-    assert array.type == ga.wkt_view()
-    assert array.type.storage_type == pa.string_view()
-
     array = ga.array([wkb_item], ga.wkb())
     assert array.type == ga.wkb()
     assert array.type.storage_type == pa.binary()
@@ -136,6 +132,20 @@ def test_array():
     assert array.type == ga.large_wkb()
     assert array.type.storage_type == pa.large_binary()
 
+
+def test_array_view_types():
+    # This one requires pyarrow >= 18, because that's when the necessary
+    # cast() was added.
+    try:
+        pa.array(["foofy"]).cast(pa.string_view())
+    except pa.lib.ArrowNotImplementedError:
+        pytest.skip("ga.array() with view types requires pyarrow >= 18.0.0")
+
+    array = ga.array(["POINT (30 10)"], ga.wkt_view())
+    assert array.type == ga.wkt_view()
+    assert array.type.storage_type == pa.string_view()
+
+    wkb_item = b"\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x3e\x40\x00\x00\x00\x00\x00\x00\x24\x40"
     array = ga.array([wkb_item], ga.wkb_view())
     assert array.type == ga.wkb_view()
     assert array.type.storage_type == pa.binary_view()
