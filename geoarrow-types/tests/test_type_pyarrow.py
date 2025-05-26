@@ -441,6 +441,8 @@ def test_multipolygon_array_from_geobuffers():
         gt.large_wkt(),
         gt.wkb(),
         gt.large_wkb(),
+        gt.wkt_view(),
+        gt.wkb_view(),
         # Geometry types
         gt.box(),
         gt.point(),
@@ -470,6 +472,12 @@ def test_multipolygon_array_from_geobuffers():
     ],
 )
 def test_roundtrip_extension_type(spec):
+    if not hasattr(pa, "binary_view") and spec.encoding in (
+        gt.Encoding.WKB_VIEW,
+        gt.Encoding.WKT_VIEW,
+    ):
+        pytest.skip("binary_view/string_view requires pyarrow >= 14")
+
     extension_type = type_pyarrow.extension_type(spec)
     serialized = extension_type.__arrow_ext_serialize__()
     extension_type2 = type_pyarrow._deserialize_storage(

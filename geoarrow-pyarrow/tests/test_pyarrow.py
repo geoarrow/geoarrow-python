@@ -68,8 +68,10 @@ def test_type_with_crs_pyproj():
 def test_constructors():
     assert ga.wkb().extension_name == "geoarrow.wkb"
     assert ga.large_wkb().extension_name == "geoarrow.wkb"
+    assert ga.wkb_view().extension_name == "geoarrow.wkb"
     assert ga.wkt().extension_name == "geoarrow.wkt"
     assert ga.large_wkt().extension_name == "geoarrow.wkt"
+    assert ga.wkt_view().extension_name == "geoarrow.wkt"
     assert ga.point().extension_name == "geoarrow.point"
     assert ga.linestring().extension_name == "geoarrow.linestring"
     assert ga.polygon().extension_name == "geoarrow.polygon"
@@ -129,6 +131,24 @@ def test_array():
     array = ga.array([wkb_item], ga.large_wkb())
     assert array.type == ga.large_wkb()
     assert array.type.storage_type == pa.large_binary()
+
+
+def test_array_view_types():
+    # This one requires pyarrow >= 18, because that's when the necessary
+    # cast() was added.
+    try:
+        pa.array(["foofy"]).cast(pa.string_view())
+    except pa.lib.ArrowNotImplementedError:
+        pytest.skip("ga.array() with view types requires pyarrow >= 18.0.0")
+
+    array = ga.array(["POINT (30 10)"], ga.wkt_view())
+    assert array.type == ga.wkt_view()
+    assert array.type.storage_type == pa.string_view()
+
+    wkb_item = b"\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x3e\x40\x00\x00\x00\x00\x00\x00\x24\x40"
+    array = ga.array([wkb_item], ga.wkb_view())
+    assert array.type == ga.wkb_view()
+    assert array.type.storage_type == pa.binary_view()
 
 
 def test_array_repr():

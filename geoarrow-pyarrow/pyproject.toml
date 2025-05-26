@@ -23,11 +23,10 @@ description = ""
 authors = [{name = "Dewey Dunnington", email = "dewey@dunnington.ca"}]
 license = {text = "Apache-2.0"}
 requires-python = ">=3.8"
-dependencies = ["pyarrow >= 14.0.2", "geoarrow-types"]
+dependencies = ["pyarrow >= 14.0.2", "geoarrow-types", "geoarrow-c"]
 
 [project.optional-dependencies]
-test = ["pytest", "pandas", "numpy", "geopandas", "pyogrio", "pyproj", "geoarrow-c"]
-compute = ["geoarrow-c"]
+test = ["pytest", "pandas", "numpy", "geopandas", "pyogrio", "pyproj"]
 
 [project.urls]
 homepage = "https://geoarrow.org"

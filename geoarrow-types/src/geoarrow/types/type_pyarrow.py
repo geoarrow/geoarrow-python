@@ -558,6 +558,10 @@ def _parse_storage(storage_type):
         return [("string", ())]
     elif pa_types.is_large_string(storage_type):
         return [("large_string", ())]
+    elif hasattr(pa_types, "is_binary_view") and pa_types.is_binary_view(storage_type):
+        return [("binary_view", ())]
+    elif hasattr(pa_types, "is_string_view") and pa_types.is_string_view(storage_type):
+        return [("string_view", ())]
     elif pa_types.is_float64(storage_type):
         return [("double", ())]
     elif isinstance(storage_type, pa.ListType):
@@ -1014,6 +1018,10 @@ _SERIALIZED_STORAGE_TYPES = {
     Encoding.LARGE_WKB: pa.large_binary(),
 }
 
+if hasattr(pa, "binary_view"):
+    _SERIALIZED_STORAGE_TYPES[Encoding.WKT_VIEW] = pa.string_view()
+    _SERIALIZED_STORAGE_TYPES[Encoding.WKB_VIEW] = pa.binary_view()
+
 _NATIVE_STORAGE_TYPES = _generate_storage_types()
 _add_union_types_to_native_storage_types()
 
@@ -1022,6 +1030,8 @@ _SPEC_FROM_TYPE_NESTING = {
     ("large_binary",): Encoding.LARGE_WKB,
     ("string",): Encoding.WKT,
     ("large_string",): Encoding.LARGE_WKT,
+    ("binary_view",): Encoding.WKB_VIEW,
+    ("string_view",): Encoding.WKT_VIEW,
     ("struct",): TypeSpec(
         encoding=Encoding.GEOARROW,
         geometry_type=GeometryType.POINT,
