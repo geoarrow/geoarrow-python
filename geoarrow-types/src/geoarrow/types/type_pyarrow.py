@@ -929,9 +929,9 @@ def _add_union_types_to_native_storage_types():
 
     for coord_type in ALL_COORD_TYPES:
         for dimension in ALL_DIMENSIONS:
-            _NATIVE_STORAGE_TYPES[(GeometryType.GEOMETRY, coord_type, dimension)] = (
-                _generate_union_storage(coord_type=coord_type, dimensions=[dimension])
-            )
+            _NATIVE_STORAGE_TYPES[
+                (GeometryType.GEOMETRY, coord_type, dimension)
+            ] = _generate_union_storage(coord_type=coord_type, dimensions=[dimension])
 
         # With unknown dimensions, we reigster the massive catch-all union
         _NATIVE_STORAGE_TYPES[

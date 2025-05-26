@@ -68,8 +68,10 @@ def test_type_with_crs_pyproj():
 def test_constructors():
     assert ga.wkb().extension_name == "geoarrow.wkb"
     assert ga.large_wkb().extension_name == "geoarrow.wkb"
+    assert ga.wkb_view().extension_name == "geoarrow.wkb"
     assert ga.wkt().extension_name == "geoarrow.wkt"
     assert ga.large_wkt().extension_name == "geoarrow.wkt"
+    assert ga.wkt_view().extension_name == "geoarrow.wkt"
     assert ga.point().extension_name == "geoarrow.point"
     assert ga.linestring().extension_name == "geoarrow.linestring"
     assert ga.polygon().extension_name == "geoarrow.polygon"

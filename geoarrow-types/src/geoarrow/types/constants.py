@@ -107,7 +107,7 @@ class Encoding(TypeSpecEnum):
             Encoding.WKT,
             Encoding.LARGE_WKT,
             Encoding.WKB_VIEW,
-            Encoding.WKT_VIEW
+            Encoding.WKT_VIEW,
         )
 
 
@@ -268,10 +268,14 @@ _VALUE_COMMON_HELPER = {
     (Encoding.WKB, Encoding.LARGE_WKB): Encoding.LARGE_WKB,
     (Encoding.WKB, Encoding.WKT): Encoding.WKB,
     (Encoding.WKB, Encoding.LARGE_WKT): Encoding.LARGE_WKB,
+    (Encoding.WKB, Encoding.WKB_VIEW): Encoding.WKB_VIEW,
     (Encoding.WKB, Encoding.GEOARROW): Encoding.WKB,
+    (Encoding.WKB_VIEW, Encoding.LARGE_WKB): Encoding.WKB_VIEW,
     (Encoding.WKT, Encoding.LARGE_WKT): Encoding.LARGE_WKT,
     (Encoding.WKT, Encoding.LARGE_WKB): Encoding.LARGE_WKB,
+    (Encoding.WKT, Encoding.WKT_VIEW): Encoding.WKT_VIEW,
     (Encoding.WKT, Encoding.GEOARROW): Encoding.WKB,
+    (Encoding.WKT_VIEW, Encoding.LARGE_WKT): Encoding.WKT_VIEW,
     (GeometryType.POINT, GeometryType.MULTIPOINT): GeometryType.MULTIPOINT,
     (
         GeometryType.LINESTRING,

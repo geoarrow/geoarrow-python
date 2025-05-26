@@ -40,6 +40,18 @@ def large_wkb() -> WkbType:
     return WkbType.__arrow_ext_deserialize__(pa.large_binary(), b"")
 
 
+def wkb_view() -> WkbType:
+    """Well-known binary using binary views as the underlying storage.
+
+    >>> import geoarrow.pyarrow as ga
+    >>> ga.wkb_view()
+    WkbType(geoarrow.wkb)
+    >>> ga.wkb().storage_type
+    DataType(binary_view)
+    """
+    return WkbType.__arrow_ext_deserialize__(pa.binary_view(), b"")
+
+
 def wkt() -> WktType:
     """Well-known text with a maximum array size of 2 GB per chunk.
 
@@ -62,6 +74,18 @@ def large_wkt() -> WktType:
     DataType(large_string)
     """
     return WktType.__arrow_ext_deserialize__(pa.large_utf8(), b"")
+
+
+def wkt_view() -> WktType:
+    """Well-known text using string views as the underlying storage.
+
+    >>> import geoarrow.pyarrow as ga
+    >>> ga.wkt_view()
+    WktType(geoarrow.wkt)
+    >>> ga.wkt().storage_type
+    DataType(string_view)
+    """
+    return WktType.__arrow_ext_deserialize__(pa.string_view(), b"")
 
 
 def point() -> PointType:
