@@ -124,6 +124,10 @@ def test_array():
     assert array.type == ga.large_wkt()
     assert array.type.storage_type == pa.large_utf8()
 
+    array = ga.array(["POINT (30 10)"], ga.wkt_view())
+    assert array.type == ga.wkt_view()
+    assert array.type.storage_type == pa.string_view()
+
     array = ga.array([wkb_item], ga.wkb())
     assert array.type == ga.wkb()
     assert array.type.storage_type == pa.binary()
@@ -131,6 +135,10 @@ def test_array():
     array = ga.array([wkb_item], ga.large_wkb())
     assert array.type == ga.large_wkb()
     assert array.type.storage_type == pa.large_binary()
+
+    array = ga.array([wkb_item], ga.wkb_view())
+    assert array.type == ga.wkb_view()
+    assert array.type.storage_type == pa.binary_view()
 
 
 def test_array_repr():
