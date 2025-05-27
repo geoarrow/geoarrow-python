@@ -321,8 +321,456 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="geoarrow-pandas">
-<h1>geoarrow-pandas<a class="headerlink" href="#geoarrow-pandas" title="Link to this heading">#</a></h1>
+  <section id="module-geoarrow.pandas">
+<span id="geoarrow-pandas"></span><h1>geoarrow-pandas<a class="headerlink" href="#module-geoarrow.pandas" title="Link to this heading">#</a></h1>
+<p>Contains pandas integration for the geoarrow Python bindings.
+Importing this package will register pyarrow extension types and
+register the <code class="docutils literal notranslate"><span class="pre">geoarrow</span></code> accessor on <code class="docutils literal notranslate"><span class="pre">pandas.Series</span></code> objects.</p>
+<section id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Link to this heading">#</a></h2>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">geoarrow.pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">_</span>
+</pre></div>
+</div>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="geoarrow.pandas.GeoArrowAccessor">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">GeoArrowAccessor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pandas_obj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pandas.GeoArrowAccessor" title="Link to this definition">#</a></dt>
+<dd><p>GeoArrow series accessor</p>
+<p>The GeoArrow series accessor adds a convenient way to apply the type
+introspection and coordinate shuffling capabilities of geoarrow-pyarrow
+to columns in a pandas data frame. The accessor can be applied to
+text columns (interpreted as WKT), binary columns (interpreted as WKB),
+<a class="reference internal" href="#geoarrow.pandas.GeoArrowExtensionDtype" title="geoarrow.pandas.GeoArrowExtensionDtype"><code class="xref py py-class docutils literal notranslate"><span class="pre">GeoArrowExtensionDtype</span></code></a> columns, or a <code class="docutils literal notranslate"><span class="pre">geopandas.GeoSeries</span></code>.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">geoarrow.pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">_</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">series</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">([</span><span class="s2">&quot;POINT (0 1)&quot;</span><span class="p">,</span> <span class="s2">&quot;POINT (2 3)&quot;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">geoarrow</span><span class="o">.</span><span class="n">point_coords</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span>
+<span class="go">0    0.0</span>
+<span class="go">1    2.0</span>
+<span class="go">dtype: float64</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span>
+<span class="go">0    1.0</span>
+<span class="go">1    3.0</span>
+<span class="go">dtype: float64</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="geoarrow.pandas.GeoArrowAccessor.as_geoarrow">
+<span class="sig-name descname"><span class="pre">as_geoarrow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coord_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pandas.GeoArrowAccessor.as_geoarrow" title="Link to this definition">#</a></dt>
+<dd><p>See <a class="reference internal" href="pyarrow.html#geoarrow.pyarrow.as_geoarrow" title="geoarrow.pyarrow.as_geoarrow"><code class="xref py py-func docutils literal notranslate"><span class="pre">geoarrow.pyarrow.as_geoarrow()</span></code></a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geoarrow.pandas.GeoArrowAccessor.as_wkb">
+<span class="sig-name descname"><span class="pre">as_wkb</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pandas.GeoArrowAccessor.as_wkb" title="Link to this definition">#</a></dt>
+<dd><p>See <a class="reference internal" href="pyarrow.html#geoarrow.pyarrow.as_wkb" title="geoarrow.pyarrow.as_wkb"><code class="xref py py-func docutils literal notranslate"><span class="pre">geoarrow.pyarrow.as_wkb()</span></code></a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geoarrow.pandas.GeoArrowAccessor.as_wkt">
+<span class="sig-name descname"><span class="pre">as_wkt</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pandas.GeoArrowAccessor.as_wkt" title="Link to this definition">#</a></dt>
+<dd><p>See <a class="reference internal" href="pyarrow.html#geoarrow.pyarrow.as_wkt" title="geoarrow.pyarrow.as_wkt"><code class="xref py py-func docutils literal notranslate"><span class="pre">geoarrow.pyarrow.as_wkt()</span></code></a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geoarrow.pandas.GeoArrowAccessor.bounds">
+<span class="sig-name descname"><span class="pre">bounds</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pandas.GeoArrowAccessor.bounds" title="Link to this definition">#</a></dt>
+<dd><p>See <a class="reference internal" href="pyarrow.html#geoarrow.pyarrow.box" title="geoarrow.pyarrow.box"><code class="xref py py-func docutils literal notranslate"><span class="pre">geoarrow.pyarrow.box()</span></code></a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geoarrow.pandas.GeoArrowAccessor.format_wkb">
+<span class="sig-name descname"><span class="pre">format_wkb</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pandas.GeoArrowAccessor.format_wkb" title="Link to this definition">#</a></dt>
+<dd><p>See <a class="reference internal" href="pyarrow.html#geoarrow.pyarrow.as_wkb" title="geoarrow.pyarrow.as_wkb"><code class="xref py py-func docutils literal notranslate"><span class="pre">geoarrow.pyarrow.as_wkb()</span></code></a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geoarrow.pandas.GeoArrowAccessor.format_wkt">
+<span class="sig-name descname"><span class="pre">format_wkt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">precision</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_element_size_bytes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pandas.GeoArrowAccessor.format_wkt" title="Link to this definition">#</a></dt>
+<dd><p>See <a class="reference internal" href="pyarrow.html#geoarrow.pyarrow.format_wkt" title="geoarrow.pyarrow.format_wkt"><code class="xref py py-func docutils literal notranslate"><span class="pre">geoarrow.pyarrow.format_wkt()</span></code></a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geoarrow.pandas.GeoArrowAccessor.parse_all">
+<span class="sig-name descname"><span class="pre">parse_all</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pandas.GeoArrowAccessor.parse_all" title="Link to this definition">#</a></dt>
+<dd><p>See <a class="reference internal" href="pyarrow.html#geoarrow.pyarrow.parse_all" title="geoarrow.pyarrow.parse_all"><code class="xref py py-func docutils literal notranslate"><span class="pre">geoarrow.pyarrow.parse_all()</span></code></a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geoarrow.pandas.GeoArrowAccessor.point_coords">
+<span class="sig-name descname"><span class="pre">point_coords</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dimensions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pandas.GeoArrowAccessor.point_coords" title="Link to this definition">#</a></dt>
+<dd><p>See <a class="reference internal" href="pyarrow.html#geoarrow.pyarrow.point_coords" title="geoarrow.pyarrow.point_coords"><code class="xref py py-func docutils literal notranslate"><span class="pre">geoarrow.pyarrow.point_coords()</span></code></a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geoarrow.pandas.GeoArrowAccessor.to_geopandas">
+<span class="sig-name descname"><span class="pre">to_geopandas</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pandas.GeoArrowAccessor.to_geopandas" title="Link to this definition">#</a></dt>
+<dd><p>See <a class="reference internal" href="pyarrow.html#geoarrow.pyarrow.to_geopandas" title="geoarrow.pyarrow.to_geopandas"><code class="xref py py-func docutils literal notranslate"><span class="pre">geoarrow.pyarrow.to_geopandas()</span></code></a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geoarrow.pandas.GeoArrowAccessor.total_bounds">
+<span class="sig-name descname"><span class="pre">total_bounds</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pandas.GeoArrowAccessor.total_bounds" title="Link to this definition">#</a></dt>
+<dd><p>See <a class="reference internal" href="pyarrow.html#geoarrow.pyarrow.box_agg" title="geoarrow.pyarrow.box_agg"><code class="xref py py-func docutils literal notranslate"><span class="pre">geoarrow.pyarrow.box_agg()</span></code></a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geoarrow.pandas.GeoArrowAccessor.with_coord_type">
+<span class="sig-name descname"><span class="pre">with_coord_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coord_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pandas.GeoArrowAccessor.with_coord_type" title="Link to this definition">#</a></dt>
+<dd><p>See <a class="reference internal" href="pyarrow.html#geoarrow.pyarrow.with_coord_type" title="geoarrow.pyarrow.with_coord_type"><code class="xref py py-func docutils literal notranslate"><span class="pre">geoarrow.pyarrow.with_coord_type()</span></code></a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geoarrow.pandas.GeoArrowAccessor.with_crs">
+<span class="sig-name descname"><span class="pre">with_crs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">crs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pandas.GeoArrowAccessor.with_crs" title="Link to this definition">#</a></dt>
+<dd><p>See <a class="reference internal" href="pyarrow.html#geoarrow.pyarrow.with_crs" title="geoarrow.pyarrow.with_crs"><code class="xref py py-func docutils literal notranslate"><span class="pre">geoarrow.pyarrow.with_crs()</span></code></a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geoarrow.pandas.GeoArrowAccessor.with_dimensions">
+<span class="sig-name descname"><span class="pre">with_dimensions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dimensions</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pandas.GeoArrowAccessor.with_dimensions" title="Link to this definition">#</a></dt>
+<dd><p>See <a class="reference internal" href="pyarrow.html#geoarrow.pyarrow.with_dimensions" title="geoarrow.pyarrow.with_dimensions"><code class="xref py py-func docutils literal notranslate"><span class="pre">geoarrow.pyarrow.with_dimensions()</span></code></a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geoarrow.pandas.GeoArrowAccessor.with_edge_type">
+<span class="sig-name descname"><span class="pre">with_edge_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">edge_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pandas.GeoArrowAccessor.with_edge_type" title="Link to this definition">#</a></dt>
+<dd><p>See <a class="reference internal" href="pyarrow.html#geoarrow.pyarrow.with_edge_type" title="geoarrow.pyarrow.with_edge_type"><code class="xref py py-func docutils literal notranslate"><span class="pre">geoarrow.pyarrow.with_edge_type()</span></code></a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geoarrow.pandas.GeoArrowAccessor.with_geometry_type">
+<span class="sig-name descname"><span class="pre">with_geometry_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">geometry_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pandas.GeoArrowAccessor.with_geometry_type" title="Link to this definition">#</a></dt>
+<dd><p>See <a class="reference internal" href="pyarrow.html#geoarrow.pyarrow.with_geometry_type" title="geoarrow.pyarrow.with_geometry_type"><code class="xref py py-func docutils literal notranslate"><span class="pre">geoarrow.pyarrow.with_geometry_type()</span></code></a></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="geoarrow.pandas.GeoArrowExtensionDtype">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">GeoArrowExtensionDtype</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pandas.GeoArrowExtensionDtype" title="Link to this definition">#</a></dt>
+<dd><p>ExtensionDtype implementation wrapping a geoarrow type</p>
+<p>The dtype object for geoarrow-encoded arrays that are converted
+to pandas. Use the <code class="docutils literal notranslate"><span class="pre">pyarrow_dtype</span></code> property to return the underlying
+<a class="reference internal" href="pyarrow.html#geoarrow.pyarrow.GeometryExtensionType" title="geoarrow.pyarrow.GeometryExtensionType"><code class="xref py py-class docutils literal notranslate"><span class="pre">geoarrow.pyarrow.GeometryExtensionType</span></code></a> (e.g., to query the
+<code class="docutils literal notranslate"><span class="pre">crs</span></code> or <code class="docutils literal notranslate"><span class="pre">dimensions</span></code>).</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="geoarrow.pandas.GeoArrowExtensionDtype.construct_array_type">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">construct_array_type</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pandas.GeoArrowExtensionDtype.construct_array_type" title="Link to this definition">#</a></dt>
+<dd><p>Return the array type associated with this dtype.</p>
+<section id="returns">
+<h2>Returns<a class="headerlink" href="#returns" title="Link to this heading">#</a></h2>
+<p>type</p>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geoarrow.pandas.GeoArrowExtensionDtype.construct_from_string">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">construct_from_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pandas.GeoArrowExtensionDtype.construct_from_string" title="Link to this definition">#</a></dt>
+<dd><p>Construct this type from a string.</p>
+<p>This is useful mainly for data types that accept parameters.
+For example, a period dtype accepts a frequency parameter that
+can be set as <code class="docutils literal notranslate"><span class="pre">period[h]</span></code> (where H means hourly frequency).</p>
+<p>By default, in the abstract class, just the name of the type is
+expected. But subclasses can overwrite this method to accept
+parameters.</p>
+<section id="parameters">
+<h2>Parameters<a class="headerlink" href="#parameters" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>string<span class="classifier">str</span></dt><dd><p>The name of the type, for example <code class="docutils literal notranslate"><span class="pre">category</span></code>.</p>
+</dd>
+</dl>
+</section>
+<section id="id1">
+<h2>Returns<a class="headerlink" href="#id1" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>ExtensionDtype</dt><dd><p>Instance of the dtype.</p>
+</dd>
+</dl>
+</section>
+<section id="raises">
+<h2>Raises<a class="headerlink" href="#raises" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>TypeError</dt><dd><p>If a class cannot be constructed from this ‘string’.</p>
+</dd>
+</dl>
+</section>
+<section id="id2">
+<h2>Examples<a class="headerlink" href="#id2" title="Link to this heading">#</a></h2>
+<p>For extension dtypes with arguments the following may be an
+adequate implementation.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nd">@classmethod</span>
+<span class="gp">... </span><span class="k">def</span><span class="w"> </span><span class="nf">construct_from_string</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">string</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="n">pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;^my_type\[(?P&lt;arg_name&gt;.+)\]$&quot;</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">match</span> <span class="o">=</span> <span class="n">pattern</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">string</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="k">if</span> <span class="n">match</span><span class="p">:</span>
+<span class="gp">... </span>        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="o">**</span><span class="n">match</span><span class="o">.</span><span class="n">groupdict</span><span class="p">())</span>
+<span class="gp">... </span>    <span class="k">else</span><span class="p">:</span>
+<span class="gp">... </span>        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+<span class="gp">... </span>            <span class="sa">f</span><span class="s2">&quot;Cannot construct a &#39;</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&#39; from &#39;</span><span class="si">{</span><span class="n">string</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+<span class="gp">... </span>        <span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="geoarrow.pandas.GeoArrowExtensionDtype.na_value">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">na_value</span></span><a class="headerlink" href="#geoarrow.pandas.GeoArrowExtensionDtype.na_value" title="Link to this definition">#</a></dt>
+<dd><p>Default NA value to use for this type.</p>
+<p>This is used in e.g. ExtensionArray.take. This should be the
+user-facing “boxed” version of the NA value, not the physical NA value
+for storage.  e.g. for JSONArray, this is an empty dictionary.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="geoarrow.pandas.GeoArrowExtensionDtype.name">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#geoarrow.pandas.GeoArrowExtensionDtype.name" title="Link to this definition">#</a></dt>
+<dd><p>A string identifying the data type.</p>
+<p>Will be used for display in, e.g. <code class="docutils literal notranslate"><span class="pre">Series.dtype</span></code></p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="geoarrow.pandas.GeoArrowExtensionDtype.type">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">type</span></span><a class="headerlink" href="#geoarrow.pandas.GeoArrowExtensionDtype.type" title="Link to this definition">#</a></dt>
+<dd><p>The scalar type for the array, e.g. <code class="docutils literal notranslate"><span class="pre">int</span></code></p>
+<p>It’s expected <code class="docutils literal notranslate"><span class="pre">ExtensionArray[item]</span></code> returns an instance
+of <code class="docutils literal notranslate"><span class="pre">ExtensionDtype.type</span></code> for scalar <code class="docutils literal notranslate"><span class="pre">item</span></code>, assuming
+that value is valid (not NA). NA values do not need to be
+instances of <cite>type</cite>.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="geoarrow.pandas.GeoArrowExtensionArray">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">GeoArrowExtensionArray</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pandas.GeoArrowExtensionArray" title="Link to this definition">#</a></dt>
+<dd><p>ExtensionArray implementation wrapping a geoarrow Array</p>
+<p>This ExtensionArray implementation currently wraps a <code class="docutils literal notranslate"><span class="pre">pyarrow.Array</span></code>
+or <code class="docutils literal notranslate"><span class="pre">pyarrow.ChunkedArray</span></code> with an extension type. Most users will
+not instantiate this class directly.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="geoarrow.pandas.GeoArrowExtensionArray.copy">
+<span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pandas.GeoArrowExtensionArray.copy" title="Link to this definition">#</a></dt>
+<dd><p>Return a copy of the array.</p>
+<section id="id3">
+<h2>Returns<a class="headerlink" href="#id3" title="Link to this heading">#</a></h2>
+<p>ExtensionArray</p>
+</section>
+<section id="id4">
+<h2>Examples<a class="headerlink" href="#id4" title="Link to this heading">#</a></h2>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">arr</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">arr2</span> <span class="o">=</span> <span class="n">arr</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">arr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">arr2</span>
+<span class="go">&lt;IntegerArray&gt;</span>
+<span class="go">[1, 2, 3]</span>
+<span class="go">Length: 3, dtype: Int64</span>
+</pre></div>
+</div>
+</section>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="geoarrow.pandas.GeoArrowExtensionArray.dtype">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dtype</span></span><a class="headerlink" href="#geoarrow.pandas.GeoArrowExtensionArray.dtype" title="Link to this definition">#</a></dt>
+<dd><p>An instance of ExtensionDtype.</p>
+<section id="id5">
+<h2>Examples<a class="headerlink" href="#id5" title="Link to this heading">#</a></h2>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pd</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span><span class="o">.</span><span class="n">dtype</span>
+<span class="go">Int64Dtype()</span>
+</pre></div>
+</div>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geoarrow.pandas.GeoArrowExtensionArray.isna">
+<span class="sig-name descname"><span class="pre">isna</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pandas.GeoArrowExtensionArray.isna" title="Link to this definition">#</a></dt>
+<dd><p>A 1-D array indicating if each value is missing.</p>
+<section id="id6">
+<h2>Returns<a class="headerlink" href="#id6" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>numpy.ndarray or pandas.api.extensions.ExtensionArray</dt><dd><p>In most cases, this should return a NumPy ndarray. For
+exceptional cases like <code class="docutils literal notranslate"><span class="pre">SparseArray</span></code>, where returning
+an ndarray would be expensive, an ExtensionArray may be
+returned.</p>
+</dd>
+</dl>
+</section>
+<section id="notes">
+<h2>Notes<a class="headerlink" href="#notes" title="Link to this heading">#</a></h2>
+<p>If returning an ExtensionArray, then</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">na_values._is_boolean</span></code> should be True</p></li>
+<li><p><cite>na_values</cite> should implement <code class="xref py py-func docutils literal notranslate"><span class="pre">ExtensionArray._reduce()</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">na_values.any</span></code> and <code class="docutils literal notranslate"><span class="pre">na_values.all</span></code> should be implemented</p></li>
+</ul>
+</section>
+<section id="id7">
+<h2>Examples<a class="headerlink" href="#id7" title="Link to this heading">#</a></h2>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">arr</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">arr</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span>
+<span class="go">array([False, False,  True,  True])</span>
+</pre></div>
+</div>
+</section>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="geoarrow.pandas.GeoArrowExtensionArray.nbytes">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">nbytes</span></span><a class="headerlink" href="#geoarrow.pandas.GeoArrowExtensionArray.nbytes" title="Link to this definition">#</a></dt>
+<dd><p>The number of bytes needed to store this object in memory.</p>
+<section id="id8">
+<h2>Examples<a class="headerlink" href="#id8" title="Link to this heading">#</a></h2>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pd</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span><span class="o">.</span><span class="n">nbytes</span>
+<span class="go">27</span>
+</pre></div>
+</div>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geoarrow.pandas.GeoArrowExtensionArray.take">
+<span class="sig-name descname"><span class="pre">take</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_fill</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fill_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pandas.GeoArrowExtensionArray.take" title="Link to this definition">#</a></dt>
+<dd><p>Take elements from an array.</p>
+<section id="id9">
+<h2>Parameters<a class="headerlink" href="#id9" title="Link to this heading">#</a></h2>
+<dl>
+<dt>indices<span class="classifier">sequence of int or one-dimensional np.ndarray of int</span></dt><dd><p>Indices to be taken.</p>
+</dd>
+<dt>allow_fill<span class="classifier">bool, default False</span></dt><dd><p>How to handle negative values in <cite>indices</cite>.</p>
+<ul class="simple">
+<li><p>False: negative values in <cite>indices</cite> indicate positional indices
+from the right (the default). This is similar to
+<code class="xref py py-func docutils literal notranslate"><span class="pre">numpy.take()</span></code>.</p></li>
+<li><p>True: negative values in <cite>indices</cite> indicate
+missing values. These values are set to <cite>fill_value</cite>. Any other
+other negative values raise a <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>.</p></li>
+</ul>
+</dd>
+<dt>fill_value<span class="classifier">any, optional</span></dt><dd><p>Fill value to use for NA-indices when <cite>allow_fill</cite> is True.
+This may be <code class="docutils literal notranslate"><span class="pre">None</span></code>, in which case the default NA value for
+the type, <code class="docutils literal notranslate"><span class="pre">self.dtype.na_value</span></code>, is used.</p>
+<p>For many ExtensionArrays, there will be two representations of
+<cite>fill_value</cite>: a user-facing “boxed” scalar, and a low-level
+physical NA value. <cite>fill_value</cite> should be the user-facing version,
+and the implementation should handle translating that to the
+physical version for processing the take if necessary.</p>
+</dd>
+</dl>
+</section>
+<section id="id10">
+<h2>Returns<a class="headerlink" href="#id10" title="Link to this heading">#</a></h2>
+<p>ExtensionArray</p>
+</section>
+<section id="id11">
+<h2>Raises<a class="headerlink" href="#id11" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>IndexError</dt><dd><p>When the indices are out of bounds for the array.</p>
+</dd>
+<dt>ValueError</dt><dd><p>When <cite>indices</cite> contains negative values other than <code class="docutils literal notranslate"><span class="pre">-1</span></code>
+and <cite>allow_fill</cite> is True.</p>
+</dd>
+</dl>
+</section>
+<section id="see-also">
+<h2>See Also<a class="headerlink" href="#see-also" title="Link to this heading">#</a></h2>
+<p>numpy.take : Take elements from an array along an axis.
+api.extensions.take : Take elements from an array.</p>
+</section>
+<section id="id12">
+<h2>Notes<a class="headerlink" href="#id12" title="Link to this heading">#</a></h2>
+<p>ExtensionArray.take is called by <code class="docutils literal notranslate"><span class="pre">Series.__getitem__</span></code>, <code class="docutils literal notranslate"><span class="pre">.loc</span></code>,
+<code class="docutils literal notranslate"><span class="pre">iloc</span></code>, when <cite>indices</cite> is a sequence of values. Additionally,
+it’s called by <code class="xref py py-meth docutils literal notranslate"><span class="pre">Series.reindex()</span></code>, or any other method
+that causes realignment, with a <cite>fill_value</cite>.</p>
+</section>
+<section id="id13">
+<h2>Examples<a class="headerlink" href="#id13" title="Link to this heading">#</a></h2>
+<p>Here’s an example implementation, which relies on casting the
+extension array to object dtype. This uses the helper method
+<code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.api.extensions.take()</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">take</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indices</span><span class="p">,</span> <span class="n">allow_fill</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pandas.core.algorithms</span><span class="w"> </span><span class="kn">import</span> <span class="n">take</span>
+
+    <span class="c1"># If the ExtensionArray is backed by an ndarray, then</span>
+    <span class="c1"># just pass that here instead of coercing to object.</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">allow_fill</span> <span class="ow">and</span> <span class="n">fill_value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">fill_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">na_value</span>
+
+    <span class="c1"># fill value should always be translated from the scalar</span>
+    <span class="c1"># type for the array, to the physical storage type for</span>
+    <span class="c1"># the data, before passing to take.</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">take</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">indices</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=</span><span class="n">fill_value</span><span class="p">,</span>
+                  <span class="n">allow_fill</span><span class="o">=</span><span class="n">allow_fill</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_from_sequence</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geoarrow.pandas.GeoArrowExtensionArray.to_numpy">
+<span class="sig-name descname"><span class="pre">to_numpy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">copy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">na_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pandas.GeoArrowExtensionArray.to_numpy" title="Link to this definition">#</a></dt>
+<dd><p>Convert to a NumPy ndarray.</p>
+<p>This is similar to <code class="xref py py-meth docutils literal notranslate"><span class="pre">numpy.asarray()</span></code>, but may provide additional control
+over how the conversion is done.</p>
+<section id="id14">
+<h2>Parameters<a class="headerlink" href="#id14" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>dtype<span class="classifier">str or numpy.dtype, optional</span></dt><dd><p>The dtype to pass to <code class="xref py py-meth docutils literal notranslate"><span class="pre">numpy.asarray()</span></code>.</p>
+</dd>
+<dt>copy<span class="classifier">bool, default False</span></dt><dd><p>Whether to ensure that the returned value is a not a view on
+another array. Note that <code class="docutils literal notranslate"><span class="pre">copy=False</span></code> does not <em>ensure</em> that
+<code class="docutils literal notranslate"><span class="pre">to_numpy()</span></code> is no-copy. Rather, <code class="docutils literal notranslate"><span class="pre">copy=True</span></code> ensure that
+a copy is made, even if not strictly necessary.</p>
+</dd>
+<dt>na_value<span class="classifier">Any, optional</span></dt><dd><p>The value to use for missing values. The default value depends
+on <cite>dtype</cite> and the type of the array.</p>
+</dd>
+</dl>
+</section>
+<section id="id15">
+<h2>Returns<a class="headerlink" href="#id15" title="Link to this heading">#</a></h2>
+<p>numpy.ndarray</p>
+</section>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="geoarrow.pandas.GeoArrowExtensionScalar">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">GeoArrowExtensionScalar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pandas.GeoArrowExtensionScalar" title="Link to this definition">#</a></dt>
+<dd><p>Scalar type for GeoArrowExtensionArray</p>
+<p>This is a generic Scalar implementation for a “Geometry”. It is currently implemented
+as an immutable subclass of bytes whose value is the well-known binary representation
+of the geometry.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="geoarrow.pandas.GeoArrowExtensionScalar.to_shapely">
+<span class="sig-name descname"><span class="pre">to_shapely</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pandas.GeoArrowExtensionScalar.to_shapely" title="Link to this definition">#</a></dt>
+<dd><p>The shapely representation of this feature.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="geoarrow.pandas.GeoArrowExtensionScalar.wkb">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">wkb</span></span><a class="headerlink" href="#geoarrow.pandas.GeoArrowExtensionScalar.wkb" title="Link to this definition">#</a></dt>
+<dd><p>The well-known binary representation of this feature.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="geoarrow.pandas.GeoArrowExtensionScalar.wkt">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">wkt</span></span><a class="headerlink" href="#geoarrow.pandas.GeoArrowExtensionScalar.wkt" title="Link to this definition">#</a></dt>
+<dd><p>The well-known text representation of this feature.</p>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 
 
@@ -354,6 +802,59 @@
                 <dialog id="pst-secondary-sidebar-modal"></dialog>
                 <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#examples">Examples</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pandas.GeoArrowAccessor"><code class="docutils literal notranslate"><span class="pre">GeoArrowAccessor</span></code></a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pandas.GeoArrowAccessor.as_geoarrow"><code class="docutils literal notranslate"><span class="pre">GeoArrowAccessor.as_geoarrow()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pandas.GeoArrowAccessor.as_wkb"><code class="docutils literal notranslate"><span class="pre">GeoArrowAccessor.as_wkb()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pandas.GeoArrowAccessor.as_wkt"><code class="docutils literal notranslate"><span class="pre">GeoArrowAccessor.as_wkt()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pandas.GeoArrowAccessor.bounds"><code class="docutils literal notranslate"><span class="pre">GeoArrowAccessor.bounds()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pandas.GeoArrowAccessor.format_wkb"><code class="docutils literal notranslate"><span class="pre">GeoArrowAccessor.format_wkb()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pandas.GeoArrowAccessor.format_wkt"><code class="docutils literal notranslate"><span class="pre">GeoArrowAccessor.format_wkt()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pandas.GeoArrowAccessor.parse_all"><code class="docutils literal notranslate"><span class="pre">GeoArrowAccessor.parse_all()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pandas.GeoArrowAccessor.point_coords"><code class="docutils literal notranslate"><span class="pre">GeoArrowAccessor.point_coords()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pandas.GeoArrowAccessor.to_geopandas"><code class="docutils literal notranslate"><span class="pre">GeoArrowAccessor.to_geopandas()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pandas.GeoArrowAccessor.total_bounds"><code class="docutils literal notranslate"><span class="pre">GeoArrowAccessor.total_bounds()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pandas.GeoArrowAccessor.with_coord_type"><code class="docutils literal notranslate"><span class="pre">GeoArrowAccessor.with_coord_type()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pandas.GeoArrowAccessor.with_crs"><code class="docutils literal notranslate"><span class="pre">GeoArrowAccessor.with_crs()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pandas.GeoArrowAccessor.with_dimensions"><code class="docutils literal notranslate"><span class="pre">GeoArrowAccessor.with_dimensions()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pandas.GeoArrowAccessor.with_edge_type"><code class="docutils literal notranslate"><span class="pre">GeoArrowAccessor.with_edge_type()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pandas.GeoArrowAccessor.with_geometry_type"><code class="docutils literal notranslate"><span class="pre">GeoArrowAccessor.with_geometry_type()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pandas.GeoArrowExtensionDtype"><code class="docutils literal notranslate"><span class="pre">GeoArrowExtensionDtype</span></code></a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pandas.GeoArrowExtensionDtype.construct_array_type"><code class="docutils literal notranslate"><span class="pre">GeoArrowExtensionDtype.construct_array_type()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pandas.GeoArrowExtensionDtype.construct_from_string"><code class="docutils literal notranslate"><span class="pre">GeoArrowExtensionDtype.construct_from_string()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pandas.GeoArrowExtensionDtype.na_value"><code class="docutils literal notranslate"><span class="pre">GeoArrowExtensionDtype.na_value</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pandas.GeoArrowExtensionDtype.name"><code class="docutils literal notranslate"><span class="pre">GeoArrowExtensionDtype.name</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pandas.GeoArrowExtensionDtype.type"><code class="docutils literal notranslate"><span class="pre">GeoArrowExtensionDtype.type</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pandas.GeoArrowExtensionArray"><code class="docutils literal notranslate"><span class="pre">GeoArrowExtensionArray</span></code></a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pandas.GeoArrowExtensionArray.copy"><code class="docutils literal notranslate"><span class="pre">GeoArrowExtensionArray.copy()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pandas.GeoArrowExtensionArray.dtype"><code class="docutils literal notranslate"><span class="pre">GeoArrowExtensionArray.dtype</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pandas.GeoArrowExtensionArray.isna"><code class="docutils literal notranslate"><span class="pre">GeoArrowExtensionArray.isna()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pandas.GeoArrowExtensionArray.nbytes"><code class="docutils literal notranslate"><span class="pre">GeoArrowExtensionArray.nbytes</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pandas.GeoArrowExtensionArray.take"><code class="docutils literal notranslate"><span class="pre">GeoArrowExtensionArray.take()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pandas.GeoArrowExtensionArray.to_numpy"><code class="docutils literal notranslate"><span class="pre">GeoArrowExtensionArray.to_numpy()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pandas.GeoArrowExtensionScalar"><code class="docutils literal notranslate"><span class="pre">GeoArrowExtensionScalar</span></code></a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pandas.GeoArrowExtensionScalar.to_shapely"><code class="docutils literal notranslate"><span class="pre">GeoArrowExtensionScalar.to_shapely()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pandas.GeoArrowExtensionScalar.wkb"><code class="docutils literal notranslate"><span class="pre">GeoArrowExtensionScalar.wkb</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pandas.GeoArrowExtensionScalar.wkt"><code class="docutils literal notranslate"><span class="pre">GeoArrowExtensionScalar.wkt</span></code></a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
 
   <div class="sidebar-secondary-item">
 
