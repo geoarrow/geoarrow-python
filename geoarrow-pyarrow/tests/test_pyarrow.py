@@ -150,6 +150,10 @@ def test_array_view_types():
     assert array.type == ga.wkb_view()
     assert array.type.storage_type == pa.binary_view()
 
+    schema_capsule, array_capsule = array.__arrow_c_array__()
+    rearr = pa.Array._import_from_c_capsule(schema_capsule, array_capsule)
+    rearr.validate(full=True)
+
 
 def test_array_repr():
     array = ga.array(["POINT (30 10)"])
