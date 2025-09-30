@@ -269,6 +269,9 @@ class TestGeoArrowInterface(base.BaseInterfaceTests):
     def test_view(self, data):
         pytest.skip()
 
+    def test_array_interface_copy(self, data):
+        pytest.skip()
+
 
 class TestGeoArrowParsing(base.BaseParsingTests):
     pass
