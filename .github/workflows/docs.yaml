@@ -13,14 +13,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           fetch-depth: 0
 
-      - uses: r-lib/actions/setup-pandoc@v2
+      - uses: r-lib/actions/setup-pandoc@6f6e5bc62fba3a704f74e7ad7ef7676c5c6a2590 # v2
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@7f4fc3e22c37d6ff65e88745f38bd3157c663f7c # v4
         with:
           python-version: '3.11'
           cache: 'pip'
@@ -46,14 +46,14 @@ jobs:
           sphinx-build source _build/html
 
       - name: Upload built documentation
-        uses: actions/upload-artifact@main
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # main
         with:
           name: docs
           path: docs/_build/html
 
       - name: Clone gh-pages branch
         if: success() && github.repository == 'geoarrow/geoarrow-python' && github.ref == 'refs/heads/main'
-        uses: actions/checkout@v2
+        uses: actions/checkout@ee0669bd1cc54295c223e0bb666b733df41de1c5 # v2
         with:
           ref: gh-pages
           path: pages-clone
