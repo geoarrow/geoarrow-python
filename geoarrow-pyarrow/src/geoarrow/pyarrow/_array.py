@@ -157,6 +157,13 @@ def _geobuffers(array, include_validity=True):
     """Collect the physical buffers of ``array`` in depth-first order."""
     import numpy as np
 
+    # While we may be able to be slightly smarter about not copying for slices
+    # where we can salvage pieces of the original buffer without copying, this
+    # line ensures correctness in the case of a sliced array (where buffers
+    # require taking into account the parent or multiple parents' offsets)
+    if array.offset != 0:
+        array = pa.concat_arrays([array])
+
     type_ = array.type
     buffers = array.buffers()
     out = []

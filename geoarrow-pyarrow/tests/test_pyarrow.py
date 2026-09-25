@@ -380,6 +380,27 @@ def test_linestring_array_from_geobuffers():
     _assert_geobuffers_roundtrip(arr, geobuffers)
 
 
+def test_linestring_array_geobuffers_slice():
+    arr = ga.linestring().from_geobuffers(
+        np.frombuffer(b"\x05", dtype=np.uint8),
+        np.array([0, 2, 5, 6], dtype=np.int32),
+        np.array([1.0, 2.0, 3.0, 4.0, 5.0, 6.0]),
+        np.array([11.0, 12.0, 13.0, 14.0, 15.0, 16.0]),
+    )
+    sliced = arr[1:3]
+    assert sliced.offset == 1
+    assert sliced.null_count == 1
+
+    geobuffers = sliced.geobuffers()
+    np.testing.assert_array_equal(geobuffers[0], np.array([2], dtype=np.uint8))
+    np.testing.assert_array_equal(geobuffers[1], np.array([0, 3, 4], dtype=np.int32))
+    np.testing.assert_array_equal(geobuffers[2], np.array([3.0, 4.0, 5.0, 6.0]))
+    np.testing.assert_array_equal(geobuffers[3], np.array([13.0, 14.0, 15.0, 16.0]))
+
+    roundtripped = sliced.type.from_geobuffers(*geobuffers)
+    assert roundtripped.equals(sliced)
+
+
 def test_polygon_array_from_geobuffers():
     geobuffers = (
         None,
