@@ -344,6 +344,7 @@ def _assert_geobuffers_roundtrip(arr, expected_geobuffers):
             assert actual.tobytes() == expected
         else:
             np.testing.assert_array_equal(actual, expected)
+            assert np.may_share_memory(actual, expected)
 
     roundtripped = arr.type.from_geobuffers(*actual_geobuffers)
     assert roundtripped.equals(arr)
