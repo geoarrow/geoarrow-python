@@ -1,9 +1,9 @@
 import sys
 
-import pyarrow as pa
-from geoarrow.types import box as box_spec
 from geoarrow.pyarrow._type import GeometryExtensionType
+from geoarrow.types import box as box_spec
 
+import pyarrow as pa
 
 _lazy_lib = None
 _geoarrow_c_version = None

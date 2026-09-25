@@ -1,16 +1,15 @@
-import sys
 import re
+import sys
 from math import inf
 
-import pyarrow as pa
-import numpy as np
-import pytest
-
-import geoarrow.c.lib as lib
-from geoarrow import types
 import geoarrow.pyarrow as ga
-import geoarrow.pyarrow._type as _type
-import geoarrow.pyarrow._array as _array
+import numpy as np
+import pyarrow as pa
+import pytest
+from geoarrow import types
+from geoarrow.c import lib
+from geoarrow.pyarrow import _array, _type
+from geoarrow.pyarrow._kernel import Kernel
 
 
 def test_version():
@@ -224,17 +223,17 @@ def test_scalar_repr():
 
 def test_kernel_void():
     with pytest.raises(TypeError):
-        kernel = ga.Kernel.void(pa.int32())
+        kernel = Kernel.void(pa.int32())
         kernel.push(5)
 
     array = ga.array(["POINT (30 10)"])
-    kernel = ga.Kernel.void(array.type)
+    kernel = Kernel.void(array.type)
     out = kernel.push(array)
     assert out.type == pa.null()
     assert len(out) == 1
 
     array = ga.array(["POINT (30 10)", "POINT (31 11)"])
-    kernel = ga.Kernel.void_agg(array.type)
+    kernel = Kernel.void_agg(array.type)
     assert kernel.push(array) is None
     out = kernel.finish()
     assert out.type == pa.null()
@@ -243,14 +242,14 @@ def test_kernel_void():
 
 def test_kernel_as():
     array = ga.array(["POINT (30 10)"], ga.wkt().with_crs(types.OGC_CRS84))
-    kernel = ga.Kernel.as_wkt(array.type)
+    kernel = Kernel.as_wkt(array.type)
     out = kernel.push(array)
     assert out.type.extension_name == "geoarrow.wkt"
     assert out.type.crs.to_json_dict() == types.OGC_CRS84.to_json_dict()
     assert isinstance(out, _array.GeometryExtensionArray)
 
     array = ga.array(["POINT (30 10)"], ga.wkt().with_crs(types.OGC_CRS84))
-    kernel = ga.Kernel.as_wkb(array.type)
+    kernel = Kernel.as_wkb(array.type)
     out = kernel.push(array)
     assert out.type.extension_name == "geoarrow.wkb"
     assert out.type.crs.to_json_dict() == types.OGC_CRS84.to_json_dict()
@@ -261,7 +260,7 @@ def test_kernel_as():
         assert out[0].as_py() == wkb_item
 
     array = ga.array(["POINT (30 10)"], ga.wkt().with_crs(types.OGC_CRS84))
-    kernel = ga.Kernel.as_geoarrow(array.type, 1)
+    kernel = Kernel.as_geoarrow(array.type, 1)
     out = kernel.push(array)
     assert out.type.extension_name == "geoarrow.point"
     assert out.type.crs.to_json_dict() == types.OGC_CRS84.to_json_dict()
@@ -270,7 +269,7 @@ def test_kernel_as():
 
 def test_kernel_format():
     array = ga.array(["POINT (30.12345 10.12345)"])
-    kernel = ga.Kernel.format_wkt(array.type, precision=3, max_element_size_bytes=15)
+    kernel = Kernel.format_wkt(array.type, precision=3, max_element_size_bytes=15)
 
     out = kernel.push(array)
     assert out.type == pa.string()
@@ -279,7 +278,7 @@ def test_kernel_format():
 
 def test_kernel_unique_geometry_types():
     array = ga.array(["POINT (0 1)", "POINT (30 10)", "LINESTRING Z (0 1 2, 3 4 5)"])
-    kernel = ga.Kernel.unique_geometry_types_agg(array.type)
+    kernel = Kernel.unique_geometry_types_agg(array.type)
     kernel.push(array)
     out = kernel.finish()
 
@@ -290,7 +289,7 @@ def test_kernel_unique_geometry_types():
 
 def test_kernel_box():
     array = ga.array(["POINT (0 1)", "POINT (30 10)", "LINESTRING EMPTY"])
-    kernel = ga.Kernel.box(array.type)
+    kernel = Kernel.box(array.type)
     out = kernel.push(array)
 
     assert out[0].as_py() == {"xmin": 0, "xmax": 0, "ymin": 1, "ymax": 1}
@@ -300,7 +299,7 @@ def test_kernel_box():
 
 def test_kernel_box_agg():
     array = ga.array(["POINT (0 1)", "POINT (30 10)", "LINESTRING EMPTY"])
-    kernel = ga.Kernel.box_agg(array.type)
+    kernel = Kernel.box_agg(array.type)
     kernel.push(array)
     out = kernel.finish()
 
@@ -309,14 +308,14 @@ def test_kernel_box_agg():
 
 def test_kernel_visit_void():
     array = ga.array(["POINT (30 10)"], ga.wkt())
-    kernel = ga.Kernel.visit_void_agg(array.type)
+    kernel = Kernel.visit_void_agg(array.type)
     assert kernel.push(array) is None
     out = kernel.finish()
     assert out.type == pa.null()
     assert len(out) == 1
 
     array = ga.array(["POINT (30 10)", "NOT VALID WKT AT ALL"], ga.wkt())
-    kernel = ga.Kernel.visit_void_agg(array.type)
+    kernel = Kernel.visit_void_agg(array.type)
     with pytest.raises(lib.GeoArrowCException):
         kernel.push(array)
     out = kernel.finish()

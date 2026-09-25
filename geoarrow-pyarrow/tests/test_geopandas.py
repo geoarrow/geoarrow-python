@@ -1,8 +1,7 @@
-import pytest
-import pyarrow as pa
-from geoarrow import types
 import geoarrow.pyarrow as ga
-
+import pyarrow as pa
+import pytest
+from geoarrow import types
 
 geopandas = pytest.importorskip("geopandas")
 

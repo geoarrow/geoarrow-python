@@ -9,11 +9,11 @@ testing and documenting the GeoArrow format and encodings.
 import json
 
 import geoarrow.pyarrow as _ga
+from geoarrow.pyarrow import _compute, _type
+
 import pyarrow as _pa
 import pyarrow.parquet as _pq
 import pyarrow.types as _types
-from geoarrow.pyarrow import _type
-from geoarrow.pyarrow import _compute
 
 
 def read_pyogrio_table(*args, **kwargs):

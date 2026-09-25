@@ -1,13 +1,7 @@
-from copy import deepcopy
 import json
-from typing import Union, Mapping, Optional
-
-try:
-    from typing import Protocol
-except ImportError:
-
-    class Protocol:
-        pass
+from collections.abc import Mapping
+from copy import deepcopy
+from typing import Optional, Protocol, Union
 
 
 class Crs(Protocol):

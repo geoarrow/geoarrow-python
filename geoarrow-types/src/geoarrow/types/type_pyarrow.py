@@ -1,17 +1,16 @@
 from contextlib import contextmanager
 from typing import Optional
 
-from geoarrow.types.type_spec import TypeSpec, type_spec
-from geoarrow.types.crs import Crs
+import pyarrow as pa
 from geoarrow.types.constants import (
+    CoordType,
+    Dimensions,
+    EdgeType,
     Encoding,
     GeometryType,
-    Dimensions,
-    CoordType,
-    EdgeType,
 )
-
-import pyarrow as pa
+from geoarrow.types.crs import Crs
+from geoarrow.types.type_spec import TypeSpec, type_spec
 from pyarrow import types as pa_types
 
 
@@ -425,8 +424,6 @@ def extension_types_registered() -> bool:
     Returns ``True`` if the GeoArrow extension types were registered by
     this module or ``False`` otherwise.
     """
-    global _extension_types_registered
-
     return _extension_types_registered
 
 
@@ -925,8 +922,6 @@ def _generate_union_type_id_mapping():
 
 
 def _add_union_types_to_native_storage_types():
-    global _NATIVE_STORAGE_TYPES
-
     for coord_type in ALL_COORD_TYPES:
         for dimension in ALL_DIMENSIONS:
             _NATIVE_STORAGE_TYPES[
@@ -970,7 +965,7 @@ def _spec_short_repr(spec, ext_name):
         type_prefix = ""
 
     if spec.crs is not None:
-        crs = f" <{repr(spec.crs)}>"
+        crs = f" <{spec.crs!r}>"
     else:
         crs = ""
 

@@ -1,9 +1,11 @@
 import re as _re
-import pandas as _pd
-import pyarrow as _pa
-import numpy as _np
-from geoarrow.types import TypeSpec, type_spec, Encoding
+
 import geoarrow.pyarrow as _ga
+import numpy as _np
+import pyarrow as _pa
+from geoarrow.types import Encoding, TypeSpec, type_spec
+
+import pandas as _pd
 
 
 class GeoArrowExtensionScalar(bytes):
@@ -79,6 +81,10 @@ class GeoArrowExtensionArray(_pd.api.extensions.ExtensionArray):
     not instantiate this class directly.
     """
 
+    # Added to pandas' ExtensionArray base class in pandas 3.0. Defining it
+    # here keeps the behavior consistent when using older pandas versions.
+    _readonly = False
+
     def __init__(self, obj, type=None):
         if type is not None:
             self._dtype = GeoArrowExtensionDtype(type)
@@ -105,10 +111,12 @@ class GeoArrowExtensionArray(_pd.api.extensions.ExtensionArray):
             else:
                 return None
         elif isinstance(item, slice):
-            return GeoArrowExtensionArray(self._data[item])
-        elif isinstance(item, list):
-            return self.take(item)
-        elif hasattr(item, "dtype") and item.dtype.kind == "i":
+            result = GeoArrowExtensionArray(self._data[item])
+            result._readonly = self._readonly
+            return result
+        elif (
+            isinstance(item, list) or hasattr(item, "dtype") and item.dtype.kind == "i"
+        ):
             return self.take(item)
         elif hasattr(item, "dtype") and item.dtype.kind == "b":
             if len(item) != len(self):
@@ -126,6 +134,32 @@ class GeoArrowExtensionArray(_pd.api.extensions.ExtensionArray):
             raise IndexError(
                 "only integers, slices (`:`), ellipsis (`...`), numpy.newaxis (`None`) and integer or boolean arrays are valid indices"
             )
+
+    def __setitem__(self, key, value):
+        if self._readonly:
+            raise ValueError("Cannot modify read-only array")
+
+        values = list(self)
+        indices = _np.arange(len(self))[key]
+
+        if _np.isscalar(indices):
+            values[int(indices)] = value
+        else:
+            indices = indices.tolist()
+            if _pd.api.types.is_scalar(value):
+                for index in indices:
+                    values[index] = value
+            else:
+                replacements = list(value)
+                if len(replacements) != len(indices):
+                    raise ValueError(
+                        "Length of values does not match length of indexer"
+                    )
+                for index, replacement in zip(indices, replacements):
+                    values[index] = replacement
+
+        replacement = self._from_sequence(values, dtype=self.dtype)
+        self._data = replacement._data
 
     def __contains__(self, item: object):
         for scalar in self:
@@ -362,7 +396,7 @@ class GeoArrowExtensionDtype(_pd.api.extensions.ExtensionDtype):
             ) from e
 
     def __repr__(self):
-        return f"{type(self).__name__}({repr(self._parent)})"
+        return f"{type(self).__name__}({self._parent!r})"
 
     def __str__(self):
         ext_name = self._parent.extension_name

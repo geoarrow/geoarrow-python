@@ -1,12 +1,11 @@
 from tempfile import TemporaryDirectory
 
+import geoarrow.pyarrow as ga
+import geoarrow.pyarrow.dataset as gads
 import pyarrow as pa
 import pyarrow.dataset as ds
 import pyarrow.parquet as pq
 import pytest
-
-import geoarrow.pyarrow as ga
-import geoarrow.pyarrow.dataset as gads
 
 
 def test_geodataset_column_name_guessing():
@@ -35,7 +34,7 @@ def test_geodataset_column_type_guessing():
     with pytest.raises(TypeError):
         table = pa.table([[123]], ["geometry"])
         geods = gads.dataset(table, geometry_columns=["geometry"])
-        geods.geometry_types
+        _ = geods.geometry_types
 
 
 def test_geodataset_in_memory():

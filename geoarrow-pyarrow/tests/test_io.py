@@ -1,13 +1,13 @@
-import pytest
-import tempfile
-import os
 import json
+import os
+import tempfile
 
-import pyarrow as pa
-from pyarrow import parquet
-from geoarrow import types
 import geoarrow.pyarrow as ga
+import pyarrow as pa
+import pytest
+from geoarrow import types
 from geoarrow.pyarrow import io
+from pyarrow import parquet
 
 
 def test_readpyogrio_table_gpkg():
@@ -46,7 +46,7 @@ def test_write_geoparquet_table_default():
         io.write_geoparquet_table(tab, temp_pq, geometry_encoding=None)
         tab2 = parquet.read_table(temp_pq)
         assert b"geo" in tab2.schema.metadata
-        ga.as_wkt(ga.point().wrap_array(tab2["geometry"])).to_pylist() == [
+        assert ga.as_wkt(ga.point().wrap_array(tab2["geometry"])).to_pylist() == [
             "POINT (0 1)"
         ]
 
@@ -75,7 +75,7 @@ def test_write_geoparquet_table_geoarrow():
         meta = json.loads(tab2.schema.metadata[b"geo"])
         assert meta["version"] == "1.1.0"
         assert meta["columns"]["geometry"]["encoding"] == "point"
-        ga.as_wkt(ga.point().wrap_array(tab2["geometry"])).to_pylist() == [
+        assert ga.as_wkt(ga.point().wrap_array(tab2["geometry"])).to_pylist() == [
             "POINT (0 1)"
         ]
 
@@ -107,7 +107,7 @@ def test_read_geoparquet_table_geoarrow():
             tab, temp_pq, geometry_encoding=io.geoparquet_encoding_geoarrow()
         )
         tab2 = io.read_geoparquet_table(temp_pq)
-        tab2["geometry"].type == ga.point()
+        assert tab2["geometry"].type == ga.point()
 
 
 def test_geoparquet_column_spec_from_type_geom_type():

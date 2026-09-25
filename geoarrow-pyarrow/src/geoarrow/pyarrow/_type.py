@@ -1,19 +1,20 @@
-from typing import Iterable
-import pyarrow as pa
+from collections.abc import Iterable
 
 from geoarrow import types
 from geoarrow.types.type_pyarrow import (
     GeometryExtensionType,
-    PointType,
     LinestringType,
-    PolygonType,
-    MultiPointType,
     MultiLinestringType,
+    MultiPointType,
     MultiPolygonType,
+    PointType,
+    PolygonType,
     WkbType,
     WktType,
     extension_type,
 )
+
+import pyarrow as pa
 
 
 def wkb() -> WkbType:

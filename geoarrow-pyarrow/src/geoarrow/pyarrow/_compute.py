@@ -1,24 +1,24 @@
-import pyarrow as pa
-import pyarrow.compute as pc
-
-from geoarrow.types import (
-    type_spec,
-    Encoding,
-    CoordType,
-    Dimensions,
-    EdgeType,
-    GeometryType,
-    TypeSpec,
-)
 from geoarrow.pyarrow import _type
 from geoarrow.pyarrow._array import array
 from geoarrow.pyarrow._kernel import Kernel, _geoarrow_c
+from geoarrow.types import (
+    CoordType,
+    Dimensions,
+    EdgeType,
+    Encoding,
+    GeometryType,
+    TypeSpec,
+    type_spec,
+)
+
+import pyarrow as pa
+import pyarrow.compute as pc
 
 
 def obj_as_array_or_chunked(obj_in):
-    if (
-        isinstance(obj_in, pa.Array) or isinstance(obj_in, pa.ChunkedArray)
-    ) and isinstance(obj_in.type, _type.GeometryExtensionType):
+    if (isinstance(obj_in, (pa.Array, pa.ChunkedArray))) and isinstance(
+        obj_in.type, _type.GeometryExtensionType
+    ):
         return obj_in
     else:
         return array(obj_in)
@@ -66,10 +66,8 @@ def parse_all(obj):
     obj = obj_as_array_or_chunked(obj)
 
     # Non-wkb or wkt types are a no-op here since they don't need parsing
-    if isinstance(obj.type, _type.WkbType) or isinstance(obj.type, _type.WktType):
+    if isinstance(obj.type, (_type.WkbType, _type.WktType)):
         push_all(Kernel.visit_void_agg, obj, result=False)
-
-    return None
 
 
 def unique_geometry_types(obj):
@@ -405,7 +403,7 @@ def _box_agg_point_struct(arrays):
     }
 
     # Apparently pyarrow reorders dict keys when inferring scalar types?
-    storage_type = pa.struct([(nm, pa.float64()) for nm in out_dict.keys()])
+    storage_type = pa.struct([(nm, pa.float64()) for nm in out_dict])
     storage_array = pa.array([out_dict], storage_type)
     return _type.types.box().to_pyarrow().wrap_array(storage_array)[0]
 

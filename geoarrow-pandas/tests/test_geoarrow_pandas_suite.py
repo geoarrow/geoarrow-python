@@ -1,13 +1,14 @@
-import pytest
-from pandas.tests.extension import base
-import geoarrow.pandas as gapd
-import geoarrow.pyarrow as ga
 import operator
 
+import geoarrow.pandas as gapd
+import geoarrow.pyarrow as ga
+import pandas as pd
+import pytest
 from pandas import (
     Series,
     options,
 )
+from pandas.tests.extension import base
 
 
 @pytest.fixture
@@ -24,7 +25,9 @@ def data():
     * data[0] and data[1] should both be non missing
     * data[0] and data[1] should not be equal
     """
-    strings = [f"POINT ({i} {i + 1})" for i in range(100)]
+    # pandas 3.0 changed the required fixture length from 100 to 10.
+    fixture_size = 10 if int(pd.__version__.split(".")[0]) >= 3 else 100
+    strings = [f"POINT ({i} {i + 1})" for i in range(fixture_size)]
     return gapd.GeoArrowExtensionArray(ga.array(strings))
 
 
@@ -207,6 +210,16 @@ def using_copy_on_write() -> bool:
     Fixture to check if Copy-on-Write is enabled.
     """
     return options.mode.copy_on_write and options.mode.data_manager == "block"
+
+
+@pytest.fixture(params=[True, False])
+def using_nan_is_na(request):
+    """Whether pandas considers NaN and NA equivalent."""
+    if int(pd.__version__.split(".")[0]) >= 3:
+        with pd.option_context("future.distinguish_nan_and_na", not request.param):
+            yield request.param
+    else:
+        yield request.param
 
 
 class TestGeoArrowDtype(base.BaseDtypeTests):
