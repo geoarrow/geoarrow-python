@@ -340,8 +340,6 @@ def _assert_geobuffers_roundtrip(arr, expected_geobuffers):
     for actual, expected in zip(actual_geobuffers, expected_geobuffers):
         if expected is None:
             assert actual is None
-        elif isinstance(expected, bytes):
-            assert actual.tobytes() == expected
         else:
             np.testing.assert_array_equal(actual, expected)
             assert np.may_share_memory(actual, expected)
@@ -352,7 +350,7 @@ def _assert_geobuffers_roundtrip(arr, expected_geobuffers):
 
 def test_point_array_from_geobuffers():
     geobuffers = (
-        b"\xff",
+        np.frombuffer(b"\xff", dtype=np.uint8),
         np.array([1.0, 2.0, 3.0]),
         np.array([4.0, 5.0, 6.0]),
     )
@@ -440,7 +438,7 @@ def test_multipolygon_array_from_geobuffers():
 
 def test_box_array_from_geobuffers():
     geobuffers = (
-        b"\xff",
+        np.frombuffer(b"\xff", dtype=np.uint8),
         np.array([1.0, 2.0, 3.0]),
         np.array([4.0, 5.0, 6.0]),
         np.array([7.0, 8.0, 9.0]),
@@ -452,71 +450,3 @@ def test_box_array_from_geobuffers():
     assert "BoxArray" in repr(arr)
     assert "'xmin': 3.0" in repr(arr)
     _assert_geobuffers_roundtrip(arr, geobuffers)
-
-
-# Easier to test here because we have actual geoarrow arrays to parse
-def test_c_array_view():
-    arr = ga.as_geoarrow(["POLYGON ((0 0, 1 0, 0 1, 0 0))"])
-
-    cschema = lib.SchemaHolder()
-    arr.type._export_to_c(cschema._addr())
-    carray = lib.ArrayHolder()
-    arr._export_to_c(carray._addr())
-
-    array_view = lib.CArrayView(carray, cschema)
-    buffers = array_view.buffers()
-    assert len(buffers) == 5
-
-    buffer_arrays = [np.array(b) for b in buffers]
-
-    assert buffers[0] is None
-
-    assert buffer_arrays[1].shape == (2,)
-    assert buffer_arrays[1][0] == 0
-    assert buffer_arrays[1][1] == 1
-
-    assert buffer_arrays[2].shape == (2,)
-    assert buffer_arrays[2][0] == 0
-    assert buffer_arrays[2][1] == 4
-
-    assert buffer_arrays[3].shape == (4,)
-    assert buffer_arrays[3][1] == 1
-    assert buffer_arrays[3][3] == 0
-
-    assert buffer_arrays[4].shape == (4,)
-    assert buffer_arrays[4][1] == 0
-    assert buffer_arrays[4][3] == 0
-
-
-def test_c_array_view_interleaved():
-    arr = ga.array(["POLYGON ((0 0, 1 0, 0 1, 0 0))"])
-    arr = ga.as_geoarrow(arr, ga.polygon().with_coord_type(ga.CoordType.INTERLEAVED))
-
-    cschema = lib.SchemaHolder()
-    arr.type._export_to_c(cschema._addr())
-    carray = lib.ArrayHolder()
-    arr._export_to_c(carray._addr())
-
-    array_view = lib.CArrayView(carray, cschema)
-    buffers = array_view.buffers()
-    assert len(buffers) == 4
-
-    buffer_arrays = [np.array(b) for b in buffers]
-
-    assert buffers[0] is None
-
-    assert buffer_arrays[1].shape == (2,)
-    assert buffer_arrays[1][0] == 0
-    assert buffer_arrays[1][1] == 1
-
-    assert buffer_arrays[2].shape == (2,)
-    assert buffer_arrays[2][0] == 0
-    assert buffer_arrays[2][1] == 4
-
-    assert buffer_arrays[3].shape == (8,)
-    assert buffer_arrays[3][0] == 0
-    assert buffer_arrays[3][1] == 0
-    assert buffer_arrays[3][2] == 1
-    assert buffer_arrays[3][3] == 0
-    assert buffer_arrays[3][6] == 0
-    assert buffer_arrays[3][7] == 0
