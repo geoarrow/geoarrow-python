@@ -29,13 +29,14 @@ class GeometryExtensionScalar(pa.ExtensionScalar):
             kernel = Kernel.format_wkt(self.type, max_element_size_bytes=max_width)
             array_formatted = kernel.push(self._array1())
             string_formatted = array_formatted[0].as_py()
-        except Exception:
+        # Keep repr() usable for any failure in PyArrow or the native formatter.
+        except Exception:  # noqa: BLE001
             string_formatted = "<value failed to parse>"
 
         if len(string_formatted) >= max_width:
             string_formatted = string_formatted[: (max_width - 3)] + "..."
 
-        return f"{type(self).__name__}:{repr(self.type)}\n<{string_formatted}>"
+        return f"{type(self).__name__}:{self.type!r}\n<{string_formatted}>"
 
     def _array1(self):
         return self.type.wrap_array(pa.array([self.value]))
@@ -106,19 +107,19 @@ class BoxScalar(GeometryExtensionScalar):
 
     @property
     def zmin(self) -> Optional[float]:
-        return self.bounds["zmin"] if "zmin" in self.bounds else None
+        return self.bounds.get("zmin", None)
 
     @property
     def zmax(self) -> Optional[float]:
-        return self.bounds["zmax"] if "zmax" in self.bounds else None
+        return self.bounds.get("zmax", None)
 
     @property
     def mmin(self) -> Optional[float]:
-        return self.bounds["mmin"] if "mmin" in self.bounds else None
+        return self.bounds.get("mmin", None)
 
     @property
     def mmax(self) -> Optional[float]:
-        return self.bounds["mmax"] if "mmax" in self.bounds else None
+        return self.bounds.get("mmax", None)
 
     def __repr__(self) -> str:
         return f"BoxScalar({self.bounds})"

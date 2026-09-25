@@ -124,12 +124,15 @@ __all__ = [
 
 try:
     register_extension_types()
-except Exception as e:
+except RuntimeError as exc:
     import warnings
 
     warnings.warn(
         "Failed to register one or more extension types.\n"
-        "If this warning appears from pytest, you may have to re-run with --import-mode=importlib.\n"
-        "You may also be able to run `unregister_extension_types()` and `register_extension_types()`.\n"
-        f"The original error was {e}"
+        "If this warning appears from pytest, re-run with --import-mode=importlib.\n"
+        "You may also try `unregister_extension_types()` followed by "
+        "`register_extension_types()`.\n"
+        f"The original error was: {exc}",
+        RuntimeWarning,
+        stacklevel=2,
     )

@@ -1,13 +1,13 @@
-import pyarrow as pa
-
 from geoarrow.pyarrow._kernel import Kernel, _geoarrow_c
 from geoarrow.pyarrow._type import (
     GeometryExtensionType,
-    wkb,
-    wkt,
     large_wkb,
     large_wkt,
+    wkb,
+    wkt,
 )
+
+import pyarrow as pa
 
 
 class GeometryExtensionArray(pa.ExtensionArray):
@@ -54,11 +54,12 @@ class GeometryExtensionArray(pa.ExtensionArray):
             kernel = Kernel.format_wkt(self.type, max_element_size_bytes=max_width)
             head = kernel.push(head)
             tail = kernel.push(tail)
-        except Exception as e:
-            err = f"* 1 or more display values failed to parse\n* {str(e)}"
+        # Keep repr() usable for any failure in PyArrow or the native formatter.
+        except Exception as exc:  # noqa: BLE001
+            err = f"* 1 or more display values failed to parse\n* {exc}"
             type_name = type(self).__name__
             super_repr = super().__repr__()
-            return f"{type_name}:{repr(self.type)}[{len(self)}]\n{err}\n{super_repr}"
+            return f"{type_name}:{self.type!r}[{len(self)}]\n{err}\n{super_repr}"
 
         head_str = [f"<{item.as_py()}>" for item in head]
         tail_str = [f"<{item.as_py()}>" for item in tail]
@@ -74,14 +75,14 @@ class GeometryExtensionArray(pa.ExtensionArray):
         tail_str = "\n".join(tail_str)
         items_str = f"{head_str}\n{mid}\n{tail_str}"
 
-        return f"{type_name}:{repr(self.type)}[{len(self)}]\n{items_str}".strip()
+        return f"{type_name}:{self.type!r}[{len(self)}]\n{items_str}".strip()
 
 
 class BoxArray(GeometryExtensionArray):
     def __repr__(self):
         type_name = type(self).__name__
         items_str = "\n".join(repr(item.bounds) for item in self)
-        return f"{type_name}:{repr(self.type)}[{len(self)}]\n{items_str}".strip()
+        return f"{type_name}:{self.type!r}[{len(self)}]\n{items_str}".strip()
 
 
 def array_cls_from_name(name):
@@ -124,7 +125,7 @@ def array(obj, type_=None, *args, **kwargs) -> GeometryExtensionArray:
         obj = obj.to_wkb(flavor="iso")
 
     # Convert obj to array if it isn't already one
-    if isinstance(obj, pa.Array) or isinstance(obj, pa.ChunkedArray):
+    if isinstance(obj, (pa.Array, pa.ChunkedArray)):
         arr = obj
     else:
         arr = pa.array(obj, *args, **kwargs)

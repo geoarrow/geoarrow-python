@@ -1,14 +1,12 @@
 import math
 
-import pyarrow as pa
-import numpy as np
-import pytest
-
-from geoarrow import types
 import geoarrow.pyarrow as ga
-import geoarrow.pyarrow._kernel as _kernel
-import geoarrow.pyarrow._compute as _compute
-import geoarrow.c.lib as lib
+import numpy as np
+import pyarrow as pa
+import pytest
+from geoarrow import types
+from geoarrow.c import lib
+from geoarrow.pyarrow import _compute, _kernel
 
 
 def test_as_array_or_chunked():
