@@ -53,9 +53,7 @@ class TypeSpecEnum(Enum):
     def _common2(cls, lhs, rhs):
         if lhs == cls.UNSPECIFIED:
             return rhs
-        elif rhs == cls.UNSPECIFIED:
-            return lhs
-        elif lhs == rhs:
+        elif rhs == cls.UNSPECIFIED or lhs == rhs:
             return lhs
         elif (lhs, rhs) in _VALUE_COMMON_HELPER:
             return _VALUE_COMMON_HELPER[(lhs, rhs)]

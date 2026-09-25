@@ -1,15 +1,15 @@
 import json
 from typing import NamedTuple, Optional
 
+from geoarrow.types import crs
 from geoarrow.types.constants import (
-    Encoding,
-    GeometryType,
+    CoordType,
     Dimensions,
     EdgeType,
-    CoordType,
+    Encoding,
+    GeometryType,
 )
 from geoarrow.types.crs import Crs
-from geoarrow.types import crs
 
 _UNSPECIFIED_CRS_ARG = crs.UnspecifiedCrs()
 
