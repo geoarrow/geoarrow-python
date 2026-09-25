@@ -180,9 +180,9 @@ def _geobuffers(array, include_validity=True):
         out.append(_buffer_to_numpy(buffers[1], np.int64))
         out.append(_buffer_to_numpy(buffers[2], np.uint8))
     elif pa_types.is_float32(type_):
-        out.append(_buffer_to_numpy(buffers[1], np.float64))
-    elif pa_types.is_float64(type_):
         out.append(_buffer_to_numpy(buffers[1], np.float32))
+    elif pa_types.is_float64(type_):
+        out.append(_buffer_to_numpy(buffers[1], np.float64))
     else:
         raise TypeError(f"Unsupported GeoArrow storage type for geobuffers(): {type_}")
 

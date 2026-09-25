@@ -333,72 +333,97 @@ def test_array_geobuffers():
     np.testing.assert_array_equal(bufs[4], np.array([0.0, 0.0, 1.0, 0.0]))
 
 
+def _assert_geobuffers_roundtrip(arr, expected_geobuffers):
+    actual_geobuffers = arr.geobuffers()
+    assert len(actual_geobuffers) == len(expected_geobuffers)
+
+    for actual, expected in zip(actual_geobuffers, expected_geobuffers):
+        if expected is None:
+            assert actual is None
+        elif isinstance(expected, bytes):
+            assert actual.tobytes() == expected
+        else:
+            np.testing.assert_array_equal(actual, expected)
+
+    roundtripped = arr.type.from_geobuffers(*actual_geobuffers)
+    assert roundtripped.equals(arr)
+
+
 def test_point_array_from_geobuffers():
-    arr = ga.point().from_geobuffers(
+    geobuffers = (
         b"\xff",
         np.array([1.0, 2.0, 3.0]),
         np.array([4.0, 5.0, 6.0]),
     )
+    arr = ga.point().from_geobuffers(*geobuffers)
     assert len(arr) == 3
     assert ga.as_wkt(arr)[2].as_py() == "POINT (3 6)"
+    _assert_geobuffers_roundtrip(arr, geobuffers)
 
-    arr = (
-        ga.point()
-        .with_coord_type(ga.CoordType.INTERLEAVED)
-        .from_geobuffers(None, np.array([1.0, 2.0, 3.0, 4.0, 5.0, 6.0]))
-    )
+    geobuffers = (None, np.array([1.0, 2.0, 3.0, 4.0, 5.0, 6.0]))
+    type_ = ga.point().with_coord_type(ga.CoordType.INTERLEAVED)
+    arr = type_.from_geobuffers(*geobuffers)
     assert len(arr) == 3
     assert ga.as_wkt(arr)[2].as_py() == "POINT (5 6)"
+    _assert_geobuffers_roundtrip(arr, geobuffers)
 
 
 def test_linestring_array_from_geobuffers():
-    arr = ga.linestring().from_geobuffers(
+    geobuffers = (
         None,
         np.array([0, 3], dtype=np.int32),
         np.array([1.0, 2.0, 3.0]),
         np.array([4.0, 5.0, 6.0]),
     )
+    arr = ga.linestring().from_geobuffers(*geobuffers)
     assert len(arr) == 1
     assert ga.as_wkt(arr)[0].as_py() == "LINESTRING (1 4, 2 5, 3 6)"
+    _assert_geobuffers_roundtrip(arr, geobuffers)
 
 
 def test_polygon_array_from_geobuffers():
-    arr = ga.polygon().from_geobuffers(
+    geobuffers = (
         None,
         np.array([0, 1], dtype=np.int32),
         np.array([0, 4], dtype=np.int32),
         np.array([1.0, 2.0, 3.0, 1.0]),
         np.array([4.0, 5.0, 6.0, 4.0]),
     )
+    arr = ga.polygon().from_geobuffers(*geobuffers)
     assert len(arr) == 1
     assert ga.as_wkt(arr)[0].as_py() == "POLYGON ((1 4, 2 5, 3 6, 1 4))"
+    _assert_geobuffers_roundtrip(arr, geobuffers)
 
 
 def test_multipoint_array_from_geobuffers():
-    arr = ga.multipoint().from_geobuffers(
+    geobuffers = (
         None,
         np.array([0, 3], dtype=np.int32),
         np.array([1.0, 2.0, 3.0]),
         np.array([4.0, 5.0, 6.0]),
     )
+    arr = ga.multipoint().from_geobuffers(*geobuffers)
     assert len(arr) == 1
     assert ga.as_wkt(arr)[0].as_py() == "MULTIPOINT (1 4, 2 5, 3 6)"
+    _assert_geobuffers_roundtrip(arr, geobuffers)
 
 
 def test_multilinestring_array_from_geobuffers():
-    arr = ga.multilinestring().from_geobuffers(
+    geobuffers = (
         None,
         np.array([0, 1], dtype=np.int32),
         np.array([0, 4], dtype=np.int32),
         np.array([1.0, 2.0, 3.0, 1.0]),
         np.array([4.0, 5.0, 6.0, 4.0]),
     )
+    arr = ga.multilinestring().from_geobuffers(*geobuffers)
     assert len(arr) == 1
     assert ga.as_wkt(arr)[0].as_py() == "MULTILINESTRING ((1 4, 2 5, 3 6, 1 4))"
+    _assert_geobuffers_roundtrip(arr, geobuffers)
 
 
 def test_multipolygon_array_from_geobuffers():
-    arr = ga.multipolygon().from_geobuffers(
+    geobuffers = (
         None,
         np.array([0, 1], dtype=np.int32),
         np.array([0, 1], dtype=np.int32),
@@ -406,26 +431,26 @@ def test_multipolygon_array_from_geobuffers():
         np.array([1.0, 2.0, 3.0, 1.0]),
         np.array([4.0, 5.0, 6.0, 4.0]),
     )
+    arr = ga.multipolygon().from_geobuffers(*geobuffers)
     assert len(arr) == 1
     assert ga.as_wkt(arr)[0].as_py() == "MULTIPOLYGON (((1 4, 2 5, 3 6, 1 4)))"
+    _assert_geobuffers_roundtrip(arr, geobuffers)
 
 
 def test_box_array_from_geobuffers():
-    arr = (
-        types.box()
-        .to_pyarrow()
-        .from_geobuffers(
-            b"\xff",
-            np.array([1.0, 2.0, 3.0]),
-            np.array([4.0, 5.0, 6.0]),
-            np.array([7.0, 8.0, 9.0]),
-            np.array([10.0, 11.0, 12.0]),
-        )
+    geobuffers = (
+        b"\xff",
+        np.array([1.0, 2.0, 3.0]),
+        np.array([4.0, 5.0, 6.0]),
+        np.array([7.0, 8.0, 9.0]),
+        np.array([10.0, 11.0, 12.0]),
     )
+    arr = types.box().to_pyarrow().from_geobuffers(*geobuffers)
     assert len(arr) == 3
     assert arr[2].bounds == {"xmin": 3.0, "ymin": 6.0, "xmax": 9.0, "ymax": 12.0}
     assert "BoxArray" in repr(arr)
     assert "'xmin': 3.0" in repr(arr)
+    _assert_geobuffers_roundtrip(arr, geobuffers)
 
 
 # Easier to test here because we have actual geoarrow arrays to parse
