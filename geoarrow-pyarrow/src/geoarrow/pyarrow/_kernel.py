@@ -1,16 +1,17 @@
 import sys
 
 from geoarrow.pyarrow._type import GeometryExtensionType
-from geoarrow.types import box as box_spec
+from geoarrow.types import CoordType, Dimensions, Encoding, GeometryType
+from geoarrow.types import wkb as wkb_spec
+from geoarrow.types import wkt as wkt_spec
 
 import pyarrow as pa
 
 _lazy_lib = None
-_geoarrow_c_version = None
 
 
 def _geoarrow_c():
-    global _lazy_lib, _geoarrow_c_version
+    global _lazy_lib
     if _lazy_lib is None:
         try:
             import geoarrow.c
@@ -19,10 +20,6 @@ def _geoarrow_c():
             raise ImportError("Requested operation requires geoarrow-c") from e
 
         _lazy_lib = geoarrow.c.lib
-        if hasattr(geoarrow.c, "__version_tuple__"):
-            _geoarrow_c_version = geoarrow.c.__version_tuple__
-        else:
-            _geoarrow_c_version = (0, 1, 0)
 
     return _lazy_lib
 
@@ -91,11 +88,11 @@ class Kernel:
 
     @staticmethod
     def as_wkt(type_in):
-        return Kernel.as_geoarrow(type_in, 100003)
+        return Kernel.as_geoarrow(type_in, wkt_spec().to_pyarrow())
 
     @staticmethod
     def as_wkb(type_in):
-        return Kernel.as_geoarrow(type_in, 100001)
+        return Kernel.as_geoarrow(type_in, wkb_spec().to_pyarrow())
 
     @staticmethod
     def format_wkt(type_in, precision=None, max_element_size_bytes=None):
@@ -107,8 +104,8 @@ class Kernel:
         )
 
     @staticmethod
-    def as_geoarrow(type_in, type_id):
-        return Kernel("as_geoarrow", type_in, type=int(type_id))
+    def as_geoarrow(type_in, type_out):
+        return Kernel("as_geoarrow", type_in, type=_type_id(type_out))
 
     @staticmethod
     def unique_geometry_types_agg(type_in):
@@ -116,19 +113,11 @@ class Kernel:
 
     @staticmethod
     def box(type_in):
-        kernel = Kernel("box", type_in)
-        if _geoarrow_c_version <= (0, 1, 3):
-            return BoxKernelCompat(kernel)
-        else:
-            return kernel
+        return Kernel("box", type_in)
 
     @staticmethod
     def box_agg(type_in):
-        kernel = Kernel("box_agg", type_in)
-        if _geoarrow_c_version <= (0, 1, 3):
-            return BoxKernelCompat(kernel)
-        else:
-            return kernel
+        return Kernel("box_agg", type_in)
 
     @staticmethod
     def _pack_options(options):
@@ -149,27 +138,56 @@ class Kernel:
         return bytes
 
 
-class BoxKernelCompat:
-    """A wrapper around the "box" kernel that works for geoarrow-c 0.1.
-    This is mostly to ease the transition for geoarrow-python CI while
-    all the packages are being updated."""
+def _type_id(type_out):
+    """Previous versions used geoarrow-c's exposed CVectorType for this; however,
+    the CVectorType has been deprecated in favour of geoarrow.types. This keeps
+    geoarrow-pyarrow working against previous and future versions of geoarrow-c
+    while freeing up geoarrow-c to remove code that was used only here."""
+    spec = type_out.spec
 
-    def __init__(self, parent: Kernel):
-        self.parent = parent
-        self.type_out = box_spec().to_pyarrow().with_crs(parent._type_in.crs)
+    if spec.encoding in _SERIALIZED_TYPE_IDS:
+        return _SERIALIZED_TYPE_IDS[spec.encoding]
 
-    def push(self, arr):
-        parent_result = self.parent.push(arr)
+    if spec.encoding != Encoding.GEOARROW:
+        raise ValueError(f"Unsupported GeoArrow encoding: {spec.encoding}")
+
+    try:
         return (
-            None if parent_result is None else self._old_box_to_new_box(parent_result)
+            _GEOMETRY_TYPE_IDS[spec.geometry_type]
+            + _DIMENSION_TYPE_ID_OFFSETS[spec.dimensions]
+            + _COORD_TYPE_ID_OFFSETS[spec.coord_type]
         )
+    except KeyError as e:
+        raise ValueError(f"Unsupported GeoArrow type: {spec}") from e
 
-    def finish(self):
-        return self._old_box_to_new_box(self.parent.finish())
 
-    def _old_box_to_new_box(self, array):
-        xmin, xmax, ymin, ymax = array.flatten()
-        storage = pa.StructArray.from_arrays(
-            [xmin, ymin, xmax, ymax], names=["xmin", "ymin", "xmax", "ymax"]
-        )
-        return self.type_out.wrap_array(storage)
+_SERIALIZED_TYPE_IDS = {
+    Encoding.WKB: 100001,
+    Encoding.LARGE_WKB: 100002,
+    Encoding.WKT: 100003,
+    Encoding.LARGE_WKT: 100004,
+    Encoding.WKB_VIEW: 100005,
+    Encoding.WKT_VIEW: 100006,
+}
+
+_GEOMETRY_TYPE_IDS = {
+    GeometryType.POINT: 1,
+    GeometryType.LINESTRING: 2,
+    GeometryType.POLYGON: 3,
+    GeometryType.MULTIPOINT: 4,
+    GeometryType.MULTILINESTRING: 5,
+    GeometryType.MULTIPOLYGON: 6,
+    GeometryType.BOX: 990,
+}
+
+_DIMENSION_TYPE_ID_OFFSETS = {
+    Dimensions.XY: 0,
+    Dimensions.XYZ: 1000,
+    Dimensions.XYM: 2000,
+    Dimensions.XYZM: 3000,
+}
+
+_COORD_TYPE_ID_OFFSETS = {
+    CoordType.SEPARATED: 0,
+    CoordType.INTERLEAVED: 10000,
+}

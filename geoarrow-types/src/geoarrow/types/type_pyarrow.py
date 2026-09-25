@@ -708,7 +708,9 @@ def _from_buffer_ordinate(x):
     if mv.format != "d":
         mv = mv.cast("d")
 
-    return pa.array(mv, pa.float64())
+    return pa.Array.from_buffers(
+        pa.float64(), len(mv), buffers=[None, pa.py_buffer(mv)]
+    )
 
 
 def _pybuffer_offset(x):
@@ -793,7 +795,7 @@ def _from_buffers_multipolygon(
     return pa.Array.from_buffers(
         type_,
         n_offsets - 1,
-        buffers=[validity, pa.py_buffer(ring_offsets)],
+        buffers=[validity, pa.py_buffer(polygon_offsets)],
         children=[polygons],
     )
 

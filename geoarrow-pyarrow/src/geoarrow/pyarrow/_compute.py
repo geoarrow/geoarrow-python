@@ -1,6 +1,6 @@
 from geoarrow.pyarrow import _type
 from geoarrow.pyarrow._array import array
-from geoarrow.pyarrow._kernel import Kernel, _geoarrow_c
+from geoarrow.pyarrow._kernel import Kernel
 from geoarrow.types import (
     CoordType,
     Dimensions,
@@ -215,7 +215,7 @@ def as_wkb(obj, strict_iso_wkb=False):
     obj = as_geoarrow(obj, _type.wkb())
 
     if check_wkb and strict_iso_wkb and _any_ewkb(obj):
-        return push_all(Kernel.as_geoarrow, obj, args={"type_id": 100001})
+        return push_all(Kernel.as_geoarrow, obj, args={"type_out": _type.wkb()})
     else:
         return obj
 
@@ -262,13 +262,7 @@ def as_geoarrow(obj, type=None, coord_type=None, promote_multi=False):
     if obj.type.spec == type.spec:
         return obj
 
-    lib = _geoarrow_c()
-
-    cschema = lib.SchemaHolder()
-    type._export_to_c(cschema._addr())
-    ctype = lib.CVectorType.FromExtension(cschema)
-
-    return push_all(Kernel.as_geoarrow, obj, args={"type_id": ctype.id})
+    return push_all(Kernel.as_geoarrow, obj, args={"type_out": type})
 
 
 def format_wkt(obj, precision=None, max_element_size_bytes=None):

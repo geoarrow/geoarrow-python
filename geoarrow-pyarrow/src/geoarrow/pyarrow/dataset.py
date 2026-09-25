@@ -6,9 +6,9 @@ Experimental geospatial-agumented wrapper around a ``pyarrow.dataset``.
 
 from concurrent.futures import ThreadPoolExecutor, wait
 
-from geoarrow.c.lib import CoordType
 from geoarrow.pyarrow._kernel import Kernel
 from geoarrow.pyarrow._type import GeometryExtensionType, wkb, wkt
+from geoarrow.types import CoordType
 
 import pyarrow as _pa
 import pyarrow.compute as _compute
@@ -385,7 +385,7 @@ class ParquetRowGroupGeoDataset(GeoDataset):
 
     def _build_index(self, geometry_columns, geometry_types, num_threads=None):
         can_use_statistics = [
-            type.coord_type == CoordType.SEPARATE for type in self.geometry_types
+            type.coord_type == CoordType.SEPARATED for type in self.geometry_types
         ]
 
         if not self._use_column_statistics or not any(can_use_statistics):
@@ -454,16 +454,18 @@ class ParquetRowGroupGeoDataset(GeoDataset):
                     boxes[i].append(
                         {
                             "xmin": stats_x.min,
-                            "xmax": stats_x.max,
                             "ymin": stats_y.min,
+                            "xmax": stats_x.max,
                             "ymax": stats_y.max,
                         }
                     )
 
             last_row_group = row_group
 
-        type_field_names = ["xmin", "xmax", "ymin", "ymax"]
-        type_fields = [_pa.field(name, _pa.float64()) for name in type_field_names]
+        type_field_names = ["xmin", "ymin", "xmax", "ymax"]
+        type_fields = [
+            _pa.field(name, _pa.float64(), nullable=False) for name in type_field_names
+        ]
         type = _pa.struct(type_fields)
         return [_pa.array(box, type=type) for box in boxes]
 

@@ -7,9 +7,8 @@ import numpy as np
 import pyarrow as pa
 import pytest
 from geoarrow import types
-from geoarrow.c import lib
 from geoarrow.pyarrow import _array, _type
-from geoarrow.pyarrow._kernel import Kernel
+from geoarrow.pyarrow._kernel import Kernel, _type_id
 
 
 def test_version():
@@ -260,11 +259,76 @@ def test_kernel_as():
         assert out[0].as_py() == wkb_item
 
     array = ga.array(["POINT (30 10)"], ga.wkt().with_crs(types.OGC_CRS84))
-    kernel = Kernel.as_geoarrow(array.type, 1)
+    kernel = Kernel.as_geoarrow(array.type, ga.point())
     out = kernel.push(array)
     assert out.type.extension_name == "geoarrow.point"
     assert out.type.crs.to_json_dict() == types.OGC_CRS84.to_json_dict()
     assert isinstance(out, _array.GeometryExtensionArray)
+
+
+@pytest.mark.parametrize(
+    "coord_type", [ga.CoordType.SEPARATED, ga.CoordType.INTERLEAVED]
+)
+@pytest.mark.parametrize(
+    "geometry_type",
+    [
+        ga.GeometryType.POINT,
+        ga.GeometryType.LINESTRING,
+        ga.GeometryType.POLYGON,
+        ga.GeometryType.MULTIPOINT,
+        ga.GeometryType.MULTILINESTRING,
+        ga.GeometryType.MULTIPOLYGON,
+    ],
+)
+@pytest.mark.parametrize(
+    "dimensions",
+    [
+        ga.Dimensions.XY,
+        ga.Dimensions.XYZ,
+        ga.Dimensions.XYM,
+        ga.Dimensions.XYZM,
+    ],
+)
+def test_type_id_geoarrow(coord_type, geometry_type, dimensions):
+    type_out = types.type_spec(
+        encoding=ga.Encoding.GEOARROW,
+        coord_type=coord_type,
+        geometry_type=geometry_type,
+        dimensions=dimensions,
+    ).to_pyarrow()
+
+    kernel = Kernel.as_geoarrow(ga.wkt(), type_out)
+    assert kernel._type_out == type_out
+
+
+@pytest.mark.parametrize(
+    ("type_out", "expected"),
+    [
+        (ga.wkb(), 100001),
+        (ga.large_wkb(), 100002),
+        (ga.wkt(), 100003),
+        (ga.large_wkt(), 100004),
+        (ga.wkb_view(), 100005),
+        (ga.wkt_view(), 100006),
+        (types.box().to_pyarrow(), 990),
+        (types.box(dimensions=types.Dimensions.XYZ).to_pyarrow(), 1990),
+        (types.box(dimensions=types.Dimensions.XYM).to_pyarrow(), 2990),
+        (types.box(dimensions=types.Dimensions.XYZM).to_pyarrow(), 3990),
+    ],
+)
+def test_type_id_serialized(type_out, expected):
+    import geoarrow.c
+
+    assert _type_id(type_out) == expected
+
+    # Double check against the CVectorType for versions where we
+    # can check (e.g., the time of this writing)
+    if geoarrow.c.__version_tuple__ <= (0, 3, 1):
+        cschema = geoarrow.c.lib.SchemaHolder()
+        type_out._export_to_c(cschema._addr())
+        assert (
+            _type_id(type_out) == geoarrow.c.lib.CVectorType.FromExtension(cschema).id
+        )
 
 
 def test_kernel_format():
@@ -307,6 +371,8 @@ def test_kernel_box_agg():
 
 
 def test_kernel_visit_void():
+    from geoarrow.c import lib
+
     array = ga.array(["POINT (30 10)"], ga.wkt())
     kernel = Kernel.visit_void_agg(array.type)
     assert kernel.push(array) is None
@@ -333,72 +399,117 @@ def test_array_geobuffers():
     np.testing.assert_array_equal(bufs[4], np.array([0.0, 0.0, 1.0, 0.0]))
 
 
+def _assert_geobuffers_roundtrip(arr, expected_geobuffers):
+    actual_geobuffers = arr.geobuffers()
+    assert len(actual_geobuffers) == len(expected_geobuffers)
+
+    for actual, expected in zip(actual_geobuffers, expected_geobuffers):
+        if expected is None:
+            assert actual is None
+        else:
+            np.testing.assert_array_equal(actual, expected)
+            assert np.may_share_memory(actual, expected)
+
+    roundtripped = arr.type.from_geobuffers(*actual_geobuffers)
+    assert roundtripped.equals(arr)
+
+
 def test_point_array_from_geobuffers():
-    arr = ga.point().from_geobuffers(
-        b"\xff",
+    geobuffers = (
+        np.frombuffer(b"\xff", dtype=np.uint8),
         np.array([1.0, 2.0, 3.0]),
         np.array([4.0, 5.0, 6.0]),
     )
+    arr = ga.point().from_geobuffers(*geobuffers)
     assert len(arr) == 3
     assert ga.as_wkt(arr)[2].as_py() == "POINT (3 6)"
+    _assert_geobuffers_roundtrip(arr, geobuffers)
 
-    arr = (
-        ga.point()
-        .with_coord_type(ga.CoordType.INTERLEAVED)
-        .from_geobuffers(None, np.array([1.0, 2.0, 3.0, 4.0, 5.0, 6.0]))
-    )
+    geobuffers = (None, np.array([1.0, 2.0, 3.0, 4.0, 5.0, 6.0]))
+    type_ = ga.point().with_coord_type(ga.CoordType.INTERLEAVED)
+    arr = type_.from_geobuffers(*geobuffers)
     assert len(arr) == 3
     assert ga.as_wkt(arr)[2].as_py() == "POINT (5 6)"
+    _assert_geobuffers_roundtrip(arr, geobuffers)
 
 
 def test_linestring_array_from_geobuffers():
-    arr = ga.linestring().from_geobuffers(
+    geobuffers = (
         None,
         np.array([0, 3], dtype=np.int32),
         np.array([1.0, 2.0, 3.0]),
         np.array([4.0, 5.0, 6.0]),
     )
+    arr = ga.linestring().from_geobuffers(*geobuffers)
     assert len(arr) == 1
     assert ga.as_wkt(arr)[0].as_py() == "LINESTRING (1 4, 2 5, 3 6)"
+    _assert_geobuffers_roundtrip(arr, geobuffers)
+
+
+def test_linestring_array_geobuffers_slice():
+    arr = ga.linestring().from_geobuffers(
+        np.frombuffer(b"\x05", dtype=np.uint8),
+        np.array([0, 2, 5, 6], dtype=np.int32),
+        np.array([1.0, 2.0, 3.0, 4.0, 5.0, 6.0]),
+        np.array([11.0, 12.0, 13.0, 14.0, 15.0, 16.0]),
+    )
+    sliced = arr[1:3]
+    assert sliced.offset == 1
+    assert sliced.null_count == 1
+
+    geobuffers = sliced.geobuffers()
+    np.testing.assert_array_equal(geobuffers[0], np.array([2], dtype=np.uint8))
+    np.testing.assert_array_equal(geobuffers[1], np.array([0, 3, 4], dtype=np.int32))
+    np.testing.assert_array_equal(geobuffers[2], np.array([3.0, 4.0, 5.0, 6.0]))
+    np.testing.assert_array_equal(geobuffers[3], np.array([13.0, 14.0, 15.0, 16.0]))
+
+    roundtripped = sliced.type.from_geobuffers(*geobuffers)
+    assert roundtripped.equals(sliced)
 
 
 def test_polygon_array_from_geobuffers():
-    arr = ga.polygon().from_geobuffers(
+    geobuffers = (
         None,
         np.array([0, 1], dtype=np.int32),
         np.array([0, 4], dtype=np.int32),
         np.array([1.0, 2.0, 3.0, 1.0]),
         np.array([4.0, 5.0, 6.0, 4.0]),
     )
+    arr = ga.polygon().from_geobuffers(*geobuffers)
     assert len(arr) == 1
     assert ga.as_wkt(arr)[0].as_py() == "POLYGON ((1 4, 2 5, 3 6, 1 4))"
+    _assert_geobuffers_roundtrip(arr, geobuffers)
 
 
 def test_multipoint_array_from_geobuffers():
-    arr = ga.multipoint().from_geobuffers(
+    geobuffers = (
         None,
         np.array([0, 3], dtype=np.int32),
         np.array([1.0, 2.0, 3.0]),
         np.array([4.0, 5.0, 6.0]),
     )
+    arr = ga.multipoint().from_geobuffers(*geobuffers)
     assert len(arr) == 1
     assert ga.as_wkt(arr)[0].as_py() == "MULTIPOINT (1 4, 2 5, 3 6)"
+    _assert_geobuffers_roundtrip(arr, geobuffers)
 
 
 def test_multilinestring_array_from_geobuffers():
-    arr = ga.multilinestring().from_geobuffers(
+    geobuffers = (
         None,
         np.array([0, 1], dtype=np.int32),
         np.array([0, 4], dtype=np.int32),
         np.array([1.0, 2.0, 3.0, 1.0]),
         np.array([4.0, 5.0, 6.0, 4.0]),
     )
+    arr = ga.multilinestring().from_geobuffers(*geobuffers)
     assert len(arr) == 1
     assert ga.as_wkt(arr)[0].as_py() == "MULTILINESTRING ((1 4, 2 5, 3 6, 1 4))"
+    _assert_geobuffers_roundtrip(arr, geobuffers)
 
 
 def test_multipolygon_array_from_geobuffers():
-    arr = ga.multipolygon().from_geobuffers(
+    geobuffers = (
         None,
         np.array([0, 1], dtype=np.int32),
         np.array([0, 1], dtype=np.int32),
@@ -406,91 +517,23 @@ def test_multipolygon_array_from_geobuffers():
         np.array([1.0, 2.0, 3.0, 1.0]),
         np.array([4.0, 5.0, 6.0, 4.0]),
     )
+    arr = ga.multipolygon().from_geobuffers(*geobuffers)
     assert len(arr) == 1
     assert ga.as_wkt(arr)[0].as_py() == "MULTIPOLYGON (((1 4, 2 5, 3 6, 1 4)))"
+    _assert_geobuffers_roundtrip(arr, geobuffers)
 
 
 def test_box_array_from_geobuffers():
-    arr = (
-        types.box()
-        .to_pyarrow()
-        .from_geobuffers(
-            b"\xff",
-            np.array([1.0, 2.0, 3.0]),
-            np.array([4.0, 5.0, 6.0]),
-            np.array([7.0, 8.0, 9.0]),
-            np.array([10.0, 11.0, 12.0]),
-        )
+    geobuffers = (
+        np.frombuffer(b"\xff", dtype=np.uint8),
+        np.array([1.0, 2.0, 3.0]),
+        np.array([4.0, 5.0, 6.0]),
+        np.array([7.0, 8.0, 9.0]),
+        np.array([10.0, 11.0, 12.0]),
     )
+    arr = types.box().to_pyarrow().from_geobuffers(*geobuffers)
     assert len(arr) == 3
     assert arr[2].bounds == {"xmin": 3.0, "ymin": 6.0, "xmax": 9.0, "ymax": 12.0}
     assert "BoxArray" in repr(arr)
     assert "'xmin': 3.0" in repr(arr)
-
-
-# Easier to test here because we have actual geoarrow arrays to parse
-def test_c_array_view():
-    arr = ga.as_geoarrow(["POLYGON ((0 0, 1 0, 0 1, 0 0))"])
-
-    cschema = lib.SchemaHolder()
-    arr.type._export_to_c(cschema._addr())
-    carray = lib.ArrayHolder()
-    arr._export_to_c(carray._addr())
-
-    array_view = lib.CArrayView(carray, cschema)
-    buffers = array_view.buffers()
-    assert len(buffers) == 5
-
-    buffer_arrays = [np.array(b) for b in buffers]
-
-    assert buffers[0] is None
-
-    assert buffer_arrays[1].shape == (2,)
-    assert buffer_arrays[1][0] == 0
-    assert buffer_arrays[1][1] == 1
-
-    assert buffer_arrays[2].shape == (2,)
-    assert buffer_arrays[2][0] == 0
-    assert buffer_arrays[2][1] == 4
-
-    assert buffer_arrays[3].shape == (4,)
-    assert buffer_arrays[3][1] == 1
-    assert buffer_arrays[3][3] == 0
-
-    assert buffer_arrays[4].shape == (4,)
-    assert buffer_arrays[4][1] == 0
-    assert buffer_arrays[4][3] == 0
-
-
-def test_c_array_view_interleaved():
-    arr = ga.array(["POLYGON ((0 0, 1 0, 0 1, 0 0))"])
-    arr = ga.as_geoarrow(arr, ga.polygon().with_coord_type(ga.CoordType.INTERLEAVED))
-
-    cschema = lib.SchemaHolder()
-    arr.type._export_to_c(cschema._addr())
-    carray = lib.ArrayHolder()
-    arr._export_to_c(carray._addr())
-
-    array_view = lib.CArrayView(carray, cschema)
-    buffers = array_view.buffers()
-    assert len(buffers) == 4
-
-    buffer_arrays = [np.array(b) for b in buffers]
-
-    assert buffers[0] is None
-
-    assert buffer_arrays[1].shape == (2,)
-    assert buffer_arrays[1][0] == 0
-    assert buffer_arrays[1][1] == 1
-
-    assert buffer_arrays[2].shape == (2,)
-    assert buffer_arrays[2][0] == 0
-    assert buffer_arrays[2][1] == 4
-
-    assert buffer_arrays[3].shape == (8,)
-    assert buffer_arrays[3][0] == 0
-    assert buffer_arrays[3][1] == 0
-    assert buffer_arrays[3][2] == 1
-    assert buffer_arrays[3][3] == 0
-    assert buffer_arrays[3][6] == 0
-    assert buffer_arrays[3][7] == 0
+    _assert_geobuffers_roundtrip(arr, geobuffers)
