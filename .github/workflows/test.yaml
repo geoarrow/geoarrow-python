@@ -20,12 +20,12 @@ jobs:
         python-version: ['3.9', '3.10', '3.11', '3.12', '3.13', '3.14']
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
@@ -58,19 +58,19 @@ jobs:
           pytest geoarrow-pandas/tests -v -s
 
       - name: Run doctests (geoarrow-pyarrow)
-        if: success() && matrix.python-version == '3.13'
+        if: success() && matrix.python-version == '3.14'
         run: |
           cd geoarrow-pyarrow
           pytest --pyargs geoarrow.pyarrow --doctest-modules --import-mode=importlib
 
       - name: Run doctests (geoarrow-types)
-        if: success() && matrix.python-version == '3.13'
+        if: success() && matrix.python-version == '3.14'
         run: |
           cd geoarrow-types
           pytest --pyargs geoarrow.types --doctest-modules --import-mode=importlib
 
       - name: Run doctests (geoarrow-pandas)
-        if: success() && matrix.python-version == '3.13'
+        if: success() && matrix.python-version == '3.14'
         run: |
           cd geoarrow-pandas
           pytest --pyargs geoarrow.pandas --doctest-modules --import-mode=importlib
@@ -121,14 +121,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v7
         with:
-          python-version: '3.13'
+          python-version: '3.14'
           cache: 'pip'
 
       - name: Install (geoarrow-pyarrow)
