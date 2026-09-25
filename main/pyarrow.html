@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 
 
@@ -27,21 +26,22 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
-<link href="_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+  <link href="_static/styles/theme.css?digest=64cc4de3f052d77215f0" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=64cc4de3f052d77215f0" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
   
   <!-- So that users can add custom icons -->
-  <script src="_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <script defer src="_static/scripts/fontawesome.js?digest=64cc4de3f052d77215f0"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
-<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=64cc4de3f052d77215f0" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=64cc4de3f052d77215f0" />
 
     <script src="_static/documentation_options.js?v=5929fcd5"></script>
-    <script src="_static/doctools.js?v=9bcbadda"></script>
-    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'pyarrow';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="geoarrow-pandas" href="pandas.html" />
@@ -49,20 +49,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
+  
+    
+    <script src="_static/searchtools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script src="searchindex.js"></script>
+  
   </head>
-  
-  
-  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
-
+  <body data-default-mode="">
   
   
   <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
   
   <div id="pst-scroll-pixel-helper"></div>
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
-
+  
+  
+  
   
   <dialog id="pst-search-dialog">
     
@@ -88,9 +94,9 @@
 </div>
 
   
-    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
 <div class="bd-header__inner bd-page-width">
-  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
     <span class="fa-solid fa-bars"></span>
   </button>
   
@@ -125,7 +131,7 @@
   <ul class="bd-navbar-elements navbar-nav">
     
 <li class="nav-item current active">
-  <a class="nav-link nav-internal" href="#">
+  <a class="nav-link nav-internal" href="#" aria-current="page">
     geoarrow-pyarrow
   </a>
 </li>
@@ -148,7 +154,7 @@
         <div class="navbar-item navbar-persistent--container">
           
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
  <i class="fa-solid fa-magnifying-glass"></i>
  <span class="search-button__default-text">Search</span>
  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
@@ -158,11 +164,18 @@
       
         <div class="navbar-item">
 
-<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
-  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
-  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
-  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
-</button></div>
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
       
     </div>
     
@@ -171,7 +184,7 @@
   
     <div class="navbar-persistent--mobile">
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
  <i class="fa-solid fa-magnifying-glass"></i>
  <span class="search-button__default-text">Search</span>
  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
@@ -180,7 +193,7 @@
   
 
   
-    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+    <button type="button" class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
       <span class="fa-solid fa-outdent"></span>
     </button>
   
@@ -211,7 +224,7 @@
   <ul class="bd-navbar-elements navbar-nav">
     
 <li class="nav-item current active">
-  <a class="nav-link nav-internal" href="#">
+  <a class="nav-link nav-internal" href="#" aria-current="page">
     geoarrow-pyarrow
   </a>
 </li>
@@ -235,11 +248,18 @@
         
           <div class="navbar-item">
 
-<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
-  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
-  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
-  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
-</button></div>
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
         
       </div>
     
@@ -263,6 +283,7 @@
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
 </form></div>
         <div class="sidebar-primary-item">
+
 <nav class="bd-docs-nav bd-links"
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
@@ -344,10 +365,10 @@ a geoarrow-encoding based on a common geometry type. GeoPandas objects are
 supported. This implementation relies heavily on <code class="docutils literal notranslate"><span class="pre">pyarrow.array()</span></code> and has
 similar behaviour.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">geoarrow.pyarrow</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ga</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ga</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="s2">&quot;POINT (0 1)&quot;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ga</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="s2">"POINT (0 1)"</span><span class="p">])</span>
 <span class="go">GeometryExtensionArray:WktType(geoarrow.wkt)[1]</span>
 <span class="go">&lt;POINT (0 1)&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ga</span><span class="o">.</span><span class="n">as_geoarrow</span><span class="p">([</span><span class="s2">&quot;POINT (0 1)&quot;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ga</span><span class="o">.</span><span class="n">as_geoarrow</span><span class="p">([</span><span class="s2">"POINT (0 1)"</span><span class="p">])</span>
 <span class="go">GeometryExtensionArray:PointType(geoarrow.point)[1]</span>
 <span class="go">&lt;POINT (0 1)&gt;</span>
 </pre></div>
@@ -497,11 +518,11 @@ similar behaviour.</p>
 <a class="reference internal" href="#geoarrow.pyarrow.wkb" title="geoarrow.pyarrow.wkb"><code class="xref py py-func docutils literal notranslate"><span class="pre">geoarrow.pyarrow.wkb()</span></code></a> and <a class="reference internal" href="#geoarrow.pyarrow.wkt" title="geoarrow.pyarrow.wkt"><code class="xref py py-func docutils literal notranslate"><span class="pre">geoarrow.pyarrow.wkt()</span></code></a>-encoded
 arrays to validate their contents. For other types, this is a no-op.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">geoarrow.pyarrow</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ga</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ga</span><span class="o">.</span><span class="n">parse_all</span><span class="p">([</span><span class="s2">&quot;POINT (0 1)&quot;</span><span class="p">])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ga</span><span class="o">.</span><span class="n">parse_all</span><span class="p">([</span><span class="s2">&quot;POINT (0 1&quot;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ga</span><span class="o">.</span><span class="n">parse_all</span><span class="p">([</span><span class="s2">"POINT (0 1)"</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ga</span><span class="o">.</span><span class="n">parse_all</span><span class="p">([</span><span class="s2">"POINT (0 1"</span><span class="p">])</span>
 <span class="gt">Traceback (most recent call last):</span>
 <span class="w"> </span><span class="c">...</span>
-<span class="gr">geoarrow.c._lib.GeoArrowCException</span>: <span class="n">GeoArrowKernel&lt;visit_void_agg&gt;::push_batch() failed (22): Expected &#39;)&#39; at byte 10</span>
+<span class="gr">geoarrow.c._lib.GeoArrowCException</span>: <span class="n">GeoArrowKernel&lt;visit_void_agg&gt;::push_batch() failed (22): Expected ')' at byte 10</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -514,7 +535,7 @@ geometry_type and dimensions. The values of these columns correspond to the
 values of the <code class="xref py py-class docutils literal notranslate"><span class="pre">geoarrow.GeometryType</span></code> and <code class="xref py py-class docutils literal notranslate"><span class="pre">geoarrow.Dimensions</span></code>
 enumerators.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">geoarrow.pyarrow</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ga</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ga</span><span class="o">.</span><span class="n">unique_geometry_types</span><span class="p">([</span><span class="s2">&quot;POINT Z (0 1 2)&quot;</span><span class="p">,</span> <span class="s2">&quot;LINESTRING (0 0, 1 3)&quot;</span><span class="p">])))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ga</span><span class="o">.</span><span class="n">unique_geometry_types</span><span class="p">([</span><span class="s2">"POINT Z (0 1 2)"</span><span class="p">,</span> <span class="s2">"LINESTRING (0 0, 1 3)"</span><span class="p">])))</span>
 <span class="go">-- is_valid: all not null</span>
 <span class="go">-- child 0 type: int32</span>
 <span class="go">  [</span>
@@ -537,9 +558,9 @@ enumerators.</p>
 geometries in <code class="docutils literal notranslate"><span class="pre">obj</span></code>, preferring geoarrow-encoded types and falling back
 to well-known binary.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">geoarrow.pyarrow</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ga</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ga</span><span class="o">.</span><span class="n">infer_type_common</span><span class="p">([</span><span class="s2">&quot;POINT Z (0 1 2)&quot;</span><span class="p">,</span> <span class="s2">&quot;LINESTRING (0 0, 1 3)&quot;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ga</span><span class="o">.</span><span class="n">infer_type_common</span><span class="p">([</span><span class="s2">"POINT Z (0 1 2)"</span><span class="p">,</span> <span class="s2">"LINESTRING (0 0, 1 3)"</span><span class="p">])</span>
 <span class="go">WkbType(geoarrow.wkb)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ga</span><span class="o">.</span><span class="n">infer_type_common</span><span class="p">([</span><span class="s2">&quot;POINT Z (0 1 2)&quot;</span><span class="p">,</span> <span class="s2">&quot;MULTIPOINT (0 0, 1 3)&quot;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ga</span><span class="o">.</span><span class="n">infer_type_common</span><span class="p">([</span><span class="s2">"POINT Z (0 1 2)"</span><span class="p">,</span> <span class="s2">"MULTIPOINT (0 0, 1 3)"</span><span class="p">])</span>
 <span class="go">MultiPointType(geoarrow.multipoint_z)</span>
 </pre></div>
 </div>
@@ -550,7 +571,7 @@ to well-known binary.</p>
 <span class="sig-name descname"><span class="pre">as_wkt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pyarrow.as_wkt" title="Link to this definition">#</a></dt>
 <dd><p>Encode <code class="docutils literal notranslate"><span class="pre">obj</span></code> as <a class="reference internal" href="#geoarrow.pyarrow.wkt" title="geoarrow.pyarrow.wkt"><code class="xref py py-func docutils literal notranslate"><span class="pre">geoarrow.pyarrow.wkt()</span></code></a>.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">geoarrow.pyarrow</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ga</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">points</span> <span class="o">=</span> <span class="n">ga</span><span class="o">.</span><span class="n">as_geoarrow</span><span class="p">([</span><span class="s2">&quot;POINT (0 1)&quot;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">points</span> <span class="o">=</span> <span class="n">ga</span><span class="o">.</span><span class="n">as_geoarrow</span><span class="p">([</span><span class="s2">"POINT (0 1)"</span><span class="p">])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ga</span><span class="o">.</span><span class="n">as_wkt</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
 <span class="go">GeometryExtensionArray:WktType(geoarrow.wkt)[1]</span>
 <span class="go">&lt;POINT (0 1)&gt;</span>
@@ -563,7 +584,7 @@ to well-known binary.</p>
 <span class="sig-name descname"><span class="pre">as_wkb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strict_iso_wkb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pyarrow.as_wkb" title="Link to this definition">#</a></dt>
 <dd><p>Encode <code class="docutils literal notranslate"><span class="pre">obj</span></code> as <a class="reference internal" href="#geoarrow.pyarrow.wkb" title="geoarrow.pyarrow.wkb"><code class="xref py py-func docutils literal notranslate"><span class="pre">geoarrow.pyarrow.wkb()</span></code></a>.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">geoarrow.pyarrow</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ga</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">points</span> <span class="o">=</span> <span class="n">ga</span><span class="o">.</span><span class="n">as_geoarrow</span><span class="p">([</span><span class="s2">&quot;POINT (0 1)&quot;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">points</span> <span class="o">=</span> <span class="n">ga</span><span class="o">.</span><span class="n">as_geoarrow</span><span class="p">([</span><span class="s2">"POINT (0 1)"</span><span class="p">])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ga</span><span class="o">.</span><span class="n">as_wkb</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
 <span class="go">GeometryExtensionArray:WkbType(geoarrow.wkb)[1]</span>
 <span class="go">&lt;POINT (0 1)&gt;</span>
@@ -577,7 +598,7 @@ to well-known binary.</p>
 <dd><p>Encode <code class="docutils literal notranslate"><span class="pre">obj</span></code> as a geoarrow-encoded array, preferring geoarrow encodings
 and falling back to well-known binary if no common geoemtry type is found.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">geoarrow.pyarrow</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ga</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ga</span><span class="o">.</span><span class="n">as_geoarrow</span><span class="p">([</span><span class="s2">&quot;POINT (0 1)&quot;</span><span class="p">,</span> <span class="s2">&quot;MULTIPOINT Z (0 1 2, 4 5 6)&quot;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ga</span><span class="o">.</span><span class="n">as_geoarrow</span><span class="p">([</span><span class="s2">"POINT (0 1)"</span><span class="p">,</span> <span class="s2">"MULTIPOINT Z (0 1 2, 4 5 6)"</span><span class="p">])</span>
 <span class="go">GeometryExtensionArray:MultiPointType(geoarrow.multipoint_z)[2]</span>
 <span class="go">&lt;MULTIPOINT Z (0 1 nan)&gt;</span>
 <span class="go">&lt;MULTIPOINT Z (0 1 2, 4 5 6)&gt;</span>
@@ -591,13 +612,13 @@ and falling back to well-known binary if no common geoemtry type is found.</p>
 <dd><p>Format geometries in an object as well-known text with an optional cap
 on digits and element size to prevent excessive output for large features.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">geoarrow.pyarrow</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ga</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ga</span><span class="o">.</span><span class="n">format_wkt</span><span class="p">(</span><span class="n">ga</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="s2">&quot;POINT (0 1.3333333333333)&quot;</span><span class="p">]),</span> <span class="n">precision</span><span class="o">=</span><span class="mi">5</span><span class="p">)))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ga</span><span class="o">.</span><span class="n">format_wkt</span><span class="p">(</span><span class="n">ga</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="s2">"POINT (0 1.3333333333333)"</span><span class="p">]),</span> <span class="n">precision</span><span class="o">=</span><span class="mi">5</span><span class="p">)))</span>
 <span class="go">[</span>
-<span class="go">  &quot;POINT (0 1.33333)&quot;</span>
+<span class="go">  "POINT (0 1.33333)"</span>
 <span class="go">]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ga</span><span class="o">.</span><span class="n">format_wkt</span><span class="p">(</span><span class="n">ga</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="s2">&quot;POINT (0 1)&quot;</span><span class="p">]),</span> <span class="n">max_element_size_bytes</span><span class="o">=</span><span class="mi">3</span><span class="p">)))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ga</span><span class="o">.</span><span class="n">format_wkt</span><span class="p">(</span><span class="n">ga</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="s2">"POINT (0 1)"</span><span class="p">]),</span> <span class="n">max_element_size_bytes</span><span class="o">=</span><span class="mi">3</span><span class="p">)))</span>
 <span class="go">[</span>
-<span class="go">  &quot;POI&quot;</span>
+<span class="go">  "POI"</span>
 <span class="go">]</span>
 </pre></div>
 </div>
@@ -609,9 +630,9 @@ on digits and element size to prevent excessive output for large features.</p>
 <dd><p>Compute a Cartesian 2D bounding box for each feature in <code class="docutils literal notranslate"><span class="pre">obj</span></code> as
 a struct(xmin, xmax, ymin, ymax) array.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">geoarrow.pyarrow</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ga</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ga</span><span class="o">.</span><span class="n">box</span><span class="p">([</span><span class="s2">&quot;LINESTRING (0 10, 34 -1)&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">type</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ga</span><span class="o">.</span><span class="n">box</span><span class="p">([</span><span class="s2">"LINESTRING (0 10, 34 -1)"</span><span class="p">])</span><span class="o">.</span><span class="n">type</span>
 <span class="go">BoxType(geoarrow.box)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ga</span><span class="o">.</span><span class="n">box</span><span class="p">([</span><span class="s2">&quot;LINESTRING (0 10, 34 -1)&quot;</span><span class="p">])))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ga</span><span class="o">.</span><span class="n">box</span><span class="p">([</span><span class="s2">"LINESTRING (0 10, 34 -1)"</span><span class="p">])))</span>
 <span class="go">-- is_valid: all not null</span>
 <span class="go">-- child 0 type: double</span>
 <span class="go">  [</span>
@@ -640,8 +661,8 @@ a struct(xmin, xmax, ymin, ymax) array.</p>
 a scalar struct(xmin, xmax, ymin, ymax). Values that are null are currently
 ignored.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">geoarrow.pyarrow</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ga</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ga</span><span class="o">.</span><span class="n">box_agg</span><span class="p">([</span><span class="s2">&quot;POINT (0 10)&quot;</span><span class="p">,</span> <span class="s2">&quot;POINT (34 -1)&quot;</span><span class="p">])</span>
-<span class="go">BoxScalar({&#39;xmin&#39;: 0.0, &#39;ymin&#39;: -1.0, &#39;xmax&#39;: 34.0, &#39;ymax&#39;: 10.0})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ga</span><span class="o">.</span><span class="n">box_agg</span><span class="p">([</span><span class="s2">"POINT (0 10)"</span><span class="p">,</span> <span class="s2">"POINT (34 -1)"</span><span class="p">])</span>
+<span class="go">BoxScalar({'xmin': 0.0, 'ymin': -1.0, 'xmax': 34.0, 'ymax': 10.0})</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -653,20 +674,20 @@ ignored.</p>
 <code class="docutils literal notranslate"><span class="pre">max_bytes</span></code>. This may be useful to more predictibly parallelize a
 computation for variable feature sizes.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">geoarrow.pyarrow</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ga</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ga</span><span class="o">.</span><span class="n">rechunk</span><span class="p">([</span><span class="s2">&quot;POINT (0 1)&quot;</span><span class="p">,</span> <span class="s2">&quot;POINT (2 3)&quot;</span><span class="p">],</span> <span class="n">max_bytes</span><span class="o">=</span><span class="mi">100</span><span class="p">)))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ga</span><span class="o">.</span><span class="n">rechunk</span><span class="p">([</span><span class="s2">"POINT (0 1)"</span><span class="p">,</span> <span class="s2">"POINT (2 3)"</span><span class="p">],</span> <span class="n">max_bytes</span><span class="o">=</span><span class="mi">100</span><span class="p">)))</span>
 <span class="go">[</span>
 <span class="go">  [</span>
-<span class="go">    &quot;POINT (0 1)&quot;,</span>
-<span class="go">    &quot;POINT (2 3)&quot;</span>
+<span class="go">    "POINT (0 1)",</span>
+<span class="go">    "POINT (2 3)"</span>
 <span class="go">  ]</span>
 <span class="go">]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ga</span><span class="o">.</span><span class="n">rechunk</span><span class="p">([</span><span class="s2">&quot;POINT (0 1)&quot;</span><span class="p">,</span> <span class="s2">&quot;POINT (2 3)&quot;</span><span class="p">],</span> <span class="n">max_bytes</span><span class="o">=</span><span class="mi">5</span><span class="p">)))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ga</span><span class="o">.</span><span class="n">rechunk</span><span class="p">([</span><span class="s2">"POINT (0 1)"</span><span class="p">,</span> <span class="s2">"POINT (2 3)"</span><span class="p">],</span> <span class="n">max_bytes</span><span class="o">=</span><span class="mi">5</span><span class="p">)))</span>
 <span class="go">[</span>
 <span class="go">  [</span>
-<span class="go">    &quot;POINT (0 1)&quot;</span>
+<span class="go">    "POINT (0 1)"</span>
 <span class="go">  ],</span>
 <span class="go">  [</span>
-<span class="go">    &quot;POINT (2 3)&quot;</span>
+<span class="go">    "POINT (2 3)"</span>
 <span class="go">  ]</span>
 <span class="go">]</span>
 </pre></div>
@@ -679,7 +700,7 @@ computation for variable feature sizes.</p>
 <dd><p>Attempt to convert <code class="docutils literal notranslate"><span class="pre">obj</span></code> to a geoarrow-encoded array with a
 specific <code class="xref py py-class docutils literal notranslate"><span class="pre">CoordType</span></code>.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">geoarrow.pyarrow</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ga</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ga</span><span class="o">.</span><span class="n">with_coord_type</span><span class="p">([</span><span class="s2">&quot;POINT (0 1)&quot;</span><span class="p">],</span> <span class="n">ga</span><span class="o">.</span><span class="n">CoordType</span><span class="o">.</span><span class="n">INTERLEAVED</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ga</span><span class="o">.</span><span class="n">with_coord_type</span><span class="p">([</span><span class="s2">"POINT (0 1)"</span><span class="p">],</span> <span class="n">ga</span><span class="o">.</span><span class="n">CoordType</span><span class="o">.</span><span class="n">INTERLEAVED</span><span class="p">)</span>
 <span class="go">GeometryExtensionArray:PointType(interleaved geoarrow.point)[1]</span>
 <span class="go">&lt;POINT (0 1)&gt;</span>
 </pre></div>
@@ -691,7 +712,7 @@ specific <code class="xref py py-class docutils literal notranslate"><span class
 <span class="sig-name descname"><span class="pre">with_edge_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edge_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pyarrow.with_edge_type" title="Link to this definition">#</a></dt>
 <dd><p>Force a <code class="xref py py-class docutils literal notranslate"><span class="pre">geoarrow.EdgeType</span></code> on an array.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">geoarrow.pyarrow</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ga</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ga</span><span class="o">.</span><span class="n">with_edge_type</span><span class="p">([</span><span class="s2">&quot;LINESTRING (0 1, 2 3)&quot;</span><span class="p">],</span> <span class="n">ga</span><span class="o">.</span><span class="n">EdgeType</span><span class="o">.</span><span class="n">SPHERICAL</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ga</span><span class="o">.</span><span class="n">with_edge_type</span><span class="p">([</span><span class="s2">"LINESTRING (0 1, 2 3)"</span><span class="p">],</span> <span class="n">ga</span><span class="o">.</span><span class="n">EdgeType</span><span class="o">.</span><span class="n">SPHERICAL</span><span class="p">)</span>
 <span class="go">GeometryExtensionArray:WktType(spherical geoarrow.wkt)[1]</span>
 <span class="go">&lt;LINESTRING (0 1, 2 3)&gt;</span>
 </pre></div>
@@ -703,7 +724,7 @@ specific <code class="xref py py-class docutils literal notranslate"><span class
 <span class="sig-name descname"><span class="pre">with_crs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pyarrow.with_crs" title="Link to this definition">#</a></dt>
 <dd><p>Force a <code class="xref py py-class docutils literal notranslate"><span class="pre">geoarrow.CrsType</span></code>/crs value on an array.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">geoarrow.pyarrow</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ga</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ga</span><span class="o">.</span><span class="n">with_crs</span><span class="p">([</span><span class="s2">&quot;POINT (0 1)&quot;</span><span class="p">],</span> <span class="n">ga</span><span class="o">.</span><span class="n">OGC_CRS84</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ga</span><span class="o">.</span><span class="n">with_crs</span><span class="p">([</span><span class="s2">"POINT (0 1)"</span><span class="p">],</span> <span class="n">ga</span><span class="o">.</span><span class="n">OGC_CRS84</span><span class="p">)</span>
 <span class="go">GeometryExtensionArray:WktType(geoarrow.wkt &lt;ProjJsonCrs(OGC:CRS84)&gt;)[1]</span>
 <span class="go">&lt;POINT (0 1)&gt;</span>
 </pre></div>
@@ -720,10 +741,10 @@ dimensions need to be dropped, this function will silently
 drop them. You can use <a class="reference internal" href="#geoarrow.pyarrow.unique_geometry_types" title="geoarrow.pyarrow.unique_geometry_types"><code class="xref py py-func docutils literal notranslate"><span class="pre">geoarrow.pyarrow.unique_geometry_types()</span></code></a>
 to efficiently detect if one or both of these will occur.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">geoarrow.pyarrow</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ga</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ga</span><span class="o">.</span><span class="n">with_dimensions</span><span class="p">([</span><span class="s2">&quot;POINT (0 1)&quot;</span><span class="p">],</span> <span class="n">ga</span><span class="o">.</span><span class="n">Dimensions</span><span class="o">.</span><span class="n">XYZM</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ga</span><span class="o">.</span><span class="n">with_dimensions</span><span class="p">([</span><span class="s2">"POINT (0 1)"</span><span class="p">],</span> <span class="n">ga</span><span class="o">.</span><span class="n">Dimensions</span><span class="o">.</span><span class="n">XYZM</span><span class="p">)</span>
 <span class="go">GeometryExtensionArray:PointType(geoarrow.point_zm)[1]</span>
 <span class="go">&lt;POINT ZM (0 1 nan nan)&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ga</span><span class="o">.</span><span class="n">with_dimensions</span><span class="p">([</span><span class="s2">&quot;POINT ZM (0 1 2 3)&quot;</span><span class="p">],</span> <span class="n">ga</span><span class="o">.</span><span class="n">Dimensions</span><span class="o">.</span><span class="n">XY</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ga</span><span class="o">.</span><span class="n">with_dimensions</span><span class="p">([</span><span class="s2">"POINT ZM (0 1 2 3)"</span><span class="p">],</span> <span class="n">ga</span><span class="o">.</span><span class="n">Dimensions</span><span class="o">.</span><span class="n">XY</span><span class="p">)</span>
 <span class="go">GeometryExtensionArray:PointType(geoarrow.point)[1]</span>
 <span class="go">&lt;POINT (0 1)&gt;</span>
 </pre></div>
@@ -736,20 +757,20 @@ to efficiently detect if one or both of these will occur.</p>
 <dd><p>Attempt to convert <code class="docutils literal notranslate"><span class="pre">obj</span></code> to a geoarrow-encoded array with a
 specific <code class="xref py py-class docutils literal notranslate"><span class="pre">geoarrow.GeometryType</span></code>.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">geoarrow.pyarrow</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ga</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ga</span><span class="o">.</span><span class="n">with_geometry_type</span><span class="p">([</span><span class="s2">&quot;POINT (0 1)&quot;</span><span class="p">],</span> <span class="n">ga</span><span class="o">.</span><span class="n">GeometryType</span><span class="o">.</span><span class="n">MULTIPOINT</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ga</span><span class="o">.</span><span class="n">with_geometry_type</span><span class="p">([</span><span class="s2">"POINT (0 1)"</span><span class="p">],</span> <span class="n">ga</span><span class="o">.</span><span class="n">GeometryType</span><span class="o">.</span><span class="n">MULTIPOINT</span><span class="p">)</span>
 <span class="go">GeometryExtensionArray:MultiPointType(geoarrow.multipoint)[1]</span>
 <span class="go">&lt;MULTIPOINT (0 1)&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ga</span><span class="o">.</span><span class="n">with_geometry_type</span><span class="p">([</span><span class="s2">&quot;MULTIPOINT (0 1)&quot;</span><span class="p">],</span> <span class="n">ga</span><span class="o">.</span><span class="n">GeometryType</span><span class="o">.</span><span class="n">POINT</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ga</span><span class="o">.</span><span class="n">with_geometry_type</span><span class="p">([</span><span class="s2">"MULTIPOINT (0 1)"</span><span class="p">],</span> <span class="n">ga</span><span class="o">.</span><span class="n">GeometryType</span><span class="o">.</span><span class="n">POINT</span><span class="p">)</span>
 <span class="go">GeometryExtensionArray:PointType(geoarrow.point)[1]</span>
 <span class="go">&lt;POINT (0 1)&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ga</span><span class="o">.</span><span class="n">with_geometry_type</span><span class="p">([</span><span class="s2">&quot;LINESTRING EMPTY&quot;</span><span class="p">,</span> <span class="s2">&quot;POINT (0 1)&quot;</span><span class="p">],</span> <span class="n">ga</span><span class="o">.</span><span class="n">GeometryType</span><span class="o">.</span><span class="n">POINT</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ga</span><span class="o">.</span><span class="n">with_geometry_type</span><span class="p">([</span><span class="s2">"LINESTRING EMPTY"</span><span class="p">,</span> <span class="s2">"POINT (0 1)"</span><span class="p">],</span> <span class="n">ga</span><span class="o">.</span><span class="n">GeometryType</span><span class="o">.</span><span class="n">POINT</span><span class="p">)</span>
 <span class="go">GeometryExtensionArray:PointType(geoarrow.point)[2]</span>
 <span class="go">&lt;POINT (nan nan)&gt;</span>
 <span class="go">&lt;POINT (0 1)&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ga</span><span class="o">.</span><span class="n">with_geometry_type</span><span class="p">([</span><span class="s2">&quot;MULTIPOINT (0 1, 2 3)&quot;</span><span class="p">],</span> <span class="n">ga</span><span class="o">.</span><span class="n">GeometryType</span><span class="o">.</span><span class="n">POINT</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ga</span><span class="o">.</span><span class="n">with_geometry_type</span><span class="p">([</span><span class="s2">"MULTIPOINT (0 1, 2 3)"</span><span class="p">],</span> <span class="n">ga</span><span class="o">.</span><span class="n">GeometryType</span><span class="o">.</span><span class="n">POINT</span><span class="p">)</span>
 <span class="gt">Traceback (most recent call last):</span>
 <span class="w">  </span><span class="c">...</span>
-<span class="gr">geoarrow.c._lib.GeoArrowCException</span>: <span class="n">GeoArrowKernel&lt;as_geoarrow&gt;::push_batch() failed (22): Can&#39;t convert feature with &gt;1 coordinate to POINT</span>
+<span class="gr">geoarrow.c._lib.GeoArrowCException</span>: <span class="n">GeoArrowKernel&lt;as_geoarrow&gt;::push_batch() failed (22): Can't convert feature with &gt;1 coordinate to POINT</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -759,7 +780,7 @@ specific <code class="xref py py-class docutils literal notranslate"><span class
 <span class="sig-name descname"><span class="pre">point_coords</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dimensions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pyarrow.point_coords" title="Link to this definition">#</a></dt>
 <dd><p>Extract point coordinates into separate arrays or chunked arrays.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">geoarrow.pyarrow</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ga</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">ga</span><span class="o">.</span><span class="n">point_coords</span><span class="p">([</span><span class="s2">&quot;POINT (0 1)&quot;</span><span class="p">,</span> <span class="s2">&quot;POINT (2 3)&quot;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">ga</span><span class="o">.</span><span class="n">point_coords</span><span class="p">([</span><span class="s2">"POINT (0 1)"</span><span class="p">,</span> <span class="s2">"POINT (2 3)"</span><span class="p">])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">list</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 <span class="go">[&lt;pyarrow.DoubleScalar: 0.0&gt;, &lt;pyarrow.DoubleScalar: 2.0&gt;]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">list</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
@@ -778,11 +799,11 @@ through WKB if using an older version of GeoPandas or an Arrow array type
 that GeoPandas doesn’t support.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">pyarrow</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pa</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">geoarrow.pyarrow</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ga</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">array</span> <span class="o">=</span> <span class="n">ga</span><span class="o">.</span><span class="n">as_geoarrow</span><span class="p">([</span><span class="s2">&quot;POINT (0 1)&quot;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">array</span> <span class="o">=</span> <span class="n">ga</span><span class="o">.</span><span class="n">as_geoarrow</span><span class="p">([</span><span class="s2">"POINT (0 1)"</span><span class="p">])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ga</span><span class="o">.</span><span class="n">to_geopandas</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>
 <span class="go">0    POINT (0 1)</span>
 <span class="go">dtype: geometry</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">table</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">table</span><span class="p">({</span><span class="s2">&quot;geometry&quot;</span><span class="p">:</span> <span class="n">array</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">table</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">table</span><span class="p">({</span><span class="s2">"geometry"</span><span class="p">:</span> <span class="n">array</span><span class="p">})</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ga</span><span class="o">.</span><span class="n">to_geopandas</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
 <span class="go">      geometry</span>
 <span class="go">0  POINT (0 1)</span>
@@ -795,11 +816,11 @@ that GeoPandas doesn’t support.</p>
 <h2>Class Reference<a class="headerlink" href="#class-reference" title="Link to this heading">#</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="geoarrow.pyarrow.GeometryExtensionType">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">GeometryExtensionType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TypeSpec</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">storage_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validate_storage_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pyarrow.GeometryExtensionType" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">GeometryExtensionType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TypeSpec</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">storage_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validate_storage_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pyarrow.GeometryExtensionType" title="Link to this definition">#</a></dt>
 <dd><p>Extension type base class for vector geometry types.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="geoarrow.pyarrow.GeometryExtensionType.coord_type">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">coord_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">CoordType</span></em><a class="headerlink" href="#geoarrow.pyarrow.GeometryExtensionType.coord_type" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">coord_type</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">CoordType</span></span><a class="headerlink" href="#geoarrow.pyarrow.GeometryExtensionType.coord_type" title="Link to this definition">#</a></dt>
 <dd><p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">CoordType</span></code> of this type.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">geoarrow.pyarrow</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ga</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ga</span><span class="o">.</span><span class="n">linestring</span><span class="p">()</span><span class="o">.</span><span class="n">coord_type</span> <span class="o">==</span> <span class="n">ga</span><span class="o">.</span><span class="n">CoordType</span><span class="o">.</span><span class="n">SEPARATED</span>
@@ -812,7 +833,7 @@ that GeoPandas doesn’t support.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="geoarrow.pyarrow.GeometryExtensionType.crs">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">crs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Crs</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#geoarrow.pyarrow.GeometryExtensionType.crs" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">crs</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Crs</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#geoarrow.pyarrow.GeometryExtensionType.crs" title="Link to this definition">#</a></dt>
 <dd><p>The coordinate reference system of this type.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">geoarrow.pyarrow</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ga</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ga</span><span class="o">.</span><span class="n">point</span><span class="p">()</span><span class="o">.</span><span class="n">with_crs</span><span class="p">(</span><span class="n">ga</span><span class="o">.</span><span class="n">OGC_CRS84</span><span class="p">)</span><span class="o">.</span><span class="n">crs</span>
@@ -823,7 +844,7 @@ that GeoPandas doesn’t support.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="geoarrow.pyarrow.GeometryExtensionType.dimensions">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dimensions</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dimensions</span></em><a class="headerlink" href="#geoarrow.pyarrow.GeometryExtensionType.dimensions" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">dimensions</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dimensions</span></span><a class="headerlink" href="#geoarrow.pyarrow.GeometryExtensionType.dimensions" title="Link to this definition">#</a></dt>
 <dd><p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">Dimensions</span></code> of this type or <code class="docutils literal notranslate"><span class="pre">UNKNOWN</span></code> for
 types where this is not constant (i.e., WKT and WKT).</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">geoarrow.pyarrow</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ga</span>
@@ -837,7 +858,7 @@ types where this is not constant (i.e., WKT and WKT).</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="geoarrow.pyarrow.GeometryExtensionType.edge_type">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">edge_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">EdgeType</span></em><a class="headerlink" href="#geoarrow.pyarrow.GeometryExtensionType.edge_type" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">edge_type</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">EdgeType</span></span><a class="headerlink" href="#geoarrow.pyarrow.GeometryExtensionType.edge_type" title="Link to this definition">#</a></dt>
 <dd><p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">EdgeType</span></code> of this type.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">geoarrow.pyarrow</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ga</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ga</span><span class="o">.</span><span class="n">linestring</span><span class="p">()</span><span class="o">.</span><span class="n">edge_type</span> <span class="o">==</span> <span class="n">ga</span><span class="o">.</span><span class="n">EdgeType</span><span class="o">.</span><span class="n">PLANAR</span>
@@ -857,7 +878,7 @@ for this type.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="geoarrow.pyarrow.GeometryExtensionType.geometry_type">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">geometry_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">GeometryType</span></em><a class="headerlink" href="#geoarrow.pyarrow.GeometryExtensionType.geometry_type" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">geometry_type</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">GeometryType</span></span><a class="headerlink" href="#geoarrow.pyarrow.GeometryExtensionType.geometry_type" title="Link to this definition">#</a></dt>
 <dd><p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">GeometryType</span></code> of this type or <code class="docutils literal notranslate"><span class="pre">GEOMETRY</span></code> for
 types where this is not constant (i.e., WKT and WKB).</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">geoarrow.pyarrow</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ga</span>
@@ -877,7 +898,7 @@ types where this is not constant (i.e., WKT and WKB).</p>
 <h3>Examples<a class="headerlink" href="#id1" title="Link to this heading">#</a></h3>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">pyarrow</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pa</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">pa</span><span class="o">.</span><span class="n">int64</span><span class="p">()</span><span class="o">.</span><span class="n">to_pandas_dtype</span><span class="p">()</span>
-<span class="go">&lt;class &#39;numpy.int64&#39;&gt;</span>
+<span class="go">&lt;class 'numpy.int64'&gt;</span>
 </pre></div>
 </div>
 </section>
@@ -959,7 +980,7 @@ LinestringType(geoarrow.linestring)</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="geoarrow.pyarrow.WkbType">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">WkbType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TypeSpec</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">storage_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validate_storage_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pyarrow.WkbType" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">WkbType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TypeSpec</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">storage_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validate_storage_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pyarrow.WkbType" title="Link to this definition">#</a></dt>
 <dd><p>Extension type whose storage is a binary or large binary array of
 well-known binary. Even though the draft specification currently mandates
 ISO well-known binary, EWKB is supported by the parser.</p>
@@ -967,14 +988,14 @@ ISO well-known binary, EWKB is supported by the parser.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="geoarrow.pyarrow.WktType">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">WktType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TypeSpec</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">storage_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validate_storage_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pyarrow.WktType" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">WktType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TypeSpec</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">storage_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validate_storage_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pyarrow.WktType" title="Link to this definition">#</a></dt>
 <dd><p>Extension type whose storage is a utf8 or large utf8 array of
 well-known text.</p>
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="geoarrow.pyarrow.PointType">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PointType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TypeSpec</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">storage_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validate_storage_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pyarrow.PointType" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">PointType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TypeSpec</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">storage_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validate_storage_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pyarrow.PointType" title="Link to this definition">#</a></dt>
 <dd><p>Extension type whose storage is an array of points stored
 as either a struct with one child per dimension or a fixed-size
 list whose single child is composed of interleaved ordinate values.</p>
@@ -989,7 +1010,7 @@ for this type.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="geoarrow.pyarrow.LinestringType">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LinestringType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TypeSpec</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">storage_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validate_storage_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pyarrow.LinestringType" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">LinestringType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TypeSpec</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">storage_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validate_storage_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pyarrow.LinestringType" title="Link to this definition">#</a></dt>
 <dd><p>Extension type whose storage is an array of linestrings stored
 as a list of points as described in <a class="reference internal" href="#geoarrow.pyarrow.PointType" title="geoarrow.pyarrow.PointType"><code class="xref py py-class docutils literal notranslate"><span class="pre">PointType</span></code></a>.</p>
 <dl class="py method">
@@ -1003,7 +1024,7 @@ for this type.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="geoarrow.pyarrow.PolygonType">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PolygonType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TypeSpec</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">storage_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validate_storage_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pyarrow.PolygonType" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">PolygonType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TypeSpec</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">storage_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validate_storage_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pyarrow.PolygonType" title="Link to this definition">#</a></dt>
 <dd><p>Extension type whose storage is an array of polygons stored
 as a list of a list of points as described in <a class="reference internal" href="#geoarrow.pyarrow.PointType" title="geoarrow.pyarrow.PointType"><code class="xref py py-class docutils literal notranslate"><span class="pre">PointType</span></code></a>.</p>
 <dl class="py method">
@@ -1017,7 +1038,7 @@ for this type.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="geoarrow.pyarrow.MultiPointType">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MultiPointType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TypeSpec</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">storage_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validate_storage_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pyarrow.MultiPointType" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">MultiPointType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TypeSpec</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">storage_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validate_storage_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pyarrow.MultiPointType" title="Link to this definition">#</a></dt>
 <dd><p>Extension type whose storage is an array of polygons stored
 as a list of points as described in <a class="reference internal" href="#geoarrow.pyarrow.PointType" title="geoarrow.pyarrow.PointType"><code class="xref py py-class docutils literal notranslate"><span class="pre">PointType</span></code></a>.</p>
 <dl class="py method">
@@ -1031,7 +1052,7 @@ for this type.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="geoarrow.pyarrow.MultiLinestringType">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MultiLinestringType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TypeSpec</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">storage_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validate_storage_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pyarrow.MultiLinestringType" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">MultiLinestringType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TypeSpec</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">storage_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validate_storage_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pyarrow.MultiLinestringType" title="Link to this definition">#</a></dt>
 <dd><p>Extension type whose storage is an array of multilinestrings stored
 as a list of a list of points as described in <a class="reference internal" href="#geoarrow.pyarrow.PointType" title="geoarrow.pyarrow.PointType"><code class="xref py py-class docutils literal notranslate"><span class="pre">PointType</span></code></a>.</p>
 <dl class="py method">
@@ -1045,7 +1066,7 @@ for this type.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="geoarrow.pyarrow.MultiPolygonType">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MultiPolygonType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TypeSpec</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">storage_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validate_storage_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pyarrow.MultiPolygonType" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">MultiPolygonType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TypeSpec</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">storage_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validate_storage_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pyarrow.MultiPolygonType" title="Link to this definition">#</a></dt>
 <dd><p>Extension type whose storage is an array of multilinestrings stored
 as a list of a list of a list of points as described in <a class="reference internal" href="#geoarrow.pyarrow.PointType" title="geoarrow.pyarrow.PointType"><code class="xref py py-class docutils literal notranslate"><span class="pre">PointType</span></code></a>.</p>
 <dl class="py method">
@@ -1078,13 +1099,13 @@ This does not parse the input, which OGR returns as
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span> <span class="k">as</span> <span class="n">tmpdir</span><span class="p">:</span>
-<span class="gp">... </span>    <span class="n">temp_gpkg</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">,</span> <span class="s2">&quot;test.gpkg&quot;</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">temp_gpkg</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">,</span> <span class="s2">"test.gpkg"</span><span class="p">)</span>
 <span class="gp">... </span>    <span class="n">geopandas</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span>
-<span class="gp">... </span>        <span class="n">geometry</span><span class="o">=</span><span class="n">geopandas</span><span class="o">.</span><span class="n">GeoSeries</span><span class="o">.</span><span class="n">from_wkt</span><span class="p">([</span><span class="s2">&quot;POINT (0 1)&quot;</span><span class="p">],</span>
-<span class="gp">... </span>        <span class="n">crs</span><span class="o">=</span><span class="s2">&quot;OGC:CRS84&quot;</span><span class="p">)</span>
+<span class="gp">... </span>        <span class="n">geometry</span><span class="o">=</span><span class="n">geopandas</span><span class="o">.</span><span class="n">GeoSeries</span><span class="o">.</span><span class="n">from_wkt</span><span class="p">([</span><span class="s2">"POINT (0 1)"</span><span class="p">],</span>
+<span class="gp">... </span>        <span class="n">crs</span><span class="o">=</span><span class="s2">"OGC:CRS84"</span><span class="p">)</span>
 <span class="gp">... </span>    <span class="p">)</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">temp_gpkg</span><span class="p">)</span>
 <span class="gp">... </span>    <span class="n">table</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">read_pyogrio_table</span><span class="p">(</span><span class="n">temp_gpkg</span><span class="p">)</span>
-<span class="gp">... </span>    <span class="n">table</span><span class="o">.</span><span class="n">column</span><span class="p">(</span><span class="s2">&quot;geom&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">chunk</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">table</span><span class="o">.</span><span class="n">column</span><span class="p">(</span><span class="s2">"geom"</span><span class="p">)</span><span class="o">.</span><span class="n">chunk</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 <span class="go">GeometryExtensionArray:WkbType(geoarrow.wkb &lt;...&gt;)[1]</span>
 <span class="go">&lt;POINT (0 1)&gt;</span>
 </pre></div>
@@ -1114,11 +1135,11 @@ refer to columns explicitly.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">pyarrow</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pa</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span> <span class="k">as</span> <span class="n">tmpdir</span><span class="p">:</span>
-<span class="gp">... </span>    <span class="n">temp_pq</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">,</span> <span class="s2">&quot;test.parquet&quot;</span><span class="p">)</span>
-<span class="gp">... </span>    <span class="n">tab</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">table</span><span class="p">([</span><span class="n">ga</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="s2">&quot;POINT (0 1)&quot;</span><span class="p">])],</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">])</span>
+<span class="gp">... </span>    <span class="n">temp_pq</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">,</span> <span class="s2">"test.parquet"</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">tab</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">table</span><span class="p">([</span><span class="n">ga</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="s2">"POINT (0 1)"</span><span class="p">])],</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s2">"geometry"</span><span class="p">])</span>
 <span class="gp">... </span>    <span class="n">io</span><span class="o">.</span><span class="n">write_geoparquet_table</span><span class="p">(</span><span class="n">tab</span><span class="p">,</span> <span class="n">temp_pq</span><span class="p">)</span>
 <span class="gp">... </span>    <span class="n">tab2</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">read_geoparquet_table</span><span class="p">(</span><span class="n">temp_pq</span><span class="p">)</span>
-<span class="gp">... </span>    <span class="n">tab2</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">chunk</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">tab2</span><span class="p">[</span><span class="s2">"geometry"</span><span class="p">]</span><span class="o">.</span><span class="n">chunk</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 <span class="go">GeometryExtensionArray:WkbType(geoarrow.wkb)[1]</span>
 <span class="go">&lt;POINT (0 1)&gt;</span>
 </pre></div>
@@ -1158,7 +1179,7 @@ details.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">geoarrow.pyarrow.dataset</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gads</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">geoarrow.pyarrow</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ga</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">pyarrow</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pa</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">table</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">table</span><span class="p">([</span><span class="n">ga</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="s2">&quot;POINT (0.5 1.5)&quot;</span><span class="p">])],</span> <span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">table</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">table</span><span class="p">([</span><span class="n">ga</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="s2">"POINT (0.5 1.5)"</span><span class="p">])],</span> <span class="p">[</span><span class="s2">"geometry"</span><span class="p">])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">dataset</span> <span class="o">=</span> <span class="n">gads</span><span class="o">.</span><span class="n">dataset</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -1166,7 +1187,7 @@ details.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="geoarrow.pyarrow.dataset.GeoDataset">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">GeoDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geometry_columns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pyarrow.dataset.GeoDataset" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">GeoDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geometry_columns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pyarrow.dataset.GeoDataset" title="Link to this definition">#</a></dt>
 <dd><p>Geospatial-augmented Dataset</p>
 <p>EXPERIMENTAL</p>
 <p>The GeoDataset wraps a pyarrow.Dataset containing one or more geometry columns
@@ -1196,40 +1217,40 @@ most or all of the fragments in the parent dataset.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">geoarrow.pyarrow.dataset</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gads</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">geoarrow.pyarrow</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ga</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">pyarrow</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pa</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">table</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">table</span><span class="p">([</span><span class="n">ga</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="s2">&quot;POINT (0.5 1.5)&quot;</span><span class="p">])],</span> <span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">table</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">table</span><span class="p">([</span><span class="n">ga</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="s2">"POINT (0.5 1.5)"</span><span class="p">])],</span> <span class="p">[</span><span class="s2">"geometry"</span><span class="p">])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">dataset</span> <span class="o">=</span> <span class="n">gads</span><span class="o">.</span><span class="n">dataset</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">dataset</span><span class="o">.</span><span class="n">filter_fragments</span><span class="p">(</span><span class="s2">&quot;POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">to_table</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dataset</span><span class="o">.</span><span class="n">filter_fragments</span><span class="p">(</span><span class="s2">"POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))"</span><span class="p">)</span><span class="o">.</span><span class="n">to_table</span><span class="p">()</span>
 <span class="go">pyarrow.Table</span>
 <span class="go">geometry: extension&lt;geoarrow.wkt&lt;WktType&gt;&gt;</span>
 <span class="go">----</span>
 <span class="go">geometry: []</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">dataset</span><span class="o">.</span><span class="n">filter_fragments</span><span class="p">(</span><span class="s2">&quot;POLYGON ((0 1, 0 2, 1 2, 1 1, 0 1))&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">to_table</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dataset</span><span class="o">.</span><span class="n">filter_fragments</span><span class="p">(</span><span class="s2">"POLYGON ((0 1, 0 2, 1 2, 1 1, 0 1))"</span><span class="p">)</span><span class="o">.</span><span class="n">to_table</span><span class="p">()</span>
 <span class="go">pyarrow.Table</span>
 <span class="go">geometry: extension&lt;geoarrow.wkt&lt;WktType&gt;&gt;</span>
 <span class="go">----</span>
-<span class="go">geometry: [[&quot;POINT (0.5 1.5)&quot;]]</span>
+<span class="go">geometry: [["POINT (0.5 1.5)"]]</span>
 </pre></div>
 </div>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="geoarrow.pyarrow.dataset.GeoDataset.geometry_columns">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">geometry_columns</span></span><a class="headerlink" href="#geoarrow.pyarrow.dataset.GeoDataset.geometry_columns" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">geometry_columns</span></span><a class="headerlink" href="#geoarrow.pyarrow.dataset.GeoDataset.geometry_columns" title="Link to this definition">#</a></dt>
 <dd><p>Get a tuple of geometry column names</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">geoarrow.pyarrow.dataset</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gads</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">geoarrow.pyarrow</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ga</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">pyarrow</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pa</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">table</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">table</span><span class="p">([</span><span class="n">ga</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="s2">&quot;POINT (0.5 1.5)&quot;</span><span class="p">])],</span> <span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">table</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">table</span><span class="p">([</span><span class="n">ga</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="s2">"POINT (0.5 1.5)"</span><span class="p">])],</span> <span class="p">[</span><span class="s2">"geometry"</span><span class="p">])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">dataset</span> <span class="o">=</span> <span class="n">gads</span><span class="o">.</span><span class="n">dataset</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">dataset</span><span class="o">.</span><span class="n">geometry_columns</span>
-<span class="go">(&#39;geometry&#39;,)</span>
+<span class="go">('geometry',)</span>
 </pre></div>
 </div>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="geoarrow.pyarrow.dataset.GeoDataset.geometry_types">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">geometry_types</span></span><a class="headerlink" href="#geoarrow.pyarrow.dataset.GeoDataset.geometry_types" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">geometry_types</span></span><a class="headerlink" href="#geoarrow.pyarrow.dataset.GeoDataset.geometry_types" title="Link to this definition">#</a></dt>
 <dd><p>Resolve a tuple of geometry column types</p>
 <p>This will convert any primitive types to the corresponding
 geo-enabled type (e.g., binary to wkb) and check that geometry
@@ -1238,7 +1259,7 @@ geometry.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">geoarrow.pyarrow.dataset</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gads</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">geoarrow.pyarrow</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ga</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">pyarrow</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pa</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">table</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">table</span><span class="p">([</span><span class="n">ga</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="s2">&quot;POINT (0.5 1.5)&quot;</span><span class="p">])],</span> <span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">table</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">table</span><span class="p">([</span><span class="n">ga</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="s2">"POINT (0.5 1.5)"</span><span class="p">])],</span> <span class="p">[</span><span class="s2">"geometry"</span><span class="p">])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">dataset</span> <span class="o">=</span> <span class="n">gads</span><span class="o">.</span><span class="n">dataset</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">dataset</span><span class="o">.</span><span class="n">geometry_types</span>
 <span class="go">(WktType(geoarrow.wkt),)</span>
@@ -1266,39 +1287,39 @@ of simplified geometry more suitable to a spherical comparison.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">geoarrow.pyarrow.dataset</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gads</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">geoarrow.pyarrow</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ga</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">pyarrow</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pa</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">table</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">table</span><span class="p">([</span><span class="n">ga</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="s2">&quot;POINT (0.5 1.5)&quot;</span><span class="p">])],</span> <span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">table</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">table</span><span class="p">([</span><span class="n">ga</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="s2">"POINT (0.5 1.5)"</span><span class="p">])],</span> <span class="p">[</span><span class="s2">"geometry"</span><span class="p">])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">dataset</span> <span class="o">=</span> <span class="n">gads</span><span class="o">.</span><span class="n">dataset</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">dataset</span><span class="o">.</span><span class="n">index_fragments</span><span class="p">()</span><span class="o">.</span><span class="n">to_pylist</span><span class="p">()</span>
-<span class="go">[{&#39;_fragment_index&#39;: 0, &#39;geometry&#39;: {&#39;xmin&#39;: 0.5, &#39;ymin&#39;: 1.5, &#39;xmax&#39;: 0.5, &#39;ymax&#39;: 1.5}}]</span>
+<span class="go">[{'_fragment_index': 0, 'geometry': {'xmin': 0.5, 'ymin': 1.5, 'xmax': 0.5, 'ymax': 1.5}}]</span>
 </pre></div>
 </div>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="geoarrow.pyarrow.dataset.GeoDataset.parent">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parent</span></span><a class="headerlink" href="#geoarrow.pyarrow.dataset.GeoDataset.parent" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">parent</span></span><a class="headerlink" href="#geoarrow.pyarrow.dataset.GeoDataset.parent" title="Link to this definition">#</a></dt>
 <dd><p>Get the parent Dataset</p>
 <p>Returns the (non geo-aware) parent pyarrow.Dataset.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">geoarrow.pyarrow.dataset</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gads</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">geoarrow.pyarrow</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ga</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">pyarrow</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pa</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">table</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">table</span><span class="p">([</span><span class="n">ga</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="s2">&quot;POINT (0.5 1.5)&quot;</span><span class="p">])],</span> <span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">table</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">table</span><span class="p">([</span><span class="n">ga</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="s2">"POINT (0.5 1.5)"</span><span class="p">])],</span> <span class="p">[</span><span class="s2">"geometry"</span><span class="p">])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">dataset</span> <span class="o">=</span> <span class="n">gads</span><span class="o">.</span><span class="n">dataset</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">type</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>
-<span class="go">&lt;class &#39;pyarrow._dataset.InMemoryDataset&#39;&gt;</span>
+<span class="go">&lt;class 'pyarrow._dataset.InMemoryDataset'&gt;</span>
 </pre></div>
 </div>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="geoarrow.pyarrow.dataset.GeoDataset.schema">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">schema</span></span><a class="headerlink" href="#geoarrow.pyarrow.dataset.GeoDataset.schema" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">schema</span></span><a class="headerlink" href="#geoarrow.pyarrow.dataset.GeoDataset.schema" title="Link to this definition">#</a></dt>
 <dd><p>Get the dataset schema</p>
 <p>The schema of a GeoDataset is identical to that of its parent.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">geoarrow.pyarrow.dataset</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gads</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">geoarrow.pyarrow</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ga</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">pyarrow</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pa</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">table</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">table</span><span class="p">([</span><span class="n">ga</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="s2">&quot;POINT (0.5 1.5)&quot;</span><span class="p">])],</span> <span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">table</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">table</span><span class="p">([</span><span class="n">ga</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="s2">"POINT (0.5 1.5)"</span><span class="p">])],</span> <span class="p">[</span><span class="s2">"geometry"</span><span class="p">])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">dataset</span> <span class="o">=</span> <span class="n">gads</span><span class="o">.</span><span class="n">dataset</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">dataset</span><span class="o">.</span><span class="n">schema</span>
 <span class="go">geometry: extension&lt;geoarrow.wkt&lt;WktType&gt;&gt;</span>
@@ -1310,7 +1331,7 @@ of simplified geometry more suitable to a spherical comparison.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="geoarrow.pyarrow.dataset.ParquetRowGroupGeoDataset">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ParquetRowGroupGeoDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">row_group_fragments</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">row_group_ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geometry_columns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_column_statistics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pyarrow.dataset.ParquetRowGroupGeoDataset" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">ParquetRowGroupGeoDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">row_group_fragments</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">row_group_ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geometry_columns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_column_statistics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geoarrow.pyarrow.dataset.ParquetRowGroupGeoDataset" title="Link to this definition">#</a></dt>
 <dd><p>Geospatial-augmented Parquet dataset using row groups</p>
 <p>An implementation of the GeoDataset that can leverage potentially
 more efficient indexing and more specific filtering. Notably, this
@@ -1368,14 +1389,14 @@ this capability.</p>
     class="page-toc tocsection onthispage">
     <i class="fa-solid fa-list"></i> On this page
   </div>
-  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
-    <ul class="visible nav section-nav flex-column">
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#examples">Examples</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#array-constructors">Array constructors</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#array-constructors">Array constructors</a><ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow.array"><code class="docutils literal notranslate"><span class="pre">array()</span></code></a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#type-constructors">Type Constructors</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#type-constructors">Type Constructors</a><ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow.wkb"><code class="docutils literal notranslate"><span class="pre">wkb()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow.wkt"><code class="docutils literal notranslate"><span class="pre">wkt()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow.large_wkb"><code class="docutils literal notranslate"><span class="pre">large_wkb()</span></code></a></li>
@@ -1388,7 +1409,7 @@ this capability.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow.multipolygon"><code class="docutils literal notranslate"><span class="pre">multipolygon()</span></code></a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#compute-functions">Compute functions</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#compute-functions">Compute functions</a><ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow.parse_all"><code class="docutils literal notranslate"><span class="pre">parse_all()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow.unique_geometry_types"><code class="docutils literal notranslate"><span class="pre">unique_geometry_types()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow.infer_type_common"><code class="docutils literal notranslate"><span class="pre">infer_type_common()</span></code></a></li>
@@ -1408,7 +1429,7 @@ this capability.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow.to_geopandas"><code class="docutils literal notranslate"><span class="pre">to_geopandas()</span></code></a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#class-reference">Class Reference</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#class-reference">Class Reference</a><ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow.GeometryExtensionType"><code class="docutils literal notranslate"><span class="pre">GeometryExtensionType</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow.GeometryExtensionType.coord_type"><code class="docutils literal notranslate"><span class="pre">GeometryExtensionType.coord_type</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow.GeometryExtensionType.crs"><code class="docutils literal notranslate"><span class="pre">GeometryExtensionType.crs</span></code></a></li>
@@ -1454,13 +1475,13 @@ this capability.</p>
 </li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-geoarrow.pyarrow.io">IO helpers</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-geoarrow.pyarrow.io">IO helpers</a><ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow.io.read_pyogrio_table"><code class="docutils literal notranslate"><span class="pre">read_pyogrio_table()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow.io.read_geoparquet_table"><code class="docutils literal notranslate"><span class="pre">read_geoparquet_table()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow.io.write_geoparquet_table"><code class="docutils literal notranslate"><span class="pre">write_geoparquet_table()</span></code></a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-geoarrow.pyarrow.dataset">Dataset constructors</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-geoarrow.pyarrow.dataset">Dataset constructors</a><ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow.dataset.dataset"><code class="docutils literal notranslate"><span class="pre">dataset()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow.dataset.GeoDataset"><code class="docutils literal notranslate"><span class="pre">GeoDataset</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#geoarrow.pyarrow.dataset.GeoDataset.filter_fragments"><code class="docutils literal notranslate"><span class="pre">GeoDataset.filter_fragments()</span></code></a></li>
@@ -1495,13 +1516,13 @@ this capability.</p>
 </div>
 
   <div class="sidebar-secondary-item">
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="_sources/pyarrow.rst.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div></div>
+
+  <div class="tocsection sourcelink">
+    <a href="_sources/pyarrow.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
 
 </div></div>
               
@@ -1516,8 +1537,8 @@ this capability.</p>
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
-<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+  <script defer src="_static/scripts/bootstrap.js?digest=64cc4de3f052d77215f0"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=64cc4de3f052d77215f0"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1528,7 +1549,7 @@ this capability.</p>
 
   <p class="copyright">
     
-      © Copyright 2023-2025 Dewey Dunnington.
+      © Copyright 2023-2026 Dewey Dunnington.
       <br/>
     
   </p>
@@ -1537,8 +1558,7 @@ this capability.</p>
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
-    <br/>
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
   </p>
 </div>
       
@@ -1551,7 +1571,7 @@ this capability.</p>
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.22.0.
 </p></div>
       
     </div>
