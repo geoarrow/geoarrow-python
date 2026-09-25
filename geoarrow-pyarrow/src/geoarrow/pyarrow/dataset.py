@@ -464,8 +464,7 @@ class ParquetRowGroupGeoDataset(GeoDataset):
 
         type_field_names = ["xmin", "ymin", "xmax", "ymax"]
         type_fields = [
-            _pa.field(name, _pa.float64(), nullable=False)
-            for name in type_field_names
+            _pa.field(name, _pa.float64(), nullable=False) for name in type_field_names
         ]
         type = _pa.struct(type_fields)
         return [_pa.array(box, type=type) for box in boxes]

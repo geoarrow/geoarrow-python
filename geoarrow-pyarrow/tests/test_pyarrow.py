@@ -260,7 +260,7 @@ def test_kernel_as():
         assert out[0].as_py() == wkb_item
 
     array = ga.array(["POINT (30 10)"], ga.wkt().with_crs(types.OGC_CRS84))
-    kernel = Kernel.as_geoarrow(array.type, 1)
+    kernel = Kernel.as_geoarrow(array.type, ga.point())
     out = kernel.push(array)
     assert out.type.extension_name == "geoarrow.point"
     assert out.type.crs.to_json_dict() == types.OGC_CRS84.to_json_dict()

@@ -1,7 +1,7 @@
 import sys
 
 from geoarrow.pyarrow._type import GeometryExtensionType
-from geoarrow.types import box as box_spec
+from geoarrow.types import box as box_spec, wkb as wkb_spec, wkt as wkt_spec
 
 import pyarrow as pa
 
@@ -91,11 +91,11 @@ class Kernel:
 
     @staticmethod
     def as_wkt(type_in):
-        return Kernel.as_geoarrow(type_in, 100003)
+        return Kernel.as_geoarrow(type_in, wkt_spec().to_pyarrow())
 
     @staticmethod
     def as_wkb(type_in):
-        return Kernel.as_geoarrow(type_in, 100001)
+        return Kernel.as_geoarrow(type_in, wkb_spec().to_pyarrow())
 
     @staticmethod
     def format_wkt(type_in, precision=None, max_element_size_bytes=None):
@@ -107,7 +107,11 @@ class Kernel:
         )
 
     @staticmethod
-    def as_geoarrow(type_in, type_id):
+    def as_geoarrow(type_in, type_out):
+        lib = _geoarrow_c()
+        cschema = lib.SchemaHolder()
+        type_out._export_to_c(cschema._addr())
+        type_id = lib.CVectorType.FromExtension(cschema).id
         return Kernel("as_geoarrow", type_in, type=int(type_id))
 
     @staticmethod
