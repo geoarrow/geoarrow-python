@@ -1,7 +1,9 @@
 import sys
 
 from geoarrow.pyarrow._type import GeometryExtensionType
-from geoarrow.types import box as box_spec, wkb as wkb_spec, wkt as wkt_spec
+from geoarrow.types import box as box_spec
+from geoarrow.types import wkb as wkb_spec
+from geoarrow.types import wkt as wkt_spec
 
 import pyarrow as pa
 
