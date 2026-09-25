@@ -7,9 +7,8 @@ import numpy as np
 import pyarrow as pa
 import pytest
 from geoarrow import types
-from geoarrow.c import lib
 from geoarrow.pyarrow import _array, _type
-from geoarrow.pyarrow._kernel import Kernel
+from geoarrow.pyarrow._kernel import Kernel, _type_id
 
 
 def test_version():
@@ -267,6 +266,71 @@ def test_kernel_as():
     assert isinstance(out, _array.GeometryExtensionArray)
 
 
+@pytest.mark.parametrize(
+    "coord_type", [ga.CoordType.SEPARATED, ga.CoordType.INTERLEAVED]
+)
+@pytest.mark.parametrize(
+    "geometry_type",
+    [
+        ga.GeometryType.POINT,
+        ga.GeometryType.LINESTRING,
+        ga.GeometryType.POLYGON,
+        ga.GeometryType.MULTIPOINT,
+        ga.GeometryType.MULTILINESTRING,
+        ga.GeometryType.MULTIPOLYGON,
+    ],
+)
+@pytest.mark.parametrize(
+    "dimensions",
+    [
+        ga.Dimensions.XY,
+        ga.Dimensions.XYZ,
+        ga.Dimensions.XYM,
+        ga.Dimensions.XYZM,
+    ],
+)
+def test_type_id_geoarrow(coord_type, geometry_type, dimensions):
+    type_out = types.type_spec(
+        encoding=ga.Encoding.GEOARROW,
+        coord_type=coord_type,
+        geometry_type=geometry_type,
+        dimensions=dimensions,
+    ).to_pyarrow()
+
+    kernel = Kernel.as_geoarrow(ga.wkt(), type_out)
+    assert kernel._type_out == type_out
+
+
+@pytest.mark.parametrize(
+    ("type_out", "expected"),
+    [
+        (ga.wkb(), 100001),
+        (ga.large_wkb(), 100002),
+        (ga.wkt(), 100003),
+        (ga.large_wkt(), 100004),
+        (ga.wkb_view(), 100005),
+        (ga.wkt_view(), 100006),
+        (types.box().to_pyarrow(), 990),
+        (types.box(dimensions=types.Dimensions.XYZ).to_pyarrow(), 1990),
+        (types.box(dimensions=types.Dimensions.XYM).to_pyarrow(), 2990),
+        (types.box(dimensions=types.Dimensions.XYZM).to_pyarrow(), 3990),
+    ],
+)
+def test_type_id_serialized(type_out, expected):
+    import geoarrow.c
+
+    assert _type_id(type_out) == expected
+
+    # Double check against the CVectorType for versions where we
+    # can check (e.g., the time of this writing)
+    if geoarrow.c.__version_tuple__ <= (0, 3, 1):
+        cschema = geoarrow.c.lib.SchemaHolder()
+        type_out._export_to_c(cschema._addr())
+        assert (
+            _type_id(type_out) == geoarrow.c.lib.CVectorType.FromExtension(cschema).id
+        )
+
+
 def test_kernel_format():
     array = ga.array(["POINT (30.12345 10.12345)"])
     kernel = Kernel.format_wkt(array.type, precision=3, max_element_size_bytes=15)
@@ -307,6 +371,8 @@ def test_kernel_box_agg():
 
 
 def test_kernel_visit_void():
+    from geoarrow.c import lib
+
     array = ga.array(["POINT (30 10)"], ga.wkt())
     kernel = Kernel.visit_void_agg(array.type)
     assert kernel.push(array) is None

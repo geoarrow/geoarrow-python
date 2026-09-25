@@ -1,6 +1,7 @@
 import sys
 
 from geoarrow.pyarrow._type import GeometryExtensionType
+from geoarrow.types import CoordType, Dimensions, Encoding, GeometryType
 from geoarrow.types import wkb as wkb_spec
 from geoarrow.types import wkt as wkt_spec
 
@@ -104,11 +105,7 @@ class Kernel:
 
     @staticmethod
     def as_geoarrow(type_in, type_out):
-        lib = _geoarrow_c()
-        cschema = lib.SchemaHolder()
-        type_out._export_to_c(cschema._addr())
-        type_id = lib.CVectorType.FromExtension(cschema).id
-        return Kernel("as_geoarrow", type_in, type=int(type_id))
+        return Kernel("as_geoarrow", type_in, type=_type_id(type_out))
 
     @staticmethod
     def unique_geometry_types_agg(type_in):
@@ -139,3 +136,58 @@ class Kernel:
             bytes += v.encode("UTF-8")
 
         return bytes
+
+
+def _type_id(type_out):
+    """Previous versions used geoarrow-c's exposed CVectorType for this; however,
+    the CVectorType has been deprecated in favour of geoarrow.types. This keeps
+    geoarrow-pyarrow working against previous and future versions of geoarrow-c
+    while freeing up geoarrow-c to remove code that was used only here."""
+    spec = type_out.spec
+
+    if spec.encoding in _SERIALIZED_TYPE_IDS:
+        return _SERIALIZED_TYPE_IDS[spec.encoding]
+
+    if spec.encoding != Encoding.GEOARROW:
+        raise ValueError(f"Unsupported GeoArrow encoding: {spec.encoding}")
+
+    try:
+        return (
+            _GEOMETRY_TYPE_IDS[spec.geometry_type]
+            + _DIMENSION_TYPE_ID_OFFSETS[spec.dimensions]
+            + _COORD_TYPE_ID_OFFSETS[spec.coord_type]
+        )
+    except KeyError as e:
+        raise ValueError(f"Unsupported GeoArrow type: {spec}") from e
+
+
+_SERIALIZED_TYPE_IDS = {
+    Encoding.WKB: 100001,
+    Encoding.LARGE_WKB: 100002,
+    Encoding.WKT: 100003,
+    Encoding.LARGE_WKT: 100004,
+    Encoding.WKB_VIEW: 100005,
+    Encoding.WKT_VIEW: 100006,
+}
+
+_GEOMETRY_TYPE_IDS = {
+    GeometryType.POINT: 1,
+    GeometryType.LINESTRING: 2,
+    GeometryType.POLYGON: 3,
+    GeometryType.MULTIPOINT: 4,
+    GeometryType.MULTILINESTRING: 5,
+    GeometryType.MULTIPOLYGON: 6,
+    GeometryType.BOX: 990,
+}
+
+_DIMENSION_TYPE_ID_OFFSETS = {
+    Dimensions.XY: 0,
+    Dimensions.XYZ: 1000,
+    Dimensions.XYM: 2000,
+    Dimensions.XYZM: 3000,
+}
+
+_COORD_TYPE_ID_OFFSETS = {
+    CoordType.SEPARATED: 0,
+    CoordType.INTERLEAVED: 10000,
+}
