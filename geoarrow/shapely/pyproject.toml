@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "geoarrow.shapely"
+version = "0.1"
+description = "Interop between GeoArrow and Shapely geometries in Python"
+authors = []
+readme = "README.md"
+packages = [
+  { include = "geoarrow" }
+]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+pyarrow = "^13"
+shapely = "^2.0.1"
+pyproj = "^3.4"
+
+[tool.poetry.dev-dependencies]
+
+[tool.poetry.group.dev.dependencies]
+ipykernel = "^6.25.2"
+black = "^23.9.1"
+pytest = "^7.4.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
