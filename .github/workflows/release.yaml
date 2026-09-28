@@ -40,6 +40,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
+          ref: ${{ github.ref }}
           fetch-depth: 0
           persist-credentials: false
 
@@ -50,10 +51,52 @@ jobs:
       - name: Install build tools
         run: python -m pip install --upgrade build twine
 
+      - name: Verify checked-out tag
+        env:
+          PACKAGE_DIR: ${{ needs.select-package.outputs.package }}
+        run: |
+          actual_tag="$(git describe --exact-match --tags --match="$PACKAGE_DIR-*")"
+          if [[ "$actual_tag" != "$GITHUB_REF_NAME" ]]; then
+            echo "::error::HEAD is tagged as $actual_tag, expected $GITHUB_REF_NAME"
+            exit 1
+          fi
+
       - name: Build ${{ needs.select-package.outputs.package }}
         env:
           PACKAGE_DIR: ${{ needs.select-package.outputs.package }}
         run: python -m build --outdir dist "$PACKAGE_DIR"
+
+      - name: Verify distribution metadata
+        env:
+          EXPECTED_PACKAGE: ${{ needs.select-package.outputs.package }}
+          EXPECTED_VERSION: ${{ needs.select-package.outputs.version }}
+        run: |
+          python - <<'PY'
+          import email
+          import os
+          from pathlib import Path
+          from zipfile import ZipFile
+
+          wheels = list(Path("dist").glob("*.whl"))
+          if len(wheels) != 1:
+              raise RuntimeError(f"Expected one wheel, found: {wheels}")
+
+          with ZipFile(wheels[0]) as wheel:
+              metadata_paths = [
+                  path for path in wheel.namelist()
+                  if path.endswith(".dist-info/METADATA")
+              ]
+              if len(metadata_paths) != 1:
+                  raise RuntimeError(
+                      f"Expected one METADATA file, found: {metadata_paths}"
+                  )
+              metadata = email.message_from_bytes(wheel.read(metadata_paths[0]))
+
+          actual = (metadata["Name"], metadata["Version"])
+          expected = (os.environ["EXPECTED_PACKAGE"], os.environ["EXPECTED_VERSION"])
+          if actual != expected:
+              raise RuntimeError(f"Built {actual}, expected {expected}")
+          PY
 
       - name: Check distributions
         run: python -m twine check dist/*
