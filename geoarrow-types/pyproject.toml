@@ -41,7 +41,7 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools_scm]
 root = ".."
-tag_regex = "geoarrow-types-([0-9.]+)"
+tag_regex = '^geoarrow-types-(?P<version>[0-9]+\.[0-9]+\.[0-9]+)$'
 git_describe_command = "git describe --long --match='geoarrow-types-*'"
 version_file = "src/geoarrow/types/_version.py"
 
