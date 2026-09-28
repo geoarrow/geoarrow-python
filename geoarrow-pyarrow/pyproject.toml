@@ -42,7 +42,7 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools_scm]
 root = ".."
 tag_regex = '^geoarrow-pyarrow-(?P<version>[0-9]+\.[0-9]+\.[0-9]+)$'
-git_describe_command = "git describe --long --match='geoarrow-pyarrow-*'"
+git_describe_command = "git describe --long --tags --match='geoarrow-pyarrow-*'"
 version_file = "src/geoarrow/pyarrow/_version.py"
 
 [tool.pytest.ini_options]
