@@ -251,6 +251,10 @@ def as_geoarrow(obj, type=None, coord_type=None, promote_multi=False):
     GeometryExtensionArray:MultiPointType(geoarrow.multipoint_z)[2]
     <MULTIPOINT Z (0 1 nan)>
     <MULTIPOINT Z (0 1 2, 4 5 6)>
+
+    Large and view WKB/WKT outputs are converted through ordinary binary/string
+    storage and then cast to the requested storage type. Each intermediate chunk
+    must fit within the ordinary storage type's 32-bit offset limits.
     """
     obj = obj_as_array_or_chunked(obj)
 
@@ -261,6 +265,26 @@ def as_geoarrow(obj, type=None, coord_type=None, promote_multi=False):
 
     if obj.type.spec == type.spec:
         return obj
+
+    # geoarrow-c cannot yet write large or view WKB/WKT arrays.
+    if type.encoding in (Encoding.LARGE_WKB, Encoding.WKB_VIEW):
+        intermediate_type = _type.wkb()
+    elif type.encoding in (Encoding.LARGE_WKT, Encoding.WKT_VIEW):
+        intermediate_type = _type.wkt()
+    else:
+        intermediate_type = None
+
+    if intermediate_type is not None:
+        obj = as_geoarrow(obj, intermediate_type)
+        storage = ensure_storage(obj).cast(type.storage_type)
+        # Match the kernel's behavior of preserving input extension metadata.
+        type = type.with_metadata(obj.type.__arrow_ext_serialize__())
+        # PyArrow cannot wrap a ChunkedArray with zero chunks directly.
+        if isinstance(storage, pa.ChunkedArray):
+            return pa.chunked_array(
+                [type.wrap_array(chunk) for chunk in storage.chunks], type=type
+            )
+        return type.wrap_array(storage)
 
     return push_all(Kernel.as_geoarrow, obj, args={"type_out": type})
 

@@ -221,6 +221,49 @@ def test_as_geoarrow():
     assert array.type.spec == ga.wkb().spec
 
 
+@pytest.mark.parametrize(
+    "target_factory", [ga.large_wkb, ga.wkb_view, ga.large_wkt, ga.wkt_view]
+)
+@pytest.mark.parametrize("input_kind", ["array", "chunked", "empty", "empty_chunked"])
+def test_as_geoarrow_serialized_storage(target_factory, input_kind):
+    target = target_factory()
+    if target.encoding in (ga.Encoding.WKB_VIEW, ga.Encoding.WKT_VIEW):
+        if int(pa.__version__.split(".")[0]) < 18:
+            pytest.skip("Casting to view storage requires pyarrow >= 18")
+
+    source = ga.as_geoarrow(["POINT (0 1)", None, "POINT (2 3)"])
+    source = ga.with_crs(source, ga.OGC_CRS84)
+    source = ga.with_edge_type(source, ga.EdgeType.SPHERICAL)
+    if input_kind == "chunked":
+        source = pa.chunked_array([source[:1], source[1:]])
+    elif input_kind == "empty":
+        source = source[:0]
+    elif input_kind == "empty_chunked":
+        source = pa.chunked_array([], type=source.type)
+
+    result = ga.as_geoarrow(source, type=target)
+    result.validate(full=True)
+    assert result.type.storage_type == target.storage_type
+    assert (
+        result.type.__arrow_ext_serialize__() == source.type.__arrow_ext_serialize__()
+    )
+    ordinary = (
+        ga.as_wkb(source)
+        if target.encoding in (ga.Encoding.LARGE_WKB, ga.Encoding.WKB_VIEW)
+        else ga.as_wkt(source)
+    )
+    assert (
+        _compute.ensure_storage(result).to_pylist()
+        == _compute.ensure_storage(ordinary).to_pylist()
+    )
+    assert ga.as_geoarrow(result, type=result.type) is result
+    if isinstance(source, pa.ChunkedArray):
+        assert isinstance(result, pa.ChunkedArray)
+        assert [len(chunk) for chunk in result.chunks] == [
+            len(chunk) for chunk in source.chunks
+        ]
+
+
 def test_make_point():
     xs = [1, 2, 3]
     ys = [4, 5, 6]
